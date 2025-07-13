@@ -35,9 +35,9 @@ const NotFound: React.FC = () => {
               </Button>
             </Link>
             <Link to="/login">
-              <Button variant="ghost" size="lg">
+              {/* <Button variant="ghost" size="lg">
                 Đăng nhập
-              </Button>
+              </Button> */}
             </Link>
           </div>
         </div>

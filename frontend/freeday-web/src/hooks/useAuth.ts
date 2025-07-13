@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { authAPI } from '@/services/api'
 
+export type UserRole = 'Guest' | 'User' | 'Organizer' | 'Admin';
 interface User {
-  id: string
-  email: string
-  name: string
-  avatar?: string
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  role: UserRole;
 }
 
 interface AuthState {

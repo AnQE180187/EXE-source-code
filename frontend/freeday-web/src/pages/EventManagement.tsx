@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@/components/common/Button'
+import EventForm, { EventFormValues } from '@/components/event/EventForm';
 
 const EventManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('upcoming')
   const [selectedEvent, setSelectedEvent] = useState<number | null>(null)
+  const [showForm, setShowForm] = useState(false);
+  const [editEvent, setEditEvent] = useState<any | null>(null);
 
   const tabs = [
     { id: 'upcoming', name: 'Sắp diễn ra', count: 3 },
@@ -154,7 +157,7 @@ const EventManagement: React.FC = () => {
               </div>
               
               <div className="flex space-x-2">
-                <Link to={`/events/${event.id}/edit`}>
+                <Link to="#" onClick={e => { e.preventDefault(); setEditEvent(event); setShowForm(true); }}>
                   <Button variant="outline" size="sm">
                     Chỉnh sửa
                   </Button>
@@ -247,16 +250,14 @@ const EventManagement: React.FC = () => {
           </div>
           <h3 className="text-lg font-semibold text-neutral-900 mb-2">Chưa có sự kiện</h3>
           <p className="text-neutral-600 mb-6">Bạn chưa có sự kiện nào trong danh mục này</p>
-          <Link to="/events/create">
-            <Button>
-              Tạo sự kiện mới
-            </Button>
-          </Link>
+          <Button variant="primary" size="sm" onClick={() => { setEditEvent(null); setShowForm(true); }}>
+            Tạo sự kiện
+          </Button>
         </div>
       )}
 
       {/* Create Event CTA */}
-      <div className="card p-6 bg-gradient-primary text-white mt-8">
+      {/* <div className="card p-6 bg-gradient-primary text-white mt-8">
         <div className="text-center">
           <h3 className="text-xl font-semibold mb-2">Tạo sự kiện mới</h3>
           <p className="text-primary-100 mb-4">
@@ -268,7 +269,30 @@ const EventManagement: React.FC = () => {
             </Button>
           </Link>
         </div>
-      </div>
+      </div> */}
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+            <button className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-900" onClick={() => setShowForm(false)}>
+              &times;
+            </button>
+            <EventForm
+              initialValues={editEvent ? {
+                ...editEvent,
+                imageUrls: editEvent.imageUrls || [],
+                tags: (editEvent.tags || []).join(', '),
+              } : {}}
+              mode={editEvent ? 'edit' : 'create'}
+              onSubmit={(values: EventFormValues) => {
+                console.log('Submit event:', values);
+                setShowForm(false);
+              }}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-neutral-800 mt-8 pt-8 text-center">
           <p className="text-neutral-400">
-            © 2024 Freeday. Tất cả quyền được bảo lưu. Được tạo với ❤️ tại Việt Nam.
+            © 2025 Freeday. Tất cả quyền được bảo lưu. Được tạo với FreeDayTeam tại Việt Nam.
           </p>
         </div>
       </div>

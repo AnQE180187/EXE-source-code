@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Button from '@/components/common/Button'
+import { authAPI } from '@/services/api'
+import { useToast } from '@/components/common/useToast'
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,16 +12,35 @@ const Register: React.FC = () => {
     confirmPassword: ''
   })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const toast = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp')
+      return
+    }
     setLoading(true)
-    
-    // Mock register logic
-    setTimeout(() => {
+    try {
+      const res = await authAPI.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      })
+      const { user, token } = res.data
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      toast.showToast('Đăng ký thành công!', 'success')
+      navigate('/')
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Đăng ký thất bại')
+      toast.showToast('Đăng ký thất bại', 'error')
+    } finally {
       setLoading(false)
-      // Handle register success
-    }, 1000)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +59,7 @@ const Register: React.FC = () => {
               <span className="text-white font-bold text-xl">F</span>
             </div>
           </div>
+          {error && <div className="text-red-500 mb-2">{error}</div>}
           <h2 className="text-3xl md:text-4xl font-display font-bold text-neutral-900 mb-2">
             Đăng ký
           </h2>
