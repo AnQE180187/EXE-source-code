@@ -164,7 +164,7 @@ const Forum: React.FC = () => {
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <h3 className="text-lg font-semibold text-neutral-900 mb-1">
-                          <Link to={`/forum/post/${post.id}`} className="hover:text-primary-600 transition-colors">
+                          <Link to={`/forum/${post.id}`} className="hover:text-primary-600 transition-colors">
                             {post.title}
                           </Link>
                         </h3>

@@ -121,19 +121,19 @@ const Home: React.FC = () => {
   const testimonials = [
     {
       name: 'Nguyễn Thị Anh',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
+      avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8vNT_8SSDnlKe0RTZXp63Ga8XMIJGWF_jFA&s',
       content: 'Freeday giúp tôi tìm được những người bạn tuyệt vời và tham gia nhiều sự kiện thú vị!',
       rating: 5
     },
     {
       name: 'Trần Văn Bình',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+      avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKuK3rI4OmFZ_Wxo4YVZgRFO1a50LU5x5NsA&s',
       content: 'Nền tảng rất dễ sử dụng và có nhiều sự kiện đa dạng. Tôi đã tham gia được 5 sự kiện chỉ trong 2 tháng!',
       rating: 5
     },
     {
       name: 'Lê Thị Cẩm',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+      avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkijd6jm283ibpY4-fj7aroi6OzS_rVrv0gA&s',
       content: 'Từ khi dùng Freeday, cuộc sống của tôi thú vị hơn nhiều. Tôi đã có thêm nhiều bạn mới!',
       rating: 5
     }
@@ -160,16 +160,16 @@ const Home: React.FC = () => {
               Khám phá những trải nghiệm đáng nhớ và tạo ra những kỷ niệm tuyệt vời.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/events">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-primary-600 hover:bg-neutral-100">
-                  Khám phá sự kiện
-                </Button>
-              </Link>
-              <Link to="/forum">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary-600">
-                  Tìm bạn đồng hành
-                </Button>
-              </Link>
+            <Link to="/events">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-primary-600 hover:bg-neutral-100">
+                Khám phá sự kiện
+              </Button>
+            </Link>
+            <Link to="/forum">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-primary-600 hover:bg-neutral-100">
+                Tìm bạn đồng hành
+              </Button>
+            </Link>
             </div>
           </div>
         </div>
@@ -334,12 +334,12 @@ const Home: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-primary text-white">
+      <section className="py-20 bg-gradient-primary">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-6" style={{ color: '#14532d', textShadow: '0 2px 8px #bbf7d0' }}>
             Sẵn sàng tham gia?
           </h2>
-          <p className="text-xl mb-8 text-primary-100">
+          <p className="text-xl mb-8" style={{ color: '#15803d', textShadow: '0 1px 6px #bbf7d0' }}>
             Hãy bắt đầu hành trình khám phá và kết nối ngay hôm nay!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -349,7 +349,7 @@ const Home: React.FC = () => {
               </Button>
             </Link>
             <Link to="/events">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary-600">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-primary-600 hover:bg-neutral-100">
                 Khám phá sự kiện
               </Button>
             </Link>
@@ -360,4 +360,4 @@ const Home: React.FC = () => {
   )
 }
 
-export default Home 
+export default Home

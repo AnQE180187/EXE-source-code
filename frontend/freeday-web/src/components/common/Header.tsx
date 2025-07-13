@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import ProfileMenu from '@/components/profile/ProfileMenu'
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -66,16 +67,8 @@ const Header: React.FC = () => {
               </span>
             </button>
 
-            {/* User menu */}
-            <div className="flex items-center space-x-2">
-              <Link to="/login">
-                <button className="p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all duration-200">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </button>
-              </Link>
-            </div>
+            {/* User/Profile menu */}
+            <ProfileMenu />
 
             {/* Mobile menu button */}
             <button

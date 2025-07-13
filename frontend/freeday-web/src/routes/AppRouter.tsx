@@ -10,6 +10,10 @@ import EventManagement from '@/pages/EventManagement'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import NotFound from '@/pages/NotFound'
+import ProtectedRoute from '@/components/common/ProtectedRoute'
+import ProfileDetail from '@/components/profile/ProfileDetail'
+import ForumPostDetail from '@/components/profile/ForumPostDetail'
+import RegisteredEvents from '@/pages/RegisteredEvents'
 
 const AppRouter: React.FC = () => {
   return (
@@ -21,11 +25,20 @@ const AppRouter: React.FC = () => {
         <Route path="/events/:id" element={<MainLayout><EventDetail /></MainLayout>} />
         <Route path="/forum" element={<MainLayout><Forum /></MainLayout>} />
         <Route path="/forum/create" element={<MainLayout><CreatePost /></MainLayout>} />
-        <Route path="/events/manage" element={<MainLayout><EventManagement /></MainLayout>} />
+        <Route path="/forum/:postId" element={<MainLayout><ForumPostDetail /></MainLayout>} />
+        <Route path="/registered-events" element={<MainLayout><RegisteredEvents /></MainLayout>} />
+        <Route path="/events/manage" element={
+          <ProtectedRoute allowedRoles={['Organizer', 'Admin']}>
+            <MainLayout>
+              <EventManagement />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
         
         {/* Public routes without MainLayout */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<ProfileDetail />} />
         
         {/* 404 route */}
         <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
