@@ -1,0 +1,30 @@
+import { Controller, Post, Body, UseGuards, Req, Delete, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { RegistrationsService } from './registrations.service';
+import { CreateRegistrationDto } from './dto/create-registration.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import { User } from '@prisma/client';
+
+@Controller('events/:eventId/registration')
+export class RegistrationsController {
+  constructor(private readonly registrationsService: RegistrationsService) {}
+
+  @Post()
+  @UseGuards(AuthGuard('jwt'))
+  create(
+    @Param('eventId') eventId: string,
+    @Req() req: Request
+  ) {
+    const user = req.user as User;
+    // DTO is simple, we can create it manually or adjust the controller path structure
+    return this.registrationsService.create({ eventId }, user);
+  }
+
+  @Delete()
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  remove(@Param('eventId') eventId: string, @Req() req: Request) {
+    const user = req.user as User;
+    return this.registrationsService.remove(eventId, user);
+  }
+}

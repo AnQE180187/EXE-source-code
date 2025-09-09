@@ -1,0 +1,92 @@
+import { EventsService } from './events.service';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { Request } from 'express';
+import { FavoritesService } from 'src/favorites/favorites.service';
+export declare class EventsController {
+    private readonly eventsService;
+    private readonly favoritesService;
+    constructor(eventsService: EventsService, favoritesService: FavoritesService);
+    create(createEventDto: CreateEventDto, req: Request): import(".prisma/client").Prisma.Prisma__EventClient<{
+        id: string;
+        createdAt: Date;
+        status: import(".prisma/client").$Enums.EventStatus;
+        updatedAt: Date;
+        title: string;
+        description: string;
+        locationText: string;
+        startAt: Date;
+        endAt: Date;
+        price: number | null;
+        capacity: number;
+        slug: string | null;
+        lat: number | null;
+        lng: number | null;
+        favoritesCount: number;
+        registeredCount: number;
+        organizerId: string;
+    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
+    findAll(): import(".prisma/client").Prisma.PrismaPromise<{
+        id: string;
+        createdAt: Date;
+        status: import(".prisma/client").$Enums.EventStatus;
+        updatedAt: Date;
+        title: string;
+        description: string;
+        locationText: string;
+        startAt: Date;
+        endAt: Date;
+        price: number | null;
+        capacity: number;
+        slug: string | null;
+        lat: number | null;
+        lng: number | null;
+        favoritesCount: number;
+        registeredCount: number;
+        organizerId: string;
+    }[]>;
+    findOne(id: string): Promise<{
+        id: string;
+        createdAt: Date;
+        status: import(".prisma/client").$Enums.EventStatus;
+        updatedAt: Date;
+        title: string;
+        description: string;
+        locationText: string;
+        startAt: Date;
+        endAt: Date;
+        price: number | null;
+        capacity: number;
+        slug: string | null;
+        lat: number | null;
+        lng: number | null;
+        favoritesCount: number;
+        registeredCount: number;
+        organizerId: string;
+    }>;
+    toggleFavorite(id: string, req: Request): Promise<{
+        favorited: boolean;
+    }>;
+    update(id: string, updateEventDto: UpdateEventDto, req: Request): Promise<{
+        id: string;
+        createdAt: Date;
+        status: import(".prisma/client").$Enums.EventStatus;
+        updatedAt: Date;
+        title: string;
+        description: string;
+        locationText: string;
+        startAt: Date;
+        endAt: Date;
+        price: number | null;
+        capacity: number;
+        slug: string | null;
+        lat: number | null;
+        lng: number | null;
+        favoritesCount: number;
+        registeredCount: number;
+        organizerId: string;
+    }>;
+    remove(id: string, req: Request): Promise<{
+        message: string;
+    }>;
+}

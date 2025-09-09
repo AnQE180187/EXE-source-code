@@ -1,112 +1,98 @@
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-# FreeDayy Backend
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-This is the backend server for the FreeDayy application, built with Node.js, Express, and MongoDB.
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Project Structure
+## Description
 
-```
-backend/
-├── config/             # Configuration files
-├── controllers/        # Request handlers
-├── middleware/         # Custom middleware
-├── models/             # Database models
-├── routes/             # API routes
-├── utils/              # Utility functions
-├── .env.example        # Example environment variables
-├── .gitignore          # Git ignore file
-├── package.json        # Project dependencies
-└── server.js           # Entry point
-```
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Getting Started
+## Project setup
 
-### Prerequisites
-
-- Node.js (v14 or later)
-- MongoDB
-
-### Installation
-
-1. Clone the repository
-2. Navigate to the backend directory
-3. Install dependencies:
-   ```
-   npm install
-   ```
-4. Create a `.env` file based on `.env.example`
-5. Start the development server:
-   ```
-   npm run dev
-   ```
-
-## Environment Variables
-
-Create a `.env` file in the root of the backend directory with the following variables:
-
-```
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-JWT_EXPIRES_IN=7d
-CORS_ORIGIN=http://localhost:3000
+```bash
+$ npm install
 ```
 
-## API Endpoints
+## Compile and run the project
 
-### Authentication
+```bash
+# development
+$ npm run start
 
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user profile
-- `PATCH /api/auth/update-profile` - Update user profile
+# watch mode
+$ npm run start:dev
 
-### Events
-
-- `GET /api/events` - Get all events
-- `GET /api/events/:id` - Get single event
-- `POST /api/events` - Create new event
-- `PATCH /api/events/:id` - Update event
-- `DELETE /api/events/:id` - Delete event
-- `POST /api/events/:id/join` - Join an event
-
-### Posts
-
-- `GET /api/posts` - Get all posts
-- `GET /api/posts/:id` - Get single post
-- `POST /api/posts` - Create new post
-- `PATCH /api/posts/:id` - Update post
-- `DELETE /api/posts/:id` - Delete post
-- `POST /api/posts/:id/comments` - Add comment to post
-- `POST /api/posts/:id/like` - Like/unlike post
-
-# Freeday Backend
-
-Backend Node.js/Express sử dụng TypeScript, MongoDB, JWT, bcryptjs.
-
-## Chức năng
-- Đăng ký, đăng nhập, xác thực người dùng (User, Organizer, Admin)
-- Lưu trữ user vào MongoDB
-
-## Cấu hình môi trường
-Tạo file `.env` với nội dung:
-```
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/freeday
-JWT_SECRET=your_jwt_secret_here
+# production mode
+$ npm run start:prod
 ```
 
-## Khởi động server
-```
-npx ts-node src/index.ts
-```
-Hoặc dùng nodemon:
-```
-npx nodemon src/index.ts
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
 ```
 
-## Thư mục chính
-- `src/models/User.ts`: Mongoose User model
-- `src/routes/auth.ts`: Đăng ký, đăng nhập
-- `src/index.ts`: Khởi tạo app
+## Deployment
+
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
+
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+
+## Resources
+
+Check out a few resources that may come in handy when working with NestJS:
+
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
