@@ -33,6 +33,28 @@ export class UsersService {
     return user;
   }
 
+  async findMyEvents(userId: string) {
+    const registeredEvents = this.prisma.registration.findMany({
+      where: { userId },
+      include: { event: true },
+    });
+
+    const favoritedEvents = this.prisma.favorite.findMany({
+      where: { userId },
+      include: { event: true },
+    });
+
+    const [registered, favorited] = await Promise.all([
+      registeredEvents,
+      favoritedEvents,
+    ]);
+
+    return {
+      registeredEvents: registered.map((r) => r.event),
+      favoritedEvents: favorited.map((f) => f.event),
+    };
+  }
+
   // 🔹 Cập nhật hoặc tạo profile
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const oldProfile = await this.prisma.profile.findUnique({ where: { userId } });

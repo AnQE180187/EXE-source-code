@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommentsController = void 0;
 const common_1 = require("@nestjs/common");
 const comments_service_1 = require("./comments.service");
-const create_comment_dto_1 = require("./dto/create-comment.dto");
 const update_comment_dto_1 = require("./dto/update-comment.dto");
 const passport_1 = require("@nestjs/passport");
 let CommentsController = class CommentsController {
@@ -23,23 +22,24 @@ let CommentsController = class CommentsController {
     constructor(commentsService) {
         this.commentsService = commentsService;
     }
-    create(createCommentDto, req) {
+    create(postId, createCommentDto, req) {
         const author = req.user;
-        return this.commentsService.create(createCommentDto, author);
+        const fullDto = { ...createCommentDto, postId };
+        return this.commentsService.create(fullDto, author);
     }
     findAllByPost(postId) {
         return this.commentsService.findAllByPost(postId);
     }
-    findOne(id) {
-        return this.commentsService.findOne(id);
+    findOne(commentId) {
+        return this.commentsService.findOne(commentId);
     }
-    update(id, updateCommentDto, req) {
+    update(commentId, updateCommentDto, req) {
         const user = req.user;
-        return this.commentsService.update(id, updateCommentDto, user.id);
+        return this.commentsService.update(commentId, updateCommentDto, user.id);
     }
-    remove(id, req) {
+    remove(commentId, req) {
         const user = req.user;
-        return this.commentsService.remove(id, user.id);
+        return this.commentsService.remove(commentId, user.id);
     }
 };
 exports.CommentsController = CommentsController;
@@ -47,30 +47,31 @@ __decorate([
     (0, common_1.Post)(),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    __param(0, (0, common_1.Param)('postId')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_comment_dto_1.CreateCommentDto, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", void 0)
 ], CommentsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('post/:postId'),
+    (0, common_1.Get)(),
     __param(0, (0, common_1.Param)('postId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CommentsController.prototype, "findAllByPost", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(':commentId'),
+    __param(0, (0, common_1.Param)('commentId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CommentsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
+    (0, common_1.Patch)(':commentId'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('commentId')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -78,17 +79,17 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CommentsController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
+    (0, common_1.Delete)(':commentId'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('commentId')),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], CommentsController.prototype, "remove", null);
 exports.CommentsController = CommentsController = __decorate([
-    (0, common_1.Controller)('comments'),
+    (0, common_1.Controller)('posts/:postId/comments'),
     __metadata("design:paramtypes", [comments_service_1.CommentsService])
 ], CommentsController);
 //# sourceMappingURL=comments.controller.js.map

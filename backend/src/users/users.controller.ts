@@ -25,6 +25,13 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('me/events')
+  getMyEvents(@Req() req: Request) {
+    const user = req.user as User;
+    return this.usersService.findMyEvents(user.id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Put('me')
   updateProfile(@Req() req: Request, @Body() updateProfileDto: UpdateProfileDto) {
     const user = req.user as User;

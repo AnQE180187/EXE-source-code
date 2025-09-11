@@ -21,6 +21,46 @@ export declare class UsersService {
         status: import(".prisma/client").$Enums.AccountStatus;
         updatedAt: Date;
     }>;
+    findMyEvents(userId: string): Promise<{
+        registeredEvents: {
+            id: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.EventStatus;
+            updatedAt: Date;
+            organizerId: string;
+            title: string;
+            slug: string | null;
+            description: string;
+            locationText: string;
+            lat: number | null;
+            lng: number | null;
+            startAt: Date;
+            endAt: Date;
+            price: number | null;
+            capacity: number;
+            favoritesCount: number;
+            registeredCount: number;
+        }[];
+        favoritedEvents: {
+            id: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.EventStatus;
+            updatedAt: Date;
+            organizerId: string;
+            title: string;
+            slug: string | null;
+            description: string;
+            locationText: string;
+            lat: number | null;
+            lng: number | null;
+            startAt: Date;
+            endAt: Date;
+            price: number | null;
+            capacity: number;
+            favoritesCount: number;
+            registeredCount: number;
+        }[];
+    }>;
     updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<{
         displayName: string;
         avatarUrl: string | null;

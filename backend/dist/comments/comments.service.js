@@ -55,7 +55,7 @@ let CommentsService = class CommentsService {
             throw new common_1.NotFoundException(`Comment with ID "${id}" not found`);
         }
         if (comment.authorId !== userId) {
-            throw new common_1.NotFoundException(`Comment with ID "${id}" not found`);
+            throw new common_1.ForbiddenException('You are not authorized to update this comment');
         }
         return this.prisma.comment.update({
             where: { id },
@@ -68,10 +68,9 @@ let CommentsService = class CommentsService {
             throw new common_1.NotFoundException(`Comment with ID "${id}" not found`);
         }
         if (comment.authorId !== userId) {
-            throw new common_1.NotFoundException(`Comment with ID "${id}" not found`);
+            throw new common_1.ForbiddenException('You are not authorized to delete this comment');
         }
         await this.prisma.comment.delete({ where: { id } });
-        return { message: 'Comment deleted successfully' };
     }
 };
 exports.CommentsService = CommentsService;

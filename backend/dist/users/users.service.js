@@ -39,6 +39,24 @@ let UsersService = class UsersService {
         }
         return user;
     }
+    async findMyEvents(userId) {
+        const registeredEvents = this.prisma.registration.findMany({
+            where: { userId },
+            include: { event: true },
+        });
+        const favoritedEvents = this.prisma.favorite.findMany({
+            where: { userId },
+            include: { event: true },
+        });
+        const [registered, favorited] = await Promise.all([
+            registeredEvents,
+            favoritedEvents,
+        ]);
+        return {
+            registeredEvents: registered.map((r) => r.event),
+            favoritedEvents: favorited.map((f) => f.event),
+        };
+    }
     async updateProfile(userId, updateProfileDto) {
         const oldProfile = await this.prisma.profile.findUnique({ where: { userId } });
         const updatedProfile = await this.prisma.profile.upsert({

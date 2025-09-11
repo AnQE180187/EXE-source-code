@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -50,7 +50,7 @@ export class CommentsService {
       throw new NotFoundException(`Comment with ID "${id}" not found`);
     }
     if (comment.authorId !== userId) {
-      throw new NotFoundException(`Comment with ID "${id}" not found`); // Or ForbiddenException
+      throw new ForbiddenException('You are not authorized to update this comment');
     }
 
     return this.prisma.comment.update({
@@ -65,10 +65,9 @@ export class CommentsService {
       throw new NotFoundException(`Comment with ID "${id}" not found`);
     }
     if (comment.authorId !== userId) {
-      throw new NotFoundException(`Comment with ID "${id}" not found`); // Or ForbiddenException
+      throw new ForbiddenException('You are not authorized to delete this comment');
     }
 
     await this.prisma.comment.delete({ where: { id } });
-    return { message: 'Comment deleted successfully' };
   }
 }

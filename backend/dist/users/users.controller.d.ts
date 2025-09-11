@@ -20,6 +20,46 @@ export declare class UsersController {
         status: import(".prisma/client").$Enums.AccountStatus;
         updatedAt: Date;
     }>;
+    getMyEvents(req: Request): Promise<{
+        registeredEvents: {
+            id: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.EventStatus;
+            updatedAt: Date;
+            organizerId: string;
+            title: string;
+            slug: string | null;
+            description: string;
+            locationText: string;
+            lat: number | null;
+            lng: number | null;
+            startAt: Date;
+            endAt: Date;
+            price: number | null;
+            capacity: number;
+            favoritesCount: number;
+            registeredCount: number;
+        }[];
+        favoritedEvents: {
+            id: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.EventStatus;
+            updatedAt: Date;
+            organizerId: string;
+            title: string;
+            slug: string | null;
+            description: string;
+            locationText: string;
+            lat: number | null;
+            lng: number | null;
+            startAt: Date;
+            endAt: Date;
+            price: number | null;
+            capacity: number;
+            favoritesCount: number;
+            registeredCount: number;
+        }[];
+    }>;
     updateProfile(req: Request, updateProfileDto: UpdateProfileDto): Promise<{
         displayName: string;
         avatarUrl: string | null;

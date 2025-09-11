@@ -5,7 +5,7 @@ import { Request } from 'express';
 export declare class CommentsController {
     private readonly commentsService;
     constructor(commentsService: CommentsService);
-    create(createCommentDto: CreateCommentDto, req: Request): Promise<{
+    create(postId: string, createCommentDto: Omit<CreateCommentDto, 'postId'>, req: Request): Promise<{
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.VisibilityStatus;
@@ -28,7 +28,7 @@ export declare class CommentsController {
         authorId: string;
         postId: string;
     })[]>;
-    findOne(id: string): Promise<{
+    findOne(commentId: string): Promise<{
         author: {
             email: string;
             id: string;
@@ -42,7 +42,7 @@ export declare class CommentsController {
         authorId: string;
         postId: string;
     }>;
-    update(id: string, updateCommentDto: UpdateCommentDto, req: Request): Promise<{
+    update(commentId: string, updateCommentDto: UpdateCommentDto, req: Request): Promise<{
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.VisibilityStatus;
@@ -51,7 +51,5 @@ export declare class CommentsController {
         authorId: string;
         postId: string;
     }>;
-    remove(id: string, req: Request): Promise<{
-        message: string;
-    }>;
+    remove(commentId: string, req: Request): Promise<void>;
 }

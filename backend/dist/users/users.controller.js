@@ -26,6 +26,10 @@ let UsersController = class UsersController {
         const user = req.user;
         return this.usersService.findUserWithProfile(user.id);
     }
+    getMyEvents(req) {
+        const user = req.user;
+        return this.usersService.findMyEvents(user.id);
+    }
     updateProfile(req, updateProfileDto) {
         const user = req.user;
         return this.usersService.updateProfile(user.id, updateProfileDto);
@@ -44,6 +48,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Get)('me/events'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getMyEvents", null);
 __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Put)('me'),

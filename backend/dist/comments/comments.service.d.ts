@@ -51,7 +51,5 @@ export declare class CommentsService {
         authorId: string;
         postId: string;
     }>;
-    remove(id: string, userId: string): Promise<{
-        message: string;
-    }>;
+    remove(id: string, userId: string): Promise<void>;
 }
