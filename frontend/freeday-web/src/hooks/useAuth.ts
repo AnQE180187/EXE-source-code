@@ -5,7 +5,7 @@ export type UserRole = 'Guest' | 'User' | 'Organizer' | 'Admin';
 interface User {
   id: string;
   email: string;
-  name: string;
+  name?: string;
   avatar?: string;
   role: UserRole;
 }
@@ -31,12 +31,28 @@ export const useAuth = () => {
     const user = localStorage.getItem('user')
     
     if (token && user) {
-      setAuthState({
-        user: JSON.parse(user),
-        token,
-        isAuthenticated: true,
-        isLoading: false,
-      })
+      try {
+        const parsedUser = JSON.parse(user)
+        if (parsedUser && typeof parsedUser === 'object') {
+          setAuthState({
+            user: parsedUser,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+          })
+        } else {
+          // Invalid user data
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setAuthState(prev => ({ ...prev, isLoading: false }))
+        }
+      } catch (error) {
+        // Invalid JSON
+        console.error('Error parsing user data:', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        setAuthState(prev => ({ ...prev, isLoading: false }))
+      }
     } else {
       setAuthState(prev => ({ ...prev, isLoading: false }))
     }
@@ -47,14 +63,22 @@ export const useAuth = () => {
       setAuthState(prev => ({ ...prev, isLoading: true }))
       
       const response = await authAPI.login({ email, password })
-      const { user, token } = response.data
+      const { accessToken } = response.data
       
-      localStorage.setItem('token', token)
+      // Decode JWT token to get user info
+      const decodedToken = JSON.parse(atob(accessToken.split('.')[1]))
+      const user = {
+        id: decodedToken.sub,
+        email: decodedToken.email,
+        role: decodedToken.role,
+      }
+      
+      localStorage.setItem('token', accessToken)
       localStorage.setItem('user', JSON.stringify(user))
       
       setAuthState({
         user,
-        token,
+        token: accessToken,
         isAuthenticated: true,
         isLoading: false,
       })
@@ -92,14 +116,23 @@ export const useAuth = () => {
       setAuthState(prev => ({ ...prev, isLoading: true }))
       
       const response = await authAPI.register({ email, password, name })
-      const { user, token } = response.data
+      const { accessToken } = response.data
       
-      localStorage.setItem('token', token)
+      // Decode JWT token to get user info
+      const decodedToken = JSON.parse(atob(accessToken.split('.')[1]))
+      const user = {
+        id: decodedToken.sub,
+        email: decodedToken.email,
+        role: decodedToken.role,
+        name
+      }
+      
+      localStorage.setItem('token', accessToken)
       localStorage.setItem('user', JSON.stringify(user))
       
       setAuthState({
         user,
-        token,
+        token: accessToken,
         isAuthenticated: true,
         isLoading: false,
       })

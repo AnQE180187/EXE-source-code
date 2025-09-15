@@ -25,7 +25,27 @@ export class EventsService {
 
   findAll() {
     return this.prisma.event.findMany({
-      where: { status: EventStatus.PUBLISHED },
+      where: {
+        OR: [
+          { status: EventStatus.PUBLISHED },
+          { status: EventStatus.CLOSED }
+        ]
+      },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            email: true,
+            profile: true
+          }
+        },
+        _count: {
+          select: {
+            registrations: true,
+            favorites: true
+          }
+        }
+      },
       orderBy: {
         startAt: 'asc',
       },

@@ -33,7 +33,27 @@ let EventsService = class EventsService {
     }
     findAll() {
         return this.prisma.event.findMany({
-            where: { status: client_1.EventStatus.PUBLISHED },
+            where: {
+                OR: [
+                    { status: client_1.EventStatus.PUBLISHED },
+                    { status: client_1.EventStatus.CLOSED }
+                ]
+            },
+            include: {
+                organizer: {
+                    select: {
+                        id: true,
+                        email: true,
+                        profile: true
+                    }
+                },
+                _count: {
+                    select: {
+                        registrations: true,
+                        favorites: true
+                    }
+                }
+            },
             orderBy: {
                 startAt: 'asc',
             },

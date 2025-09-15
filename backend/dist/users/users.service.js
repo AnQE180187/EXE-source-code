@@ -21,6 +21,31 @@ let UsersService = class UsersService {
         this.prisma = prisma;
         this.auditLogsService = auditLogsService;
     }
+    async findAll(currentUser) {
+        const select = currentUser.role === client_1.Role.ADMIN ? {
+            id: true,
+            email: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            profile: true,
+        } : {
+            id: true,
+            email: true,
+            role: true,
+            profile: {
+                select: {
+                    displayName: true,
+                    avatarUrl: true,
+                }
+            }
+        };
+        return this.prisma.user.findMany({
+            select,
+            orderBy: { createdAt: 'desc' },
+        });
+    }
     async findUserWithProfile(userId) {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
