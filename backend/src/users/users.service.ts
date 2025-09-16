@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
@@ -10,6 +10,34 @@ export class UsersService {
     private prisma: PrismaService,
     private auditLogsService: AuditLogsService,
   ) { }
+
+  async findAll(currentUser: User) {
+    // Chỉ ADMIN mới có thể xem tất cả thông tin user
+    const select = currentUser.role === Role.ADMIN ? {
+      id: true,
+      email: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      profile: true,
+    } : {
+      id: true,
+      email: true,
+      role: true,
+      profile: {
+        select: {
+          displayName: true,
+          avatarUrl: true,
+        }
+      }
+    };
+
+    return this.prisma.user.findMany({
+      select,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 
   // 🔹 Trả user kèm profile, nhưng không có passwordHash
   async findUserWithProfile(userId: string) {

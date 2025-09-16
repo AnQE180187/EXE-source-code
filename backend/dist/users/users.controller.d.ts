@@ -4,14 +4,46 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
+    findAll(req: Request): Promise<{
+        profile: {
+            displayName: string;
+            avatarUrl: string | null;
+            city: string | null;
+            bio: string | null;
+            interests: import("@prisma/client/runtime/library").JsonValue | null;
+            userId: string;
+        } | null;
+        email: string;
+        id: string;
+        createdAt: Date;
+        role: import(".prisma/client").$Enums.Role;
+        status: import(".prisma/client").$Enums.AccountStatus;
+        updatedAt: Date;
+    }[]>;
+    getAllUsers(req: Request): Promise<{
+        profile: {
+            displayName: string;
+            avatarUrl: string | null;
+            city: string | null;
+            bio: string | null;
+            interests: import("@prisma/client/runtime/library").JsonValue | null;
+            userId: string;
+        } | null;
+        email: string;
+        id: string;
+        createdAt: Date;
+        role: import(".prisma/client").$Enums.Role;
+        status: import(".prisma/client").$Enums.AccountStatus;
+        updatedAt: Date;
+    }[]>;
     getProfile(req: Request): Promise<{
         profile: {
             displayName: string;
             avatarUrl: string | null;
             city: string | null;
             bio: string | null;
-            userId: string;
             interests: import("@prisma/client/runtime/library").JsonValue | null;
+            userId: string;
         } | null;
         email: string;
         id: string;
@@ -65,8 +97,8 @@ export declare class UsersController {
         avatarUrl: string | null;
         city: string | null;
         bio: string | null;
-        userId: string;
         interests: import("@prisma/client/runtime/library").JsonValue | null;
+        userId: string;
     }>;
     upgradeToOrganizer(req: Request): Promise<{
         email: string;

@@ -1,8 +1,9 @@
 import axios from 'axios'
+import { UpdateProfileDto, UserProfile, UserEvents } from '@/types/profile'
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -32,8 +33,17 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
       window.location.href = '/login'
     }
+    
+    // Log error details for debugging
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config
+    })
+    
     return Promise.reject(error)
   }
 )
@@ -65,9 +75,10 @@ export const forumAPI = {
 }
 
 export const userAPI = {
-  getProfile: () => api.get('/user/profile'),
-  updateProfile: (data: any) => api.put('/user/profile', data),
-  getEvents: () => api.get('/user/events'),
+  getProfile: () => api.get<{ data: UserProfile }>('/users/me'),
+  updateProfile: (data: UpdateProfileDto) => api.put<{ data: UserProfile }>('/users/me', data),
+  getEvents: () => api.get<{ data: UserEvents }>('/users/me/events'),
+  upgradeToOrganizer: () => api.post<{ data: UserProfile }>('/users/me/upgrade-to-organizer'),
 }
 
 export default api 

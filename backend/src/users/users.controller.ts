@@ -17,6 +17,20 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  findAll(@Req() req: Request) {
+    const user = req.user as User;
+    return this.usersService.findAll(user);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get()
+  getAllUsers(@Req() req: Request) {
+    const user = req.user as User;
+    return this.usersService.findAll(user);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   getProfile(@Req() req: Request) {

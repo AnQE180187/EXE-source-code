@@ -17,7 +17,20 @@ export declare class ReportsController {
         note: string | null;
         reporterId: string;
     }>;
-    findAll(status?: ReportStatus): import(".prisma/client").Prisma.PrismaPromise<{
+    findAll(req: Request, status?: ReportStatus): import(".prisma/client").Prisma.PrismaPromise<({
+        reporter: {
+            profile: {
+                displayName: string;
+                avatarUrl: string | null;
+                city: string | null;
+                bio: string | null;
+                interests: import("@prisma/client/runtime/library").JsonValue | null;
+                userId: string;
+            } | null;
+            email: string;
+            id: string;
+        };
+    } & {
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.ReportStatus;
@@ -27,7 +40,7 @@ export declare class ReportsController {
         targetCommentId: string | null;
         note: string | null;
         reporterId: string;
-    }[]>;
+    })[]>;
     findOne(id: string): Promise<{
         id: string;
         createdAt: Date;

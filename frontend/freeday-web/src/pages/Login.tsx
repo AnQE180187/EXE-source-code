@@ -23,11 +23,21 @@ const Login: React.FC = () => {
         email: formData.email,
         password: formData.password
       })
-      const { user, token } = res.data
-      localStorage.setItem('token', token)
+      const { accessToken } = res.data
+      
+      // Decode token để lấy thông tin user
+      const payload = JSON.parse(atob(accessToken.split('.')[1]))
+      const user = {
+        id: payload.sub,
+        email: payload.email,
+        role: payload.role
+      }
+      
+      localStorage.setItem('token', accessToken)
       localStorage.setItem('user', JSON.stringify(user))
+      
       toast.showToast('Đăng nhập thành công!', 'success')
-      navigate('/')
+      navigate('/', { replace: true })
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại')
       toast.showToast('Đăng nhập thất bại', 'error')

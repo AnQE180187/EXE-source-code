@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportStatusDto } from './dto/update-report-status.dto';
-import { User, ReportStatus } from '@prisma/client';
+import { User, ReportStatus, Role } from '@prisma/client';
 
 @Injectable()
 export class ReportsService {
@@ -25,9 +25,29 @@ export class ReportsService {
     });
   }
 
-  findAll(status?: ReportStatus) {
+  findAll(status?: ReportStatus, user?: User) {
+    const where: any = {};
+    
+    if (status) {
+      where.status = status;
+    }
+
+    // If not admin, only show user's own reports
+    if (user && user.role !== Role.ADMIN) {
+      where.reporterId = user.id;
+    }
+
     return this.prisma.report.findMany({
-      where: status ? { status } : undefined,
+      where,
+      include: {
+        reporter: {
+          select: {
+            id: true,
+            email: true,
+            profile: true
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

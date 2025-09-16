@@ -30,11 +30,23 @@ const Register: React.FC = () => {
         email: formData.email,
         password: formData.password
       })
-      const { user, token } = res.data
-      localStorage.setItem('token', token)
+      
+      const { accessToken } = res.data
+      
+      // Decode JWT token để lấy thông tin user
+      const payload = JSON.parse(atob(accessToken.split('.')[1]))
+      const user = {
+        id: payload.sub,
+        email: payload.email,
+        role: payload.role,
+        name: formData.name
+      }
+      
+      localStorage.setItem('token', accessToken)
       localStorage.setItem('user', JSON.stringify(user))
+      
       toast.showToast('Đăng ký thành công!', 'success')
-      navigate('/')
+      navigate('/', { replace: true })
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký thất bại')
       toast.showToast('Đăng ký thất bại', 'error')
@@ -55,9 +67,6 @@ const Register: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <div className="flex items-center justify-center mb-6">
-            <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">F</span>
-            </div>
           </div>
           {error && <div className="text-red-500 mb-2">{error}</div>}
           <h2 className="text-3xl md:text-4xl font-display font-bold text-neutral-900 mb-2">

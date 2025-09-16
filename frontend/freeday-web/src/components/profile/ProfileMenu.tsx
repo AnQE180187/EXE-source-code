@@ -45,7 +45,7 @@ const ProfileMenu: React.FC = () => {
         onMouseEnter={() => setOpen(true)}
       >
         <span className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold">
-          {user.name?.charAt(0).toUpperCase() || 'U'}
+          {user.email?.charAt(0).toUpperCase() || user.name?.charAt(0).toUpperCase() || 'U'}
         </span>
       </button>
       {open && (

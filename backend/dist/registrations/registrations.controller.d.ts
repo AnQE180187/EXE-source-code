@@ -7,8 +7,8 @@ export declare class RegistrationsController {
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.RegistrationStatus;
-        eventId: string;
         userId: string;
+        eventId: string;
     }>;
     remove(eventId: string, req: Request): Promise<{
         message: string;

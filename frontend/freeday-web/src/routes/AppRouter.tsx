@@ -11,6 +11,7 @@ import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import NotFound from '@/pages/NotFound'
 import ProtectedRoute from '@/components/common/ProtectedRoute'
+import PrivateRoute from '@/components/common/PrivateRoute'
 import ProfileDetail from '@/components/profile/ProfileDetail'
 import ForumPostDetail from '@/components/profile/ForumPostDetail'
 import RegisteredEvents from '@/pages/RegisteredEvents'
@@ -19,14 +20,36 @@ const AppRouter: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
         {/* Public routes with MainLayout */}
         <Route path="/" element={<MainLayout><Home /></MainLayout>} />
         <Route path="/events" element={<MainLayout><Events /></MainLayout>} />
         <Route path="/events/:id" element={<MainLayout><EventDetail /></MainLayout>} />
-        <Route path="/forum" element={<MainLayout><Forum /></MainLayout>} />
-        <Route path="/forum/create" element={<MainLayout><CreatePost /></MainLayout>} />
-        <Route path="/forum/:postId" element={<MainLayout><ForumPostDetail /></MainLayout>} />
-        <Route path="/registered-events" element={<MainLayout><RegisteredEvents /></MainLayout>} />
+        
+        {/* Protected routes with MainLayout */}
+        <Route path="/forum" element={
+          <PrivateRoute>
+            <MainLayout><Forum /></MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/forum/create" element={
+          <PrivateRoute>
+            <MainLayout><CreatePost /></MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/forum/:postId" element={
+          <PrivateRoute>
+            <MainLayout><ForumPostDetail /></MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/registered-events" element={
+          <PrivateRoute>
+            <MainLayout><RegisteredEvents /></MainLayout>
+          </PrivateRoute>
+        } />
         <Route path="/events/manage" element={
           <ProtectedRoute allowedRoles={['Organizer', 'Admin']}>
             <MainLayout>
@@ -34,11 +57,11 @@ const AppRouter: React.FC = () => {
             </MainLayout>
           </ProtectedRoute>
         } />
-        
-        {/* Public routes without MainLayout */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<ProfileDetail />} />
+        <Route path="/profile" element={
+          <PrivateRoute>
+            <MainLayout><ProfileDetail /></MainLayout>
+          </PrivateRoute>
+        } />
         
         {/* 404 route */}
         <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />

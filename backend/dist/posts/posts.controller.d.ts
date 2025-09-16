@@ -8,8 +8,8 @@ export declare class PostsController {
     create(createPostDto: CreatePostDto, req: Request): Promise<{
         tags: {
             tag: {
-                id: string;
                 name: string;
+                id: string;
             };
         }[];
     } & {
@@ -24,8 +24,8 @@ export declare class PostsController {
     findAll(): import(".prisma/client").Prisma.PrismaPromise<({
         tags: {
             tag: {
-                id: string;
                 name: string;
+                id: string;
             };
         }[];
         author: {
@@ -44,8 +44,8 @@ export declare class PostsController {
     findOne(id: string): Promise<{
         tags: {
             tag: {
-                id: string;
                 name: string;
+                id: string;
             };
         }[];
         author: {
@@ -64,8 +64,8 @@ export declare class PostsController {
     update(id: string, updatePostDto: UpdatePostDto, req: Request): Promise<{
         tags: {
             tag: {
-                id: string;
                 name: string;
+                id: string;
             };
         }[];
     } & {

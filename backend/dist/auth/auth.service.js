@@ -25,7 +25,7 @@ let AuthService = class AuthService {
         this.auditLogsService = auditLogsService;
     }
     async register(registerUserDto) {
-        const { email, password } = registerUserDto;
+        const { email, password, name } = registerUserDto;
         const existingUser = await this.prisma.user.findUnique({
             where: { email },
         });
@@ -37,7 +37,15 @@ let AuthService = class AuthService {
             data: {
                 email,
                 passwordHash: hashedPassword,
+                profile: {
+                    create: {
+                        displayName: name
+                    }
+                }
             },
+            include: {
+                profile: true
+            }
         });
         await this.auditLogsService.log(user.id, 'REGISTER', 'User', user.id, null, { email: user.email, role: user.role });
         const { passwordHash, ...result } = user;
@@ -49,6 +57,9 @@ let AuthService = class AuthService {
             where: { email },
         });
         if (!user) {
+            throw new common_1.UnauthorizedException('Invalid credentials');
+        }
+        if (!user.passwordHash) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         const isPasswordMatching = await bcrypt.compare(password, user.passwordHash);

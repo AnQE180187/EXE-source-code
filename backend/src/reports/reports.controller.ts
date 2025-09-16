@@ -21,10 +21,10 @@ export class ReportsController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
-  findAll(@Query('status') status?: ReportStatus) {
-    return this.reportsService.findAll(status);
+  @UseGuards(AuthGuard('jwt'))
+  findAll(@Req() req: Request, @Query('status') status?: ReportStatus) {
+    const user = req.user as User;
+    return this.reportsService.findAll(status, user);
   }
 
   @Get(':id')

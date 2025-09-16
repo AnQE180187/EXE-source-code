@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReportsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let ReportsService = class ReportsService {
     prisma;
     constructor(prisma) {
@@ -30,9 +31,25 @@ let ReportsService = class ReportsService {
             },
         });
     }
-    findAll(status) {
+    findAll(status, user) {
+        const where = {};
+        if (status) {
+            where.status = status;
+        }
+        if (user && user.role !== client_1.Role.ADMIN) {
+            where.reporterId = user.id;
+        }
         return this.prisma.report.findMany({
-            where: status ? { status } : undefined,
+            where,
+            include: {
+                reporter: {
+                    select: {
+                        id: true,
+                        email: true,
+                        profile: true
+                    }
+                }
+            },
             orderBy: { createdAt: 'desc' },
         });
     }

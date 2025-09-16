@@ -30,8 +30,9 @@ let ReportsController = class ReportsController {
         const reporter = req.user;
         return this.reportsService.create(createReportDto, reporter);
     }
-    findAll(status) {
-        return this.reportsService.findAll(status);
+    findAll(req, status) {
+        const user = req.user;
+        return this.reportsService.findAll(status, user);
     }
     findOne(id) {
         return this.reportsService.findOne(id);
@@ -53,11 +54,11 @@ __decorate([
 ], ReportsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.Role.ADMIN),
-    __param(0, (0, common_1.Query)('status')),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ReportsController.prototype, "findAll", null);
 __decorate([
