@@ -80,8 +80,7 @@ const EditEvent: React.FC = () => {
   const handleStatusChange = async (newStatus: z.infer<typeof EventStatus>) => {
     if (!id) return;
     try {
-      // Use the new dedicated endpoint for status changes
-      await eventsAPI.updateStatus(id, { status: newStatus });
+      await eventsAPI.update(id, { status: newStatus });
       toast.showToast(`Sự kiện đã được ${newStatus === 'PUBLISHED' ? 'công khai' : 'chuyển về bản nháp'}.`, 'success');
       setCurrentStatus(newStatus);
     } catch (error) {
@@ -166,6 +165,7 @@ const EditEvent: React.FC = () => {
             {currentStatus === 'PUBLISHED' && (
               <Button type="button" variant="solid" color="warning" onClick={() => handleStatusChange('DRAFT')} disabled={isSubmitting}>
                 Chuyển về bản nháp
+
               </Button>
             )}
           </div>
