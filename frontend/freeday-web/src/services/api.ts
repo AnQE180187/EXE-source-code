@@ -1,5 +1,6 @@
-import axios from 'axios'
-import { UpdateProfileDto, UserProfile, UserEvents } from '@/types/profile'
+import axios from 'axios';
+import { useAuthStore } from '@/store/useAuthStore';
+import { UpdateProfileDto, UserProfile, UserEvents } from '@/types/profile';
 
 // Create axios instance
 const api = axios.create({
@@ -8,45 +9,45 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-})
+});
 
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    // Get token from the Zustand store
+    const token = useAuthStore.getState().token;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    return response
+    return response;
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Handle unauthorized access by calling the logout action from the store
+      useAuthStore.getState().logout();
+      window.location.href = '/login';
     }
     
     // Log error details for debugging
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
-      config: error.config
-    })
+      config: error.config,
+    });
     
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 // API endpoints
 export const authAPI = {
@@ -55,7 +56,7 @@ export const authAPI = {
   register: (data: { email: string; password: string; name: string }) =>
     api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
-}
+};
 
 export const eventsAPI = {
   getAll: (params?: any) => api.get('/events', { params }),
@@ -63,7 +64,7 @@ export const eventsAPI = {
   create: (data: any) => api.post('/events', data),
   update: (id: string, data: any) => api.put(`/events/${id}`, data),
   delete: (id: string) => api.delete(`/events/${id}`),
-}
+};
 
 export const forumAPI = {
   getPosts: (params?: any) => api.get('/forum/posts', { params }),
@@ -72,13 +73,13 @@ export const forumAPI = {
   getComments: (postId: string) => api.get(`/forum/posts/${postId}/comments`),
   createComment: (postId: string, data: any) =>
     api.post(`/forum/posts/${postId}/comments`, data),
-}
+};
 
 export const userAPI = {
   getProfile: () => api.get<{ data: UserProfile }>('/users/me'),
   updateProfile: (data: UpdateProfileDto) => api.put<{ data: UserProfile }>('/users/me', data),
   getEvents: () => api.get<{ data: UserEvents }>('/users/me/events'),
   upgradeToOrganizer: () => api.post<{ data: UserProfile }>('/users/me/upgrade-to-organizer'),
-}
+};
 
-export default api 
+export default api; 

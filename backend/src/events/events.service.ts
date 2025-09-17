@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { User, EventStatus, Role } from '@prisma/client';
+import { User, EventStatus, Role, Prisma } from '@prisma/client';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 
 @Injectable()
@@ -23,20 +23,45 @@ export class EventsService {
     });
   }
 
-  findAll() {
-    return this.prisma.event.findMany({
-      where: {
+  findAll(query: { search?: string; price?: string }) {
+    const { search, price } = query;
+    const where: Prisma.EventWhereInput = {
+      status: { in: [EventStatus.PUBLISHED, EventStatus.CLOSED] },
+      AND: [], // Initialize AND as an array
+    };
+
+    if (search) {
+      (where.AND as Prisma.EventWhereInput[]).push({
         OR: [
-          { status: EventStatus.PUBLISHED },
-          { status: EventStatus.CLOSED }
-        ]
-      },
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+
+    if (price && price !== 'all') {
+      if (price === 'free') {
+        (where.AND as Prisma.EventWhereInput[]).push({ price: 0 });
+      } else if (price === 'low') {
+        (where.AND as Prisma.EventWhereInput[]).push({ price: { gt: 0, lt: 100000 } });
+      } else if (price === 'medium') {
+        (where.AND as Prisma.EventWhereInput[]).push({ price: { gte: 100000, lte: 500000 } });
+      } else if (price === 'high') {
+        (where.AND as Prisma.EventWhereInput[]).push({ price: { gt: 500000 } });
+      }
+    }
+
+    return this.prisma.event.findMany({
+      where,
       include: {
         organizer: {
           select: {
             id: true,
-            email: true,
-            profile: true
+            profile: {
+              select: {
+                displayName: true,
+              }
+            }
           }
         },
         _count: {
@@ -55,13 +80,33 @@ export class EventsService {
   async findOne(id: string) {
     const event = await this.prisma.event.findUnique({
       where: { id },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!event) {
       throw new NotFoundException(`Event with ID "${id}" not found`);
     }
 
-    return event;
+    // Manually shape the organizer object to match frontend expectations
+    const { organizer, ...rest } = event;
+    return {
+      ...rest,
+      organizer: {
+        id: organizer.id,
+        name: organizer.profile?.displayName || 'Không rõ',
+      },
+    };
   }
 
   async update(id: string, updateEventDto: UpdateEventDto, user: User) {

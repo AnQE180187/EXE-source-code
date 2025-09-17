@@ -39,6 +39,12 @@ enum VisibilityStatus {
   VISIBLE
   HIDDEN
 }
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
 
 enum ReportStatus {
   OPEN

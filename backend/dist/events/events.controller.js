@@ -33,8 +33,8 @@ let EventsController = class EventsController {
         const organizer = req.user;
         return this.eventsService.create(createEventDto, organizer);
     }
-    findAll() {
-        return this.eventsService.findAll();
+    findAll(query) {
+        return this.eventsService.findAll(query);
     }
     findOne(id) {
         return this.eventsService.findOne(id);
@@ -65,8 +65,9 @@ __decorate([
 ], EventsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], EventsController.prototype, "findAll", null);
 __decorate([

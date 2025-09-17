@@ -1,21 +1,23 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface ProtectedRouteProps {
   allowedRoles: string[];
-  children: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
+  const { user } = useAuthStore();
 
-  if (isLoading) return <div>Đang kiểm tra quyền truy cập...</div>;
-  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
-  // if (!('role' in user) || !allowedRoles.includes((user as any).role)) {
-  //   return <Navigate to="/not-found" replace />;
-  // }
-  return <>{children}</>;
+  // While the parent PrivateRoute should handle this, it's a good safeguard.
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if the user's role is in the allowed list
+  const isAllowed = allowedRoles.includes(user.role);
+
+  return isAllowed ? <Outlet /> : <Navigate to="/not-found" replace />;
 };
 
 export default ProtectedRoute;

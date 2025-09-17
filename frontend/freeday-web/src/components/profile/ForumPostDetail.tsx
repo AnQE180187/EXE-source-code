@@ -1,107 +1,155 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import { forumService } from '@/services/forumService';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useToast } from '@/components/common/useToast';
 
-// Mock data
-const mockPost = {
-  id: '1',
-  title: 'Tìm bạn đi hiking Bà Nà cuối tuần',
-  content: 'Mình muốn tìm 2-3 bạn cùng đi hiking Bà Nà vào thứ 7 tuần này. Ai hứng thú join nhé! Mang theo nước và đồ ăn nhẹ.',
-  author: {
-    name: 'Nguyễn Văn A',
-    avatar: 'https://i.pravatar.cc/100?img=1',
-  },
-  createdAt: '2024-06-01T10:00:00Z',
-};
+// Define types for Post and Comment
+interface Author {
+  name: string;
+  avatar?: string;
+}
 
-const mockComments = [
-  {
-    id: 'c1',
-    author: { name: 'Trần Thị B', avatar: 'https://i.pravatar.cc/100?img=2' },
-    content: 'Cho mình join với nhé!',
-    createdAt: '2024-06-01T12:00:00Z',
-  },
-  {
-    id: 'c2',
-    author: { name: 'Lê Văn C', avatar: 'https://i.pravatar.cc/100?img=3' },
-    content: 'Mình cũng muốn tham gia, inbox mình nhé.',
-    createdAt: '2024-06-01T13:30:00Z',
-  },
-];
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: Author;
+  createdAt: string;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  author: Author;
+  createdAt: string;
+}
 
 const ForumPostDetail: React.FC = () => {
-  const { postId } = useParams();
-  const [comments, setComments] = useState(mockComments);
-  const [comment, setComment] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { postId } = useParams<{ postId: string }>();
+  const { user } = useAuthStore();
+  const toast = useToast();
 
-  const handleComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
+  const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    if (!postId) return;
     setLoading(true);
-    setTimeout(() => {
-      setComments([
-        ...comments,
-        {
-          id: `c${comments.length + 1}`,
-          author: { name: 'Bạn', avatar: 'https://i.pravatar.cc/100?img=4' },
-          content: comment,
-          createdAt: new Date().toISOString(),
-        },
+    try {
+      const [postRes, commentsRes] = await Promise.all([
+        forumService.getPostById(postId),
+        forumService.getCommentsByPostId(postId),
       ]);
-      setComment('');
+      setPost(postRes.data);
+      setComments(commentsRes.data);
+    } catch (err) {
+      setError('Không thể tải bài viết này.');
+      console.error(err);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
+  }, [postId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !postId) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await forumService.createComment(postId, { content: newComment });
+      // Add the new comment to the list instantly
+      setComments(prevComments => [response.data, ...prevComments]);
+      setNewComment(''); // Clear the input
+      toast.showToast('Đã gửi bình luận', 'success');
+    } catch (err) {
+      toast.showToast('Gửi bình luận thất bại', 'error');
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
+  if (loading) {
+    return <div className="text-center py-20">Đang tải bài viết...</div>;
+  }
+
+  if (error || !post) {
+    return <div className="text-center py-20 text-red-500">{error || 'Không tìm thấy bài viết.'}</div>;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50">
-      <main className="flex-1 flex flex-col items-center py-10 px-2">
-        <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-8 flex flex-col gap-8 border border-neutral-100">
-          {/* Post info */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-2 text-primary-700">{mockPost.title}</h1>
-            <div className="flex items-center mb-4 gap-3">
-              <img src={mockPost.author.avatar} alt={mockPost.author.name} className="w-10 h-10 rounded-full" />
-              <div>
-                <div className="font-semibold">{mockPost.author.name}</div>
-                <div className="text-neutral-500 text-sm">{new Date(mockPost.createdAt).toLocaleString()}</div>
-              </div>
-            </div>
-            <div className="text-neutral-700 leading-relaxed mb-2">{mockPost.content}</div>
-          </div>
-          {/* Comments */}
-          <div className="bg-neutral-50 rounded-xl shadow-soft p-6 mb-8">
-            <h2 className="text-lg font-semibold mb-4">Bình luận ({comments.length})</h2>
-            <div className="space-y-6 mb-6">
-              {comments.map((c) => (
-                <div key={c.id} className="flex items-start space-x-3">
-                  <img src={c.author.avatar} alt={c.author.name} className="w-9 h-9 rounded-full" />
-                  <div>
-                    <div className="font-medium">{c.author.name}</div>
-                    <div className="text-neutral-600 text-sm mb-1">{new Date(c.createdAt).toLocaleString()}</div>
-                    <div className="text-neutral-800">{c.content}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Comment form */}
-            <form onSubmit={handleComment} className="flex items-center space-x-3">
-              <input
-                type="text"
-                className="flex-1 border border-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300"
-                placeholder="Viết bình luận..."
-                value={comment}
-                onChange={e => setComment(e.target.value)}
-                disabled={loading}
-              />
-              <Button type="submit" className="btn-primary" disabled={loading || !comment.trim()}>
-                {loading ? 'Đang gửi...' : 'Gửi'}
-              </Button>
-            </form>
+    <div className="max-w-3xl mx-auto py-8 px-4">
+      {/* Post Content */}
+      <div className="card p-8 mb-8">
+        <h1 className="text-3xl font-bold text-neutral-800 mb-4">{post.title}</h1>
+        <div className="flex items-center mb-6 gap-3 text-sm">
+          <img src={post.author.avatar || `https://i.pravatar.cc/150?u=${post.author.name}`} alt={post.author.name} className="w-10 h-10 rounded-full" />
+          <div>
+            <p className="font-semibold text-neutral-700">{post.author.name}</p>
+            <p className="text-neutral-500">Đăng vào {new Date(post.createdAt).toLocaleString('vi-VN')}</p>
           </div>
         </div>
-      </main>
+        <div className="prose max-w-none text-neutral-700 leading-relaxed">
+          {post.content}
+        </div>
+      </div>
+
+      {/* Comments Section */}
+      <div className="card p-8">
+        <h2 className="text-2xl font-bold text-neutral-800 mb-6">Bình luận ({comments.length})</h2>
+        
+        {/* Comment Form */}
+        {user && (
+          <form onSubmit={handleCommentSubmit} className="flex items-start gap-3 mb-8">
+            <img src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.name}`} alt={user.name} className="w-10 h-10 rounded-full" />
+            <div className="flex-1">
+              <textarea
+                rows={3}
+                className="input w-full"
+                placeholder="Viết bình luận của bạn..."
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                disabled={isSubmitting}
+              />
+              <div className="flex justify-end mt-2">
+                <Button type="submit" loading={isSubmitting} disabled={!newComment.trim()}>
+                  Gửi bình luận
+                </Button>
+              </div>
+            </div>
+          </form>
+        )}
+
+        {/* Comments List */}
+        <div className="space-y-6">
+          {comments.map((comment) => (
+            <div key={comment.id} className="flex items-start gap-3">
+              <img src={comment.author.avatar || `https://i.pravatar.cc/150?u=${comment.author.name}`} alt={comment.author.name} className="w-10 h-10 rounded-full" />
+              <div className="flex-1 bg-neutral-100 rounded-lg p-3">
+                <div className="flex items-baseline gap-2">
+                  <p className="font-semibold text-sm text-neutral-800">{comment.author.name}</p>
+                  <p className="text-xs text-neutral-500">{new Date(comment.createdAt).toLocaleString('vi-VN')}</p>
+                </div>
+                <p className="text-neutral-700">{comment.content}</p>
+              </div>
+            </div>
+          ))}
+          {comments.length === 0 && (
+            <p className="text-center text-neutral-500 py-4">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

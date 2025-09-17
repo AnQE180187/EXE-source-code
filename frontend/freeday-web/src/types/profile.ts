@@ -1,42 +1,21 @@
+// Based on backend DTO
 export interface UpdateProfileDto {
-  displayName: string; // Max 50 chars
-  avatarUrl?: string; // Optional, valid URL, max 2048 chars
-  city?: string; // Optional, max 100 chars
-  bio?: string; // Optional, max 500 chars
+  displayName: string;
+  avatarUrl?: string;
+  city?: string;
+  bio?: string;
 }
 
-export interface UserProfile {
-  id: string;
+// Represents the full profile data received from the server
+export interface UserProfile extends UpdateProfileDto {
+  id: string; // Add the ID field
   email: string;
-  role: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  profile: {
-    id: string;
-    userId: string;
-    displayName: string;
-    avatarUrl?: string;
-    city?: string;
-    bio?: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  role: 'participant' | 'organizer' | 'admin';
 }
 
+// You can expand this later
 export interface UserEvents {
-  registeredEvents: Array<{
-    id: string;
-    title: string;
-    startAt: string;
-    endAt: string;
-    location: string;
-  }>;
-  favoritedEvents: Array<{
-    id: string;
-    title: string;
-    startAt: string;
-    endAt: string;
-    location: string;
-  }>;
+  registered: any[];
+  favorited: any[];
+  organized: any[];
 }

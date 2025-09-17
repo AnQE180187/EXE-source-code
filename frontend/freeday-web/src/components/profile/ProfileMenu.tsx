@@ -1,82 +1,100 @@
-import React, { useState, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const ProfileMenu: React.FC = () => {
-  const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
+  const { user, logout } = useAuthStore();
+  const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Đóng menu khi click ra ngoài
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+  // Effect to handle clicks outside of the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpen(false);
+        setIsOpen(false);
       }
-    }
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [open]);
+  }, []);
 
-  // Nếu chưa đăng nhập, hiển thị icon dẫn tới trang đăng ký
-  if (!user) {
-    return (
-      <Link to="/register" className="flex items-center space-x-2 focus:outline-none">
-        <span className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </span>
-      </Link>
-    );
-  }
+  const handleLogout = () => {
+    logout();
+    setIsOpen(false);
+    navigate('/'); // Navigate to homepage after logout
+  };
 
-  // Nếu đã đăng nhập, nhấp vào icon sẽ chuyển sang trang chi tiết profile
   return (
     <div className="relative" ref={menuRef}>
+      {/* User Icon Button */}
       <button
-        className="flex items-center space-x-2 focus:outline-none"
-        onClick={() => setOpen((prev) => !prev)}
-        onMouseEnter={() => setOpen(true)}
+        onClick={() => setIsOpen(prev => !prev)}
+        className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
       >
-        <span className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-bold">
-          {user.email?.charAt(0).toUpperCase() || user.name?.charAt(0).toUpperCase() || 'U'}
-        </span>
+        {user ? (
+          <span>{user.name?.charAt(0).toUpperCase() || 'A'}</span>
+        ) : (
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        )}
       </button>
-      {open && (
-        <div
-          className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50"
-          onMouseLeave={() => setOpen(false)}
-        >
-          <Link
-            to="/profile"
-            className="block px-4 py-2 hover:bg-gray-100 text-gray-800"
-            onClick={() => setOpen(false)}
-          >
-            Xem Profile
-          </Link>
-          <Link
-            to="/registered-events"
-            className="block px-4 py-2 hover:bg-gray-100 text-gray-800"
-            onClick={() => setOpen(false)}
-          >
-            Sự kiện đã đăng ký
-          </Link>
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-            onClick={() => {
-              setOpen(false);
-              logout?.();
-              navigate('/login');
-            }}
-          >
-            Đăng xuất
-          </button>
+
+      {/* Dropdown Panel */}
+      {isOpen && (
+        <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none animate-slide-up-fast z-50">
+          <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            {user ? (
+              // --- Menu for logged-in users ---
+              <>
+                <div className="px-4 py-3 border-b">
+                  <p className="text-sm font-semibold text-neutral-800">{user.name}</p>
+                  <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+                </div>
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Hồ sơ của tôi
+                </Link>
+                <Link
+                  to="/my-events"
+                  className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Sự kiện của tôi
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  Đăng xuất
+                </button>
+              </>
+            ) : (
+              // --- Menu for logged-out users ---
+              <>
+                <Link
+                  to="/login"
+                  className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Đăng nhập
+                </Link>
+                <Link
+                  to="/register"
+                  className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Đăng ký
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

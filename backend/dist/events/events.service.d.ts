@@ -1,13 +1,13 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { User } from '@prisma/client';
+import { User, Prisma } from '@prisma/client';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 export declare class EventsService {
     private prisma;
     private auditLogsService;
     constructor(prisma: PrismaService, auditLogsService: AuditLogsService);
-    create(createEventDto: CreateEventDto, organizer: User): import(".prisma/client").Prisma.Prisma__EventClient<{
+    create(createEventDto: CreateEventDto, organizer: User): Prisma.Prisma__EventClient<{
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.EventStatus;
@@ -25,8 +25,11 @@ export declare class EventsService {
         capacity: number;
         favoritesCount: number;
         registeredCount: number;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    findAll(): import(".prisma/client").Prisma.PrismaPromise<({
+    }, never, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    findAll(query: {
+        search?: string;
+        price?: string;
+    }): Prisma.PrismaPromise<({
         _count: {
             registrations: number;
             favorites: number;
@@ -34,13 +37,7 @@ export declare class EventsService {
         organizer: {
             profile: {
                 displayName: string;
-                avatarUrl: string | null;
-                city: string | null;
-                bio: string | null;
-                interests: import("@prisma/client/runtime/library").JsonValue | null;
-                userId: string;
             } | null;
-            email: string;
             id: string;
         };
     } & {
@@ -63,6 +60,10 @@ export declare class EventsService {
         registeredCount: number;
     })[]>;
     findOne(id: string): Promise<{
+        organizer: {
+            id: string;
+            name: string;
+        };
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.EventStatus;

@@ -53,7 +53,7 @@ export declare class UsersController {
         updatedAt: Date;
     }>;
     getMyEvents(req: Request): Promise<{
-        registeredEvents: {
+        registered: {
             id: string;
             createdAt: Date;
             status: import(".prisma/client").$Enums.EventStatus;
@@ -72,7 +72,7 @@ export declare class UsersController {
             favoritesCount: number;
             registeredCount: number;
         }[];
-        favoritedEvents: {
+        favorited: {
             id: string;
             createdAt: Date;
             status: import(".prisma/client").$Enums.EventStatus;
@@ -91,6 +91,29 @@ export declare class UsersController {
             favoritesCount: number;
             registeredCount: number;
         }[];
+        organized: ({
+            _count: {
+                registrations: number;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            status: import(".prisma/client").$Enums.EventStatus;
+            updatedAt: Date;
+            organizerId: string;
+            title: string;
+            slug: string | null;
+            description: string;
+            locationText: string;
+            lat: number | null;
+            lng: number | null;
+            startAt: Date;
+            endAt: Date;
+            price: number | null;
+            capacity: number;
+            favoritesCount: number;
+            registeredCount: number;
+        })[];
     }>;
     updateProfile(req: Request, updateProfileDto: UpdateProfileDto): Promise<{
         displayName: string;

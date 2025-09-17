@@ -26,7 +26,10 @@ export declare class EventsController {
         favoritesCount: number;
         registeredCount: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    findAll(): import(".prisma/client").Prisma.PrismaPromise<({
+    findAll(query: {
+        search?: string;
+        price?: string;
+    }): import(".prisma/client").Prisma.PrismaPromise<({
         _count: {
             registrations: number;
             favorites: number;
@@ -34,13 +37,7 @@ export declare class EventsController {
         organizer: {
             profile: {
                 displayName: string;
-                avatarUrl: string | null;
-                city: string | null;
-                bio: string | null;
-                interests: import("@prisma/client/runtime/library").JsonValue | null;
-                userId: string;
             } | null;
-            email: string;
             id: string;
         };
     } & {
@@ -63,6 +60,10 @@ export declare class EventsController {
         registeredCount: number;
     })[]>;
     findOne(id: string): Promise<{
+        organizer: {
+            id: string;
+            name: string;
+        };
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.EventStatus;

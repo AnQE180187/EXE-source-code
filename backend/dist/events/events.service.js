@@ -31,20 +31,45 @@ let EventsService = class EventsService {
             },
         });
     }
-    findAll() {
-        return this.prisma.event.findMany({
-            where: {
+    findAll(query) {
+        const { search, price } = query;
+        const where = {
+            status: { in: [client_1.EventStatus.PUBLISHED, client_1.EventStatus.CLOSED] },
+            AND: [],
+        };
+        if (search) {
+            where.AND.push({
                 OR: [
-                    { status: client_1.EventStatus.PUBLISHED },
-                    { status: client_1.EventStatus.CLOSED }
-                ]
-            },
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                ],
+            });
+        }
+        if (price && price !== 'all') {
+            if (price === 'free') {
+                where.AND.push({ price: 0 });
+            }
+            else if (price === 'low') {
+                where.AND.push({ price: { gt: 0, lt: 100000 } });
+            }
+            else if (price === 'medium') {
+                where.AND.push({ price: { gte: 100000, lte: 500000 } });
+            }
+            else if (price === 'high') {
+                where.AND.push({ price: { gt: 500000 } });
+            }
+        }
+        return this.prisma.event.findMany({
+            where,
             include: {
                 organizer: {
                     select: {
                         id: true,
-                        email: true,
-                        profile: true
+                        profile: {
+                            select: {
+                                displayName: true,
+                            }
+                        }
                     }
                 },
                 _count: {
@@ -62,11 +87,30 @@ let EventsService = class EventsService {
     async findOne(id) {
         const event = await this.prisma.event.findUnique({
             where: { id },
+            include: {
+                organizer: {
+                    select: {
+                        id: true,
+                        profile: {
+                            select: {
+                                displayName: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
         if (!event) {
             throw new common_1.NotFoundException(`Event with ID "${id}" not found`);
         }
-        return event;
+        const { organizer, ...rest } = event;
+        return {
+            ...rest,
+            organizer: {
+                id: organizer.id,
+                name: organizer.profile?.displayName || 'Không rõ',
+            },
+        };
     }
     async update(id, updateEventDto, user) {
         const event = await this.prisma.event.findUnique({ where: { id } });
