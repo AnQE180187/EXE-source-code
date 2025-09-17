@@ -1,12 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@/components/common/Button'
+import { eventsAPI } from '@/services/api'
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  startAt: string;
+  endAt: string;
+  locationText: string;
+  price: number;
+  image: string;
+  participants: number;
+  maxParticipants: number;
+  type: string;
+  vibe: string;
+  favoritesCount: number;
+  registeredCount: number;
+}
 
 const Events: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState('all')
   const [selectedVibe, setSelectedVibe] = useState('all')
   const [selectedPrice, setSelectedPrice] = useState('all')
+  const [events, setEvents] = useState<Event[]>([])
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await eventsAPI.getAll();
+        setEvents(response.data);
+        console.log('Fetched events:', response.data); // Log toàn bộ dữ liệu sự kiện
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, [])
 
   const eventTypes = [
     { id: 'all', name: 'Tất cả' },
@@ -34,136 +67,6 @@ const Events: React.FC = () => {
     { id: 'low', name: 'Dưới 100k' },
     { id: 'medium', name: '100k - 500k' },
     { id: 'high', name: 'Trên 500k' }
-  ]
-
-  // Mock data với nhiều sự kiện hơn
-  const events = [
-    {
-      id: 1,
-      title: 'Live Music Night',
-      type: 'music',
-      vibe: 'energetic',
-      date: '2024-01-20',
-      time: '20:00',
-      location: 'Saigon Outcast',
-      price: 0,
-      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
-      participants: 45,
-      maxParticipants: 100,
-      description: 'Đêm nhạc live với các nghệ sĩ trẻ tài năng. Không gian mở, âm nhạc chất lượng.'
-    },
-    {
-      id: 2,
-      title: 'Bóng đá cộng đồng',
-      type: 'sports',
-      vibe: 'energetic',
-      date: '2024-01-21',
-      time: '16:00',
-      location: 'Sân bóng Thảo Điền',
-      price: 50000,
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop',
-      participants: 18,
-      maxParticipants: 22,
-      description: 'Trận đấu bóng đá cộng đồng, rèn luyện sức khỏe và kết bạn mới.'
-    },
-    {
-      id: 3,
-      title: 'Workshop Nấu ăn',
-      type: 'food',
-      vibe: 'creative',
-      date: '2024-01-19',
-      time: '19:00',
-      location: 'Cooking Studio',
-      price: 200000,
-      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop',
-      participants: 12,
-      maxParticipants: 20,
-      description: 'Học nấu các món ăn truyền thống và hiện đại từ đầu bếp chuyên nghiệp.'
-    },
-    {
-      id: 4,
-      title: 'Hiking Bà Nà',
-      type: 'outdoor',
-      vibe: 'adventure',
-      date: '2024-01-25',
-      time: '07:00',
-      location: 'Bà Nà Hills',
-      price: 150000,
-      image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=300&fit=crop',
-      participants: 8,
-      maxParticipants: 15,
-      description: 'Chuyến đi bộ đường dài khám phá thiên nhiên Bà Nà, ngắm cảnh đẹp.'
-    },
-    {
-      id: 5,
-      title: 'Photography Workshop',
-      type: 'art',
-      vibe: 'creative',
-      date: '2024-01-22',
-      time: '14:00',
-      location: 'District 1',
-      price: 300000,
-      image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop',
-      participants: 6,
-      maxParticipants: 12,
-      description: 'Học nhiếp ảnh cơ bản, kỹ thuật chụp ảnh và chỉnh sửa.'
-    },
-    {
-      id: 6,
-      title: 'Board Game Night',
-      type: 'social',
-      vibe: 'chill',
-      date: '2024-01-23',
-      time: '19:30',
-      location: 'Café 42',
-      price: 0,
-      image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=400&h=300&fit=crop',
-      participants: 15,
-      maxParticipants: 25,
-      description: 'Tối chơi board game, giao lưu và kết bạn trong không gian thân thiện.'
-    },
-    {
-      id: 7,
-      title: 'Yoga tại công viên',
-      type: 'sports',
-      vibe: 'chill',
-      date: '2024-01-24',
-      time: '06:00',
-      location: 'Công viên Tao Đàn',
-      price: 0,
-      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
-      participants: 25,
-      maxParticipants: 40,
-      description: 'Lớp yoga buổi sáng, rèn luyện sức khỏe và tinh thần.'
-    },
-    {
-      id: 8,
-      title: 'Coding Meetup',
-      type: 'tech',
-      vibe: 'creative',
-      date: '2024-01-26',
-      time: '19:00',
-      location: 'WeWork Saigon',
-      price: 100000,
-      image: 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=400&h=300&fit=crop',
-      participants: 30,
-      maxParticipants: 50,
-      description: 'Gặp gỡ các developer, chia sẻ kinh nghiệm và học hỏi công nghệ mới.'
-    },
-    {
-      id: 9,
-      title: 'Karaoke Night',
-      type: 'music',
-      vibe: 'social',
-      date: '2024-01-27',
-      time: '20:00',
-      location: 'Karaoke Bar',
-      price: 80000,
-      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
-      participants: 20,
-      maxParticipants: 30,
-      description: 'Đêm karaoke vui nhộn, hát hò và giao lưu với bạn bè.'
-    }
   ]
 
   // Filter events based on search and filters
@@ -297,7 +200,7 @@ const Events: React.FC = () => {
               <div className="absolute bottom-3 left-3 right-3">
                 <div className="flex items-center justify-between text-white">
                   <span className="text-sm font-medium">
-                    {event.participants}/{event.maxParticipants} người
+                    {event.registeredCount}/{event.maxParticipants} người đã đăng ký
                   </span>
                   <span className="text-sm font-medium">
                     {event.price === 0 ? 'Miễn phí' : `${event.price.toLocaleString()}đ`}
@@ -314,14 +217,14 @@ const Events: React.FC = () => {
                   <svg className="w-4 h-4 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a4 4 0 118 0v4m-4 6h.01M9 12h6m-6 4h6m2 1H9a2 2 0 01-2-2V6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2z" />
                   </svg>
-                  {event.date} - {event.time}
+                  {new Date(event.startAt).toLocaleDateString()} - {new Date(event.endAt).toLocaleDateString()}
                 </div>
                 <div className="flex items-center">
                   <svg className="w-4 h-4 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  {event.location}
+                  {event.locationText}
                 </div>
               </div>
               
@@ -373,4 +276,4 @@ const Events: React.FC = () => {
   )
 }
 
-export default Events 
+export default Events

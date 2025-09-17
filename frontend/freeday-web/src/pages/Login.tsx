@@ -59,7 +59,7 @@ const Login: React.FC = () => {
         <div className="text-center">
           <div className="flex items-center justify-center mb-6">
             <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">F</span>
+              <span className="text-white font-bold text-xl"></span>
             </div>
           </div>
           {error && <div className="text-red-500 mb-2">{error}</div>}
