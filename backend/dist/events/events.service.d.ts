@@ -1,6 +1,7 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { User, Prisma } from '@prisma/client';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 export declare class EventsService {
@@ -83,6 +84,25 @@ export declare class EventsService {
         registeredCount: number;
     }>;
     update(id: string, updateEventDto: UpdateEventDto, user: User): Promise<{
+        id: string;
+        createdAt: Date;
+        status: import(".prisma/client").$Enums.EventStatus;
+        updatedAt: Date;
+        organizerId: string;
+        title: string;
+        slug: string | null;
+        description: string;
+        locationText: string;
+        lat: number | null;
+        lng: number | null;
+        startAt: Date;
+        endAt: Date;
+        price: number | null;
+        capacity: number;
+        favoritesCount: number;
+        registeredCount: number;
+    }>;
+    updateStatus(id: string, updateEventStatusDto: UpdateEventStatusDto, user: User): Promise<{
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.EventStatus;

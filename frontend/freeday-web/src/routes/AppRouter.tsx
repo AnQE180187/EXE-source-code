@@ -16,6 +16,7 @@ import ProfilePage from '@/pages/Profile'; // Correct import
 import ForumPostDetail from '@/components/profile/ForumPostDetail';
 import RegisteredEvents from '@/pages/RegisteredEvents';
 import CreateEvent from '@/pages/CreateEvent';
+import EditEvent from '@/pages/EditEvent';
 
 // The MainLayout now acts as a layout route component.
 const AppRouter: React.FC = () => {
@@ -47,6 +48,7 @@ const AppRouter: React.FC = () => {
           <Route element={<ProtectedRoute allowedRoles={['ORGANIZER', 'ADMIN']} />}>
             <Route path="events/manage" element={<EventManagement />} />
             <Route path="events/new" element={<CreateEvent />} />
+            <Route path="events/edit/:id" element={<EditEvent />} />
           </Route>
 
           {/* 404 Not Found */}

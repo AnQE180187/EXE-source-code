@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateEventDto = void 0;
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class CreateEventDto {
     title;
     description;
@@ -19,6 +20,7 @@ class CreateEventDto {
     endAt;
     price;
     capacity;
+    status;
 }
 exports.CreateEventDto = CreateEventDto;
 __decorate([
@@ -56,4 +58,9 @@ __decorate([
     (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], CreateEventDto.prototype, "capacity", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.EventStatus),
+    __metadata("design:type", String)
+], CreateEventDto.prototype, "status", void 0);
 //# sourceMappingURL=create-event.dto.js.map

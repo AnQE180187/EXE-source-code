@@ -13,6 +13,7 @@ exports.UpdateEventDto = void 0;
 const mapped_types_1 = require("@nestjs/mapped-types");
 const create_event_dto_1 = require("./create-event.dto");
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class UpdateEventDto extends (0, mapped_types_1.PartialType)(create_event_dto_1.CreateEventDto) {
     title;
     description;
@@ -21,6 +22,7 @@ class UpdateEventDto extends (0, mapped_types_1.PartialType)(create_event_dto_1.
     endAt;
     price;
     capacity;
+    status;
 }
 exports.UpdateEventDto = UpdateEventDto;
 __decorate([
@@ -63,4 +65,9 @@ __decorate([
     (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], UpdateEventDto.prototype, "capacity", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.EventStatus),
+    __metadata("design:type", String)
+], UpdateEventDto.prototype, "status", void 0);
 //# sourceMappingURL=update-event.dto.js.map

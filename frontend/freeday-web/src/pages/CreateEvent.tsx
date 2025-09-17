@@ -7,7 +7,6 @@ import { eventsAPI } from '@/services/api';
 import { useToast } from '@/components/common/useToast';
 import Button from '@/components/common/Button';
 
-// Final simplified schema to avoid environment/library issues
 const createEventSchema = z.object({
   title: z.string().nonempty('Tiêu đề không được để trống'),
   description: z.string().nonempty('Mô tả không được để trống'),
@@ -16,12 +15,8 @@ const createEventSchema = z.object({
   endAt: z.string().nonempty('Thời gian kết thúc là bắt buộc'),
   price: z.coerce.number().min(0, 'Giá vé không hợp lệ').optional(),
   capacity: z.coerce.number().positive('Sức chứa phải là số dương').optional(),
-}).refine(data => {
-  // Ensure dates are valid before comparing
-  const startDate = new Date(data.startAt);
-  const endDate = new Date(data.endAt);
-  return !isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate < endDate;
-}, {
+  status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
+}).refine(data => new Date(data.startAt) < new Date(data.endAt), {
   message: 'Thời gian kết thúc phải sau thời gian bắt đầu',
   path: ['endAt'],
 });
@@ -34,6 +29,8 @@ const CreateEvent: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventSchema),
@@ -46,14 +43,22 @@ const CreateEvent: React.FC = () => {
     }
   });
 
-  const onSubmit = async (data: CreateEventFormValues) => {
+  const handleFormSubmit = async (data: CreateEventFormValues) => {
     try {
-      const response = await eventsAPI.create(data);
-      toast.showToast('Tạo sự kiện thành công!', 'success');
-      navigate(`/events/${response.data.id}`);
+      await eventsAPI.create(data);
+      toast.showToast(`Sự kiện đã được ${data.status === 'PUBLISHED' ? 'công khai' : 'lưu làm nháp'} thành công!`, 'success');
+      navigate(`/events/manage`);
     } catch (error) {
-      toast.showToast('Tạo sự kiện thất bại, vui lòng thử lại.', 'error');
+      toast.showToast('Thao tác thất bại, vui lòng thử lại.', 'error');
       console.error(error);
+    }
+  };
+
+  const handleAction = async (status: 'DRAFT' | 'PUBLISHED') => {
+    setValue('status', status);
+    const isValid = await trigger(); // Manually trigger validation
+    if (isValid) {
+      handleSubmit(handleFormSubmit)();
     }
   };
 
@@ -64,7 +69,7 @@ const CreateEvent: React.FC = () => {
         <p className="text-neutral-500 mt-1">Điền thông tin chi tiết để tạo sự kiện của bạn.</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="card p-8 space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="card p-8 space-y-6">
         <div>
           <label htmlFor="title">Tiêu đề sự kiện</label>
           <input id="title" {...register('title')} className={`input ${errors.title ? 'input-error' : ''}`} />
@@ -111,7 +116,23 @@ const CreateEvent: React.FC = () => {
 
         <div className="flex justify-end gap-4 pt-4">
           <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isSubmitting}>Hủy</Button>
-          <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>Tạo sự kiện</Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            loading={isSubmitting} 
+            disabled={isSubmitting}
+            onClick={() => handleAction('DRAFT')}
+          >
+            Lưu làm nháp
+          </Button>
+          <Button 
+            type="button" 
+            loading={isSubmitting} 
+            disabled={isSubmitting}
+            onClick={() => handleAction('PUBLISHED')}
+          >
+            Lưu & Công khai
+          </Button>
         </div>
       </form>
     </div>

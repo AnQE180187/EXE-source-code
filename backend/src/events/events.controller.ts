@@ -2,6 +2,7 @@ import { Controller, Post, Body, UseGuards, Req, Get, Param, Patch, Delete, Http
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventStatusDto } from './dto/update-event-status.dto'; // Import new DTO
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -51,6 +52,19 @@ export class EventsController {
   ) {
     const user = req.user as User;
     return this.eventsService.update(id, updateEventDto, user);
+  }
+
+  // New dedicated endpoint for status change
+  @Patch(':id/status')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ORGANIZER, Role.ADMIN)
+  updateStatus(
+    @Param('id') id: string,
+    @Body() updateEventStatusDto: UpdateEventStatusDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as User;
+    return this.eventsService.updateStatus(id, updateEventStatusDto, user);
   }
 
   @Delete(':id')

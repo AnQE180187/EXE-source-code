@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const events_service_1 = require("./events.service");
 const create_event_dto_1 = require("./dto/create-event.dto");
 const update_event_dto_1 = require("./dto/update-event.dto");
+const update_event_status_dto_1 = require("./dto/update-event-status.dto");
 const passport_1 = require("@nestjs/passport");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
@@ -46,6 +47,10 @@ let EventsController = class EventsController {
     update(id, updateEventDto, req) {
         const user = req.user;
         return this.eventsService.update(id, updateEventDto, user);
+    }
+    updateStatus(id, updateEventStatusDto, req) {
+        const user = req.user;
+        return this.eventsService.updateStatus(id, updateEventStatusDto, user);
     }
     remove(id, req) {
         const user = req.user;
@@ -97,6 +102,17 @@ __decorate([
     __metadata("design:paramtypes", [String, update_event_dto_1.UpdateEventDto, Object]),
     __metadata("design:returntype", void 0)
 ], EventsController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':id/status'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.Role.ORGANIZER, client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_event_status_dto_1.UpdateEventStatusDto, Object]),
+    __metadata("design:returntype", void 0)
+], EventsController.prototype, "updateStatus", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),

@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString, IsNumber, Min, IsPositive } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsNumber, Min, IsPositive, IsEnum } from 'class-validator';
+import { EventStatus } from '@prisma/client';
 
 export class CreateEventDto {
   @IsString()
@@ -28,4 +29,8 @@ export class CreateEventDto {
   @IsOptional()
   @IsPositive()
   capacity?: number;
+
+  @IsOptional()
+  @IsEnum(EventStatus)
+  status?: EventStatus;
 }

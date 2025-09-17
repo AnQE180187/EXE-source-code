@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventStatusDto } from './dto/update-event-status.dto'; // Import new DTO
 import { User, EventStatus, Role, Prisma } from '@prisma/client';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 
@@ -120,13 +121,19 @@ export class EventsService {
       throw new ForbiddenException('You are not authorized to update this event');
     }
 
+    const dataToUpdate: Prisma.EventUpdateInput = {};
+    if (updateEventDto.title) dataToUpdate.title = updateEventDto.title;
+    if (updateEventDto.description) dataToUpdate.description = updateEventDto.description;
+    if (updateEventDto.locationText) dataToUpdate.locationText = updateEventDto.locationText;
+    if (updateEventDto.price !== undefined) dataToUpdate.price = updateEventDto.price;
+    if (updateEventDto.capacity) dataToUpdate.capacity = updateEventDto.capacity;
+    if (updateEventDto.status) dataToUpdate.status = updateEventDto.status;
+    if (updateEventDto.startAt) dataToUpdate.startAt = new Date(updateEventDto.startAt);
+    if (updateEventDto.endAt) dataToUpdate.endAt = new Date(updateEventDto.endAt);
+
     const updatedEvent = await this.prisma.event.update({
       where: { id },
-      data: {
-        ...updateEventDto,
-        startAt: updateEventDto.startAt ? new Date(updateEventDto.startAt) : undefined,
-        endAt: updateEventDto.endAt ? new Date(updateEventDto.endAt) : undefined,
-      },
+      data: dataToUpdate,
     });
 
     await this.auditLogsService.log(
@@ -136,6 +143,35 @@ export class EventsService {
       event.id,
       event,
       updatedEvent,
+    );
+
+    return updatedEvent;
+  }
+
+  // New dedicated service for status change
+  async updateStatus(id: string, updateEventStatusDto: UpdateEventStatusDto, user: User) {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID "${id}" not found`);
+    }
+
+    if (event.organizerId !== user.id && user.role !== Role.ADMIN) {
+      throw new ForbiddenException('You are not authorized to update this event status');
+    }
+
+    const updatedEvent = await this.prisma.event.update({
+      where: { id },
+      data: { status: updateEventStatusDto.status },
+    });
+
+    await this.auditLogsService.log(
+      user.id,
+      'UPDATE_EVENT_STATUS',
+      'Event',
+      event.id,
+      { status: event.status },
+      { status: updatedEvent.status },
     );
 
     return updatedEvent;

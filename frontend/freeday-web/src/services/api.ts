@@ -62,7 +62,8 @@ export const eventsAPI = {
   getAll: (params?: any) => api.get('/events', { params }),
   getById: (id: string) => api.get(`/events/${id}`),
   create: (data: any) => api.post('/events', data),
-  update: (id: string, data: any) => api.put(`/events/${id}`, data),
+  update: (id: string, data: any) => api.patch(`/events/${id}`, data),
+  updateStatus: (id: string, data: { status: string }) => api.patch(`/events/${id}/status`, data),
   delete: (id: string) => api.delete(`/events/${id}`),
 };
 

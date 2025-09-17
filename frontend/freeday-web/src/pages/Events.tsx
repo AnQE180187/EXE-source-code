@@ -122,7 +122,7 @@ const Events: React.FC = () => {
             <div key={event.id} className="card card-hover overflow-hidden animate-slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
               <Link to={`/events/${event.id}`} className="block">
                 <div className="h-48 relative overflow-hidden">
-                  <img src={event.image || 'https://via.placeholder.com/400x200'} alt={event.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" />
+                  <img src={event.image || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23e2e8f0'/%3E%3C/svg%3E`} alt={event.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-2 text-neutral-900 truncate">{event.title}</h3>

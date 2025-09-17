@@ -1,6 +1,7 @@
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { Request } from 'express';
 import { FavoritesService } from 'src/favorites/favorites.service';
 export declare class EventsController {
@@ -86,6 +87,25 @@ export declare class EventsController {
         favorited: boolean;
     }>;
     update(id: string, updateEventDto: UpdateEventDto, req: Request): Promise<{
+        id: string;
+        createdAt: Date;
+        status: import(".prisma/client").$Enums.EventStatus;
+        updatedAt: Date;
+        organizerId: string;
+        title: string;
+        slug: string | null;
+        description: string;
+        locationText: string;
+        lat: number | null;
+        lng: number | null;
+        startAt: Date;
+        endAt: Date;
+        price: number | null;
+        capacity: number;
+        favoritesCount: number;
+        registeredCount: number;
+    }>;
+    updateStatus(id: string, updateEventStatusDto: UpdateEventStatusDto, req: Request): Promise<{
         id: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.EventStatus;

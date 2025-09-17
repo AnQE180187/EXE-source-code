@@ -1,3 +1,4 @@
+import { EventStatus } from '@prisma/client';
 export declare class CreateEventDto {
     title: string;
     description: string;
@@ -6,4 +7,5 @@ export declare class CreateEventDto {
     endAt: string;
     price?: number;
     capacity?: number;
+    status?: EventStatus;
 }

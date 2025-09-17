@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateEventDto } from './create-event.dto';
-import { IsString, IsNotEmpty, IsOptional, IsDateString, IsNumber, Min, IsPositive } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsNumber, Min, IsPositive, IsEnum } from 'class-validator';
+import { EventStatus } from '@prisma/client';
 
 export class UpdateEventDto extends PartialType(CreateEventDto) {
   @IsOptional()
@@ -35,4 +36,8 @@ export class UpdateEventDto extends PartialType(CreateEventDto) {
   @IsNumber()
   @IsPositive()
   capacity?: number;
+
+  @IsOptional()
+  @IsEnum(EventStatus)
+  status?: EventStatus;
 }
