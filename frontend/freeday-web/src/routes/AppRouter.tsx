@@ -45,7 +45,7 @@ const AppRouter: React.FC = () => {
           </Route>
 
           {/* Role-protected routes */}
-          <Route element={<ProtectedRoute allowedRoles={['ORGANIZER', 'ADMIN']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['organizer', 'admin']} />}>
             <Route path="events/manage" element={<EventManagement />} />
             <Route path="events/new" element={<CreateEvent />} />
             <Route path="events/edit/:id" element={<EditEvent />} />

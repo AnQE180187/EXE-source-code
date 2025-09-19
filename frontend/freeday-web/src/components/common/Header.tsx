@@ -1,17 +1,25 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import ProfileMenu from '@/components/profile/ProfileMenu'
+import { useAuthStore } from '@/store/useAuthStore'
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
-
-  const navigation = [
+  const { user } = useAuthStore()
+  
+  // Base navigation items that are visible to all users
+  const baseNavigation = [
     { name: 'Trang chủ', href: '/' },
     { name: 'Sự kiện', href: '/events' },
     { name: 'Diễn đàn', href: '/forum' },
-    { name: 'Quản lý sự kiện', href: '/events/manage' },
   ]
+  
+  // Add the "Quản lý sự kiện" option only for organizer and admin roles
+  const navigation = [...baseNavigation]
+  if (user && (user.role === 'organizer' || user.role === 'admin')) {
+    navigation.push({ name: 'Quản lý sự kiện', href: '/events/manage' })
+  }
 
   const isActive = (path: string) => location.pathname === path
 

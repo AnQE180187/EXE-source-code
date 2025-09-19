@@ -1,36 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { eventsAPI } from '@/services/api';
 import { useToast } from '@/components/common/useToast';
 import Button from '@/components/common/Button';
 
-const EventStatus = z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'CANCELLED']);
+const eventStatusOptions = ['DRAFT', 'PUBLISHED', 'CLOSED', 'CANCELLED'] as const;
 
-const editEventSchema = z.object({
-  id: z.string().optional(),
-  title: z.string().nonempty('Tiêu đề không được để trống'),
-  description: z.string().nonempty('Mô tả không được để trống'),
-  locationText: z.string().nonempty('Địa điểm không được để trống'),
-  startAt: z.string().nonempty('Thời gian bắt đầu là bắt buộc'),
-  endAt: z.string().nonempty('Thời gian kết thúc là bắt buộc'),
-  price: z.coerce.number().min(0, 'Giá vé không hợp lệ').optional(),
-  capacity: z.coerce.number().positive('Sức chứa phải là số dương').optional(),
-  status: EventStatus.optional(),
-}).refine(data => new Date(data.startAt) < new Date(data.endAt), {
-  message: 'Thời gian kết thúc phải sau thời gian bắt đầu',
-  path: ['endAt'],
-});
-
-type EditEventFormValues = z.infer<typeof editEventSchema>;
+interface EditEventFormValues {
+  id?: string;
+  title: string;
+  description: string;
+  locationText: string;
+  startAt: string;
+  endAt: string;
+  price?: number;
+  capacity?: number;
+  status?: string;
+}
 
 const EditEvent: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const toast = useToast();
-  const [currentStatus, setCurrentStatus] = useState<z.infer<typeof EventStatus> | undefined>();
+  const [currentStatus, setCurrentStatus] = useState<typeof eventStatusOptions[number] | undefined>();
 
   const {
     register,
@@ -38,7 +31,6 @@ const EditEvent: React.FC = () => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<EditEventFormValues>({
-    resolver: zodResolver(editEventSchema),
   });
 
   useEffect(() => {
@@ -77,7 +69,7 @@ const EditEvent: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (newStatus: z.infer<typeof EventStatus>) => {
+  const handleStatusChange = async (newStatus: typeof eventStatusOptions[number]) => {
     if (!id) return;
     try {
       await eventsAPI.update(id, { status: newStatus });
@@ -158,12 +150,12 @@ const EditEvent: React.FC = () => {
         <div className="flex justify-between items-center gap-4 pt-4">
           <div>
             {currentStatus === 'DRAFT' && (
-              <Button type="button" variant="solid" color="success" onClick={() => handleStatusChange('PUBLISHED')} disabled={isSubmitting}>
+              <Button type="button" variant="primary" onClick={() => handleStatusChange('PUBLISHED')} disabled={isSubmitting}>
                 Công khai sự kiện
               </Button>
             )}
             {currentStatus === 'PUBLISHED' && (
-              <Button type="button" variant="solid" color="warning" onClick={() => handleStatusChange('DRAFT')} disabled={isSubmitting}>
+              <Button type="button" variant="secondary" onClick={() => handleStatusChange('DRAFT')} disabled={isSubmitting}>
                 Chuyển về bản nháp
 
               </Button>

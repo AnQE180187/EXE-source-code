@@ -1,19 +1,9 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import type { UserProfile, UpdateProfileDto } from '@/types/profile';
 import { userService } from '@/services/userService';
 import { useToast } from '@/components/common/useToast';
 import Button from '@/components/common/Button';
-
-// Schema for validation
-const profileSchema = z.object({
-  displayName: z.string().min(1, 'Tên hiển thị là bắt buộc').max(50, 'Tên hiển thị quá dài'),
-  avatarUrl: z.string().url('URL ảnh không hợp lệ').or(z.literal('')).optional(),
-  city: z.string().max(100, 'Tên thành phố quá dài').optional(),
-  bio: z.string().max(500, 'Giới thiệu quá dài').optional(),
-});
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -29,7 +19,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onUpdate, onCancel }
     reset,
     formState: { errors, isSubmitting },
   } = useForm<UpdateProfileDto>({
-    resolver: zodResolver(profileSchema),
     defaultValues: {
       displayName: '',
       avatarUrl: '',

@@ -1,31 +1,28 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 
 import Button from '@/components/common/Button';
 import { useToast } from '@/components/common/useToast';
 import { forumService } from '@/services/forumService';
+import { useAuthStore } from '@/store/useAuthStore';
 
-// Final simplified schema for debugging
-const createPostSchema = z.object({
-  title: z.string().nonempty('Tiêu đề không được để trống'),
-  content: z.string().nonempty('Nội dung không được để trống'),
-  tags: z.string().optional(),
-});
-
-type CreatePostFormValues = z.infer<typeof createPostSchema>;
+// Form validation types
+interface CreatePostFormValues {
+  title: string;
+  content: string;
+  tags?: string;
+}
 
 const CreatePost: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const { user } = useAuthStore();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<CreatePostFormValues>({
-    resolver: zodResolver(createPostSchema),
     defaultValues: {
       title: '',
       content: '',
@@ -35,6 +32,10 @@ const CreatePost: React.FC = () => {
 
   const onSubmit = async (data: CreatePostFormValues) => {
     try {
+      if (!user) {
+        toast.showToast('Bạn cần đăng nhập để đăng bài.', 'error');
+        return;
+      }
       // Process tags string into an array of non-empty strings
       const tagsArray = data.tags
         ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
@@ -43,7 +44,8 @@ const CreatePost: React.FC = () => {
       const response = await forumService.createPost({
         title: data.title,
         content: data.content,
-        tags: tagsArray,
+        tagIds: tagsArray,
+        authorId: user.id,
       });
 
       toast.showToast('Đăng bài thành công!', 'success');
@@ -67,6 +69,7 @@ const CreatePost: React.FC = () => {
       </div>
 
       <div className="card p-8">
+        {/* userId debug: {user?.id} */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-2">

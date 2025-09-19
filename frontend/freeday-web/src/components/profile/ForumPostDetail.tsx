@@ -112,7 +112,7 @@ const ForumPostDetail: React.FC = () => {
         {/* Comment Form */}
         {user && (
           <form onSubmit={handleCommentSubmit} className="flex items-start gap-3 mb-8">
-            <img src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.name}`} alt={user.name} className="w-10 h-10 rounded-full" />
+            <img src={`https://i.pravatar.cc/150?u=${user.name}`} alt={user.name} className="w-10 h-10 rounded-full" />
             <div className="flex-1">
               <textarea
                 rows={3}

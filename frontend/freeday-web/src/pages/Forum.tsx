@@ -9,13 +9,16 @@ interface Post {
   title: string;
   content: string;
   author: {
-    name: string;
-    avatar?: string;
+    id: string;
+    email: string;
+    profile?: {
+      displayName?: string;
+      avatarUrl?: string;
+    };
   };
-  // Corrected type for nested tag object from Prisma include
   tags: { tag: { id: string; name: string; } }[];
   createdAt: string;
-  _count: { // Prisma count convention
+  _count: {
     comments: number;
     likes: number;
   };
@@ -54,11 +57,19 @@ const Forum: React.FC = () => {
   const PostCard: React.FC<{ post: Post }> = ({ post }) => (
     <div className="card p-6 transition-shadow hover:shadow-md">
       <div className="flex items-start space-x-4">
-        <img 
-          src={post.author.avatar || `https://i.pravatar.cc/150?u=${post.author.name}`}
-          alt={post.author.name}
-          className="w-12 h-12 rounded-full"
-        />
+        {post.author?.profile?.avatarUrl ? (
+          <img
+            src={post.author.profile.avatarUrl}
+            alt={post.author.profile.displayName || post.author.email}
+            className="w-12 h-12 rounded-full"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-neutral-200 flex items-center justify-center">
+            <svg className="w-7 h-7 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A9.001 9.001 0 0112 15c2.21 0 4.21.805 5.879 2.146M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+        )}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -68,12 +79,11 @@ const Forum: React.FC = () => {
                 </Link>
               </h3>
               <div className="flex items-center space-x-4 text-sm text-neutral-600">
-                <span>{post.author.name}</span>
+                <span>{post.author?.profile?.displayName || post.author?.email}</span>
                 <span>{new Date(post.createdAt).toLocaleDateString('vi-VN')}</span>
               </div>
             </div>
           </div>
-          
           <p className="text-neutral-600 mb-4 line-clamp-2">
             {post.content}
           </p>

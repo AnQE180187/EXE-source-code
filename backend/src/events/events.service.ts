@@ -88,6 +88,7 @@ export class EventsService {
             profile: {
               select: {
                 displayName: true,
+                avatarUrl: true,
               },
             },
           },
@@ -106,6 +107,7 @@ export class EventsService {
       organizer: {
         id: organizer.id,
         name: organizer.profile?.displayName || 'Không rõ',
+        avatarUrl: organizer.profile?.avatarUrl || null,
       },
     };
   }

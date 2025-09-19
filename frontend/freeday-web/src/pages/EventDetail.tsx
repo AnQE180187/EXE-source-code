@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { eventsAPI } from '@/services/api';
@@ -19,7 +19,7 @@ interface EventDetailType {
   capacity: number | null;
   registeredCount: number;
   image: string; // Assuming a single primary image
-  organizer: { id: string; name: string; };
+  organizer: { id: string; name: string; avatarUrl?: string };
   // These fields should be provided by the backend for the logged-in user
   currentUser: {
     isRegistered: boolean;
@@ -125,7 +125,15 @@ const EventDetail: React.FC = () => {
           
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="flex items-center gap-3">
-              <img src={`https://i.pravatar.cc/150?u=${event.organizer?.id}`} alt={event.organizer?.name || 'Organizer'} className="w-10 h-10 rounded-full" />
+              {event.organizer?.avatarUrl ? (
+                <img src={event.organizer.avatarUrl} alt={event.organizer?.name || 'Organizer'} className="w-10 h-10 rounded-full" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A9.001 9.001 0 0112 15c2.21 0 4.21.805 5.879 2.146M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+              )}
               <div>
                 <p className="text-sm text-neutral-500">Tổ chức bởi</p>
                 <p className="font-semibold text-neutral-800">{event.organizer?.name || 'Không rõ'}</p>

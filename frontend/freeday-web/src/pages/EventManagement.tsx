@@ -23,22 +23,29 @@ const EventManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchManagedEvents = async () => {
+    const fetchEvents = async () => {
       try {
         setLoading(true);
-        const res = await userAPI.getEvents();
-        // Assuming the API returns an object with an 'organized' key
-        setEvents(res.data.organized || []);
+        let eventsData: OrganizedEvent[] = [];
+        if (user?.role === 'admin') {
+          // Admin lấy toàn bộ sự kiện
+          const res = await userAPI.getAllEvents(); // cần API trả về toàn bộ events
+          eventsData = res.data.data.events || [];
+        } else if (user?.role === 'organizer') {
+          // Organizer chỉ lấy sự kiện mình tổ chức
+          const res = await userAPI.getEvents();
+          eventsData = res.data.data.organized || [];
+        }
+        setEvents(eventsData);
       } catch (err) {
-        setError('Không thể tải danh sách sự kiện của bạn.');
+        setError('Không thể tải danh sách sự kiện.');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     if (user) {
-      fetchManagedEvents();
+      fetchEvents();
     }
   }, [user]);
 
@@ -65,9 +72,11 @@ const EventManagement: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-neutral-800">Quản lý sự kiện</h1>
-          <p className="text-neutral-500 mt-1">Xem, sửa và quản lý các sự kiện bạn đã tạo.</p>
+          <p className="text-neutral-500 mt-1">{user?.role === 'admin' ? 'Quản lý toàn bộ sự kiện trong hệ thống.' : 'Xem, sửa và quản lý các sự kiện bạn đã tạo.'}</p>
         </div>
-        <Button onClick={() => navigate('/events/new')}>Tạo sự kiện mới</Button>
+        {(user?.role === 'organizer' || user?.role === 'admin') && (
+          <Button onClick={() => navigate('/events/new')}>Tạo sự kiện mới</Button>
+        )}
       </div>
 
       {events.length === 0 ? (
@@ -104,7 +113,14 @@ const EventManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                     <Link to={`/events/${event.id}`} className="text-primary-600 hover:text-primary-900">Xem trang</Link>
-                    <Link to={`/events/edit/${event.id}`} className="text-indigo-600 hover:text-indigo-900">Sửa</Link>
+                    {(user?.role === 'admin' || user?.role === 'organizer') && (
+                      <Link to={`/events/edit/${event.id}`} className="text-indigo-600 hover:text-indigo-900">Sửa</Link>
+                    )}
+                    {(user?.role === 'admin' || user?.role === 'organizer') && (
+                      <Button variant="danger" size="sm" onClick={() => {/* TODO: handleDelete(event.id) */}}>
+                        Xóa
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

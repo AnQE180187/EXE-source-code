@@ -24,8 +24,8 @@ const RegisteredEvents: React.FC = () => {
       try {
         const res = await userAPI.getEvents();
         // Assuming the API returns an object with these two keys
-        setRegisteredEvents(res.data.registered || []);
-        setFavoritedEvents(res.data.favorited || []);
+        setRegisteredEvents(res.data.data.registered || []);
+        setFavoritedEvents(res.data.data.favorited || []);
       } catch (err) {
         setError('Không thể tải danh sách sự kiện.');
         console.error(err);

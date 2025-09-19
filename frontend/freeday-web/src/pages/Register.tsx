@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 
 import Button from '@/components/common/Button';
 import { useToast } from '@/components/common/useToast';
@@ -10,21 +8,14 @@ import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { User } from '@/types/user';
 
-// Schema validation using Zod
-const registerSchema = z.object({
-  name: z.string().min(1, 'Họ và tên là bắt buộc'),
-  email: z.string().email('Email không hợp lệ'),
-  password: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-  confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu của bạn'),
-  agreeTerms: z.boolean().refine(val => val === true, {
-    message: 'Bạn phải đồng ý với điều khoản',
-  }),
-}).refine(data => data.password === data.confirmPassword, {
-  message: 'Mật khẩu xác nhận không khớp',
-  path: ['confirmPassword'], // path to show error
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+// Form validation types
+interface RegisterFormValues {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreeTerms: boolean;
+}
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -37,7 +28,6 @@ const Register: React.FC = () => {
     setError, // Get setError from useForm
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
       email: '',

@@ -33,7 +33,18 @@ export class PostsService {
     return this.prisma.post.findMany({
       where: { status: VisibilityStatus.VISIBLE },
       include: {
-        author: { select: { id: true, email: true } },
+        author: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                displayName: true,
+                avatarUrl: true,
+              }
+            }
+          }
+        },
         tags: { select: { tag: true } },
       },
       orderBy: { createdAt: 'desc' },

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 
 import Button from '@/components/common/Button';
 import { useToast } from '@/components/common/useToast';
@@ -10,13 +8,11 @@ import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { User } from '@/types/user';
 
-// Schema for validation
-const loginSchema = z.object({
-  email: z.string().email('Email không hợp lệ'),
-  password: z.string().min(1, 'Mật khẩu là bắt buộc'),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+// Form validation types
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +25,6 @@ const Login: React.FC = () => {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: '',
@@ -55,7 +50,6 @@ const Login: React.FC = () => {
       toast.showToast('Đăng nhập thành công!', 'success');
       navigate('/', { replace: true });
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
       setError('root', { type: 'server', message: 'Email hoặc mật khẩu không chính xác' });
       toast.showToast('Email hoặc mật khẩu không chính xác', 'error');
     }

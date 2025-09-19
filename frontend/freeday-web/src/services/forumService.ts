@@ -11,7 +11,7 @@ export const forumService = {
     return api.get(`/posts/${postId}`);
   },
 
-  createPost: (data: { title: string; content: string; tagIds?: string[] }) => {
+  createPost: (data: { title: string; content: string; tagIds?: string[]; authorId: string }) => {
     return api.post('/posts', data);
   },
 

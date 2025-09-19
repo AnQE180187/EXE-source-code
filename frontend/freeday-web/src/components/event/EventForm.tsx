@@ -43,7 +43,7 @@ interface EventFormProps {
 }
 
 const EventForm: React.FC<EventFormProps> = ({ initialValues = {}, onSubmit, onCancel, mode = 'create' }) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<EventFormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm<EventFormValues>({
     defaultValues: {
       title: '',
       description: '',

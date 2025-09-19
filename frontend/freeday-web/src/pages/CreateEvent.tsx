@@ -1,27 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { eventsAPI } from '@/services/api';
 import { useToast } from '@/components/common/useToast';
 import Button from '@/components/common/Button';
 
-const createEventSchema = z.object({
-  title: z.string().nonempty('Tiêu đề không được để trống'),
-  description: z.string().nonempty('Mô tả không được để trống'),
-  locationText: z.string().nonempty('Địa điểm không được để trống'),
-  startAt: z.string().nonempty('Thời gian bắt đầu là bắt buộc'),
-  endAt: z.string().nonempty('Thời gian kết thúc là bắt buộc'),
-  price: z.coerce.number().min(0, 'Giá vé không hợp lệ').optional(),
-  capacity: z.coerce.number().positive('Sức chứa phải là số dương').optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
-}).refine(data => new Date(data.startAt) < new Date(data.endAt), {
-  message: 'Thời gian kết thúc phải sau thời gian bắt đầu',
-  path: ['endAt'],
-});
-
-type CreateEventFormValues = z.infer<typeof createEventSchema>;
+interface CreateEventFormValues {
+  title: string;
+  description: string;
+  locationText: string;
+  slug?: string;
+  startAt: string;
+  endAt: string;
+  price?: number;
+  capacity?: number;
+  status?: string;
+}
 
 const CreateEvent: React.FC = () => {
   const navigate = useNavigate();
@@ -33,11 +27,11 @@ const CreateEvent: React.FC = () => {
     trigger,
     formState: { errors, isSubmitting },
   } = useForm<CreateEventFormValues>({
-    resolver: zodResolver(createEventSchema),
     defaultValues: {
       title: '',
       description: '',
       locationText: '',
+      slug: '',
       startAt: '',
       endAt: '',
     }
@@ -45,7 +39,25 @@ const CreateEvent: React.FC = () => {
 
   const handleFormSubmit = async (data: CreateEventFormValues) => {
     try {
-      await eventsAPI.create(data);
+      // Chuẩn hóa dữ liệu
+      const payload: any = {
+        title: data.title,
+        description: data.description,
+        locationText: data.locationText,
+        startAt: data.startAt,
+        endAt: data.endAt,
+        status: data.status,
+      };
+      if (data.slug) {
+        payload.slug = data.slug;
+      }
+      if (data.price !== undefined && data.price !== null && data.price !== '') {
+        payload.price = Number(data.price);
+      }
+      if (data.capacity !== undefined && data.capacity !== null && data.capacity !== '') {
+        payload.capacity = Number(data.capacity);
+      }
+      await eventsAPI.create(payload);
       toast.showToast(`Sự kiện đã được ${data.status === 'PUBLISHED' ? 'công khai' : 'lưu làm nháp'} thành công!`, 'success');
       navigate(`/events/manage`);
     } catch (error) {
@@ -86,6 +98,10 @@ const CreateEvent: React.FC = () => {
           <label htmlFor="locationText">Địa điểm</label>
           <input id="locationText" {...register('locationText')} className={`input ${errors.locationText ? 'input-error' : ''}`} />
           {errors.locationText && <p className="text-red-500 text-sm mt-1">{errors.locationText.message}</p>}
+        </div>
+        <div>
+          <label htmlFor="slug">Vibe (tùy chọn, không dấu, không khoảng trắng)</label>
+          <input id="slug" {...register('slug')} className="input" placeholder="vd: hiking-ba-na" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
