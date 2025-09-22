@@ -1,22 +1,27 @@
-import { IsString, IsOptional, MaxLength, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsUrl, IsDateString } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
-  @MaxLength(50)
-  displayName: string;
-
   @IsOptional()
+  displayName?: string;
+
   @IsUrl()
-  @MaxLength(2048) // Common URL length limit
+  @IsOptional()
   avatarUrl?: string;
 
-  @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @IsOptional()
   city?: string;
 
-  @IsOptional()
   @IsString()
-  @MaxLength(500)
+  @IsOptional()
   bio?: string;
+
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @IsDateString()
+  @IsOptional()
+  dateOfBirth?: string;
 }

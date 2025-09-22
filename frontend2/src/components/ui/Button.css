@@ -1,0 +1,31 @@
+/* src/components/ui/Button.css */
+.button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+
+  /* Primary button style */
+  background-color: #1E3A8A; /* Dark Blue */
+  color: #FFFFFF; /* White */
+}
+
+.button:hover {
+  background-color: #1c3473; /* Darker Blue */
+}
+
+/* Secondary button style */
+.button.button--secondary {
+  background-color: #10B981; /* Emerald Green */
+  color: #FFFFFF; /* White */
+}
+
+.button.button--secondary:hover {
+  background-color: #0e9a6e; /* Darker Green */
+}

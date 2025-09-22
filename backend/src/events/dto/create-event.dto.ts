@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString, IsNumber, Min, IsPositive, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, IsOptional, IsInt, IsNumber, Min, IsArray, IsUrl } from 'class-validator';
 import { EventStatus } from '@prisma/client';
 
 export class CreateEventDto {
@@ -25,12 +25,19 @@ export class CreateEventDto {
   @Min(0)
   price?: number;
 
-  @IsNumber()
-  @IsOptional()
-  @IsPositive()
-  capacity?: number;
+  @IsInt()
+  @Min(1)
+  capacity: number;
 
   @IsOptional()
-  @IsEnum(EventStatus)
   status?: EventStatus;
+
+  @IsUrl()
+  @IsOptional()
+  imageUrl?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 }

@@ -1,0 +1,126 @@
+:root {
+    --footer-bg: #111827; /* Gray 900 */
+    --footer-text: #9ca3af; /* Gray 400 */
+    --footer-heading: #e5e7eb; /* Gray 200 */
+    --footer-link-hover: #ffffff;
+    --primary-color: #10B981; /* Emerald Green */
+}
+
+.footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    padding: 4rem 2rem 2rem;
+}
+
+.footer-content {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--footer-heading);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.footer-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.footer-links a {
+    color: var(--footer-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: var(--footer-link-hover);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-link {
+    color: var(--footer-text);
+    transition: color 0.2s ease;
+}
+
+.social-link:hover {
+    color: var(--primary-color);
+}
+
+.newsletter-form {
+    position: relative;
+    max-width: 280px;
+    margin-top: 0.5rem;
+}
+
+.newsletter-input {
+    width: 100%;
+    padding: 0.75rem 3rem 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #374151; /* Gray 700 */
+    background-color: #1f2937; /* Gray 800 */
+    color: var(--footer-heading);
+    font-size: 0.9rem;
+}
+
+.newsletter-input::placeholder {
+    color: #6b7280; /* Gray 500 */
+}
+
+.newsletter-button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.newsletter-button:hover {
+    background-color: var(--primary-hover);
+}
+
+.footer-bottom {
+    border-top: 1px solid #374151; /* Gray 700 */
+    padding-top: 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+}

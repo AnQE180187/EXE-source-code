@@ -1,0 +1,80 @@
+/* src/pages/PostDetailPage.css */
+.post-detail-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.post-detail__header {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.post-detail__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1E3A8A;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.post-detail__meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.author-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.post-detail__meta div {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  font-weight: 600;
+  color: #334155;
+}
+
+.post-date {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.post-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.button.button--danger {
+    background-color: #E53E3E;
+}
+.button.button--danger:hover {
+    background-color: #c53030;
+}
+
+.post-detail__content {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #334155;
+  white-space: pre-wrap;
+}
+
+.post-detail__comments {
+  margin-top: 2rem;
+}
+
+.post-detail__comments h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1E3A8A;
+  margin-bottom: 1.5rem;
+}

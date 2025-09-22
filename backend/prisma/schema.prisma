@@ -86,6 +86,8 @@ model Profile {
   city        String?
   bio         String?
   interests   Json?
+  gender      String?   // Add gender
+  dateOfBirth DateTime? @map("date_of_birth") // Add date of birth
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -106,6 +108,7 @@ model Event {
   price           Float?
   capacity        Int           @default(0)
   status          EventStatus   @default(DRAFT)
+  imageUrl        String?       @map("image_url")
   favoritesCount  Int           @default(0) @map("favorites_count")
   registeredCount Int           @default(0) @map("registered_count")
   createdAt       DateTime      @default(now()) @map("created_at")

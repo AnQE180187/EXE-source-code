@@ -1,0 +1,7 @@
+/* src/pages/LoginPage.css */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 0;
+}

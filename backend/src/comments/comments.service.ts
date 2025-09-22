@@ -22,13 +22,38 @@ export class CommentsService {
         postId,
         authorId: author.id,
       },
+      include: {
+        author: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
   findAllByPost(postId: string) {
     return this.prisma.comment.findMany({
       where: { postId, status: VisibilityStatus.VISIBLE },
-      include: { author: { select: { id: true, email: true } } },
+      include: {
+        author: {
+          select: {
+            id: true,
+            profile: {
+              select: {
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: 'asc' },
     });
   }

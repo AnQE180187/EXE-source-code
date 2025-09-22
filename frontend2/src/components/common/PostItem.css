@@ -1,0 +1,52 @@
+/* src/components/common/PostItem.css */
+.post-item {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: #FFFFFF;
+  border: 1px solid #e2e8f0; /* slate-200 */
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease;
+}
+
+.post-item:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.post-item__avatar {
+  flex-shrink: 0;
+}
+
+.post-item__avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post-item__title a {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1E3A8A; /* Dark Blue */
+  text-decoration: none;
+}
+
+.post-item__title a:hover {
+  text-decoration: underline;
+}
+
+.post-item__excerpt {
+  color: #475569; /* slate-600 */
+  line-height: 1.6;
+}
+
+.post-item__meta {
+  font-size: 0.875rem;
+  color: #64748b; /* slate-500 */
+}

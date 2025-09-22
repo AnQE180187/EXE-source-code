@@ -14,18 +14,33 @@ export class EventsService {
   ) {}
 
   create(createEventDto: CreateEventDto, organizer: User) {
-    return this.prisma.event.create({
-      data: {
-        ...createEventDto,
-        startAt: new Date(createEventDto.startAt),
-        endAt: new Date(createEventDto.endAt),
-        organizerId: organizer.id,
-      },
-    });
+    const { tags, ...eventData } = createEventDto;
+
+    const eventInput: Prisma.EventCreateInput = {
+      ...eventData,
+      startAt: new Date(eventData.startAt),
+      endAt: new Date(eventData.endAt),
+      organizer: { connect: { id: organizer.id } },
+    };
+
+    if (tags && tags.length > 0) {
+      eventInput.tags = {
+        create: tags.map(tagName => ({
+          tag: {
+            connectOrCreate: {
+              where: { name: tagName },
+              create: { name: tagName },
+            },
+          },
+        })),
+      };
+    }
+
+    return this.prisma.event.create({ data: eventInput });
   }
 
-  findAll(query: { search?: string; price?: string }) {
-    const { search, price } = query;
+  findAll(query: { search?: string; price?: string, tag?: string }) {
+    const { search, price, tag } = query;
     const where: Prisma.EventWhereInput = {
       status: { in: [EventStatus.PUBLISHED, EventStatus.CLOSED] },
       AND: [], // Initialize AND as an array
@@ -42,14 +57,22 @@ export class EventsService {
 
     if (price && price !== 'all') {
       if (price === 'free') {
-        (where.AND as Prisma.EventWhereInput[]).push({ price: 0 });
-      } else if (price === 'low') {
-        (where.AND as Prisma.EventWhereInput[]).push({ price: { gt: 0, lt: 100000 } });
-      } else if (price === 'medium') {
-        (where.AND as Prisma.EventWhereInput[]).push({ price: { gte: 100000, lte: 500000 } });
-      } else if (price === 'high') {
-        (where.AND as Prisma.EventWhereInput[]).push({ price: { gt: 500000 } });
+        (where.AND as Prisma.EventWhereInput[]).push({ price: { lte: 0 } });
+      } else if (price === 'paid') {
+        (where.AND as Prisma.EventWhereInput[]).push({ price: { gt: 0 } });
       }
+    }
+
+    if (tag && tag !== 'all') {
+        (where.AND as Prisma.EventWhereInput[]).push({
+            tags: {
+                some: {
+                    tag: {
+                        name: tag
+                    }
+                }
+            }
+        });
     }
 
     return this.prisma.event.findMany({
@@ -93,6 +116,7 @@ export class EventsService {
             },
           },
         },
+        tags: { include: { tag: true } }, // Include tags
       },
     });
 
@@ -100,7 +124,6 @@ export class EventsService {
       throw new NotFoundException(`Event with ID "${id}" not found`);
     }
 
-    // Manually shape the organizer object to match frontend expectations
     const { organizer, ...rest } = event;
     return {
       ...rest,
@@ -110,6 +133,36 @@ export class EventsService {
         avatarUrl: organizer.profile?.avatarUrl || null,
       },
     };
+  }
+
+  async getRegistrationsForEvent(eventId: string, user: User) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID "${eventId}" not found`);
+    }
+
+    if (event.organizerId !== user.id && user.role !== Role.ADMIN) {
+      throw new ForbiddenException('You are not authorized to view registrations for this event');
+    }
+
+    return this.prisma.registration.findMany({
+      where: { eventId },
+      include: {
+        user: {
+          select: {
+            email: true,
+            profile: {
+              select: {
+                displayName: true,
+              }
+            }
+          }
+        }
+      }
+    });
   }
 
   async update(id: string, updateEventDto: UpdateEventDto, user: User) {
@@ -123,15 +176,26 @@ export class EventsService {
       throw new ForbiddenException('You are not authorized to update this event');
     }
 
-    const dataToUpdate: Prisma.EventUpdateInput = {};
-    if (updateEventDto.title) dataToUpdate.title = updateEventDto.title;
-    if (updateEventDto.description) dataToUpdate.description = updateEventDto.description;
-    if (updateEventDto.locationText) dataToUpdate.locationText = updateEventDto.locationText;
-    if (updateEventDto.price !== undefined) dataToUpdate.price = updateEventDto.price;
-    if (updateEventDto.capacity) dataToUpdate.capacity = updateEventDto.capacity;
-    if (updateEventDto.status) dataToUpdate.status = updateEventDto.status;
-    if (updateEventDto.startAt) dataToUpdate.startAt = new Date(updateEventDto.startAt);
-    if (updateEventDto.endAt) dataToUpdate.endAt = new Date(updateEventDto.endAt);
+    const { tags, ...eventData } = updateEventDto;
+    const dataToUpdate: Prisma.EventUpdateInput = { ...eventData };
+
+    if (eventData.startAt) dataToUpdate.startAt = new Date(eventData.startAt);
+    if (eventData.endAt) dataToUpdate.endAt = new Date(eventData.endAt);
+
+    // Handle tags separately for update
+    if (tags) {
+        dataToUpdate.tags = {
+            deleteMany: {}, // First, disconnect all existing tags
+            create: tags.map(tagName => ({ // Then, create connections to the new set of tags
+                tag: {
+                    connectOrCreate: {
+                        where: { name: tagName },
+                        create: { name: tagName },
+                    },
+                },
+            })),
+        };
+    }
 
     const updatedEvent = await this.prisma.event.update({
       where: { id },

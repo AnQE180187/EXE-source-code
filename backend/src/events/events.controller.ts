@@ -35,6 +35,14 @@ export class EventsController {
     return this.eventsService.findOne(id);
   }
 
+  @Get(':id/registrations')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ORGANIZER, Role.ADMIN)
+  getRegistrations(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as User;
+    return this.eventsService.getRegistrationsForEvent(id, user);
+  }
+
   @Post(':id/favorite')
   @UseGuards(AuthGuard('jwt'))
   toggleFavorite(@Param('id') id: string, @Req() req: Request) {

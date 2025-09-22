@@ -55,8 +55,35 @@ export class PostsService {
     const post = await this.prisma.post.findUnique({
       where: { id, status: VisibilityStatus.VISIBLE },
       include: {
-        author: { select: { id: true, email: true } },
+        author: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
         tags: { select: { tag: true } },
+        comments: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                profile: {
+                  select: {
+                    displayName: true,
+                    avatarUrl: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
     if (!post) {

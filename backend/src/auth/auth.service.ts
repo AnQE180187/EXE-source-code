@@ -1,94 +1,84 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
-import * as bcrypt from 'bcryptjs';
 import { LoginUserDto } from './dto/login-user.dto';
-import { JwtService } from '@nestjs/jwt';
-import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
+import * as bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private auditLogsService: AuditLogsService,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
-    const { email, password, name } = registerUserDto;
+    const { email, password, displayName, dateOfBirth, ...restProfileData } = registerUserDto;
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Safely construct profile data
+    const profileCreateData: Prisma.ProfileCreateWithoutUserInput = {
+        displayName: displayName || email, // Fallback to email if no displayName
+        ...restProfileData,
+    };
+
+    // Only add dateOfBirth if it's a valid, non-empty string
+    if (dateOfBirth && dateOfBirth.length > 0) {
+        profileCreateData.dateOfBirth = new Date(dateOfBirth);
+    }
+
     const user = await this.prisma.user.create({
       data: {
         email,
         passwordHash: hashedPassword,
         profile: {
-          create: {
-            displayName: name
-          }
-        }
+          create: profileCreateData,
+        },
       },
       include: {
-        profile: true
-      }
+        profile: true, // Include profile in the returned user object
+      },
     });
 
-    await this.auditLogsService.log(
-      user.id,
-      'REGISTER',
-      'User',
-      user.id,
-      null,
-      { email: user.email, role: user.role },
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash, ...result } = user;
-    return this.login({ email, password });
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
   }
 
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
+    const user = await this.prisma.user.findUnique({ where: { email } });
 
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
+    if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    const isPasswordMatching = await bcrypt.compare(password, user.passwordHash);
-
-    if (!isPasswordMatching) {
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
-
-    await this.auditLogsService.log(
-      user.id,
-      'LOGIN',
-      'User',
-      user.id,
-      null,
-      { email: user.email },
-    );
-
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  async validateUser(payload: any) {
+    const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    // You might want to return a subset of the user object
+    const { passwordHash, ...result } = user;
+    return result;
   }
 }

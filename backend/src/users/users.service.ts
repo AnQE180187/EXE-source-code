@@ -97,14 +97,22 @@ export class UsersService {
 
   // 🔹 Cập nhật hoặc tạo profile
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID "${userId}" not found`);
+    }
+
     const oldProfile = await this.prisma.profile.findUnique({ where: { userId } });
+
+    const { displayName, ...restOfDto } = updateProfileDto;
 
     const updatedProfile = await this.prisma.profile.upsert({
       where: { userId },
-      update: updateProfileDto,
+      update: updateProfileDto, // Update with all fields
       create: {
         userId,
-        ...updateProfileDto,
+        displayName: displayName || user.email, // Fallback for creation
+        ...restOfDto,
       },
     });
 

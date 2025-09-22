@@ -1,0 +1,42 @@
+Đề xuất Homepage (kèm Header)
+Header (Thanh điều hướng cố định trên cùng)
+
+Logo (bên trái, chữ + icon).
+
+Navigation (bên phải):
+
+Trang chủ
+
+Sự kiện
+
+Diễn đàn
+
+Về chúng tôi
+
+Quản lí sự kiển (hiển thị cho role Organizer)
+
+CTA button nổi bật (màu xanh lục bảo): Đăng nhập / Đăng ký
+
+Nếu đã đăng nhập → hiển thị avatar + menu dropdown (Profile, Quản lý sự kiện, Logout).
+
+Header có background trắng trong suốt + shadow nhẹ → khi scroll thì đổi thành background xanh lam nhạt.
+
+Các section chính của homepage (sau Header):
+
+Hero Section → banner giới thiệu.
+
+Featured Events → card sự kiện nổi bật.
+
+How It Works → 4 bước cơ bản.
+
+Community Forum → bài viết mới nhất.
+
+About Us → thông tin về web.
+
+Testimonials (optional).
+
+Strong Call to Action → kêu gọi đăng ký.
+
+Footer → link, bản quyền, social.
+
+   

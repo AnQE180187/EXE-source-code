@@ -1,0 +1,100 @@
+/* src/styles/form.css */
+
+/* Container for forms */
+.form-container {
+  width: 100%;
+  max-width: 450px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1E3A8A; /* Dark Blue */
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #334155; /* slate-700 */
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1; /* slate-300 */
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #1E3A8A; /* Dark Blue */
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
+}
+
+.form-error {
+  color: #dc2626; /* red-600 */
+  font-size: 0.875rem;
+}
+
+.form-message {
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.form-message--success {
+  background-color: #dcfce7; /* green-100 */
+  color: #166534; /* green-700 */
+}
+
+.form-message--error {
+  background-color: #fee2e2; /* red-100 */
+  color: #991b1b; /* red-800 */
+}
+
+.form-footer {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-button {
+  width: 100%;
+}
+
+.form-switch {
+  font-size: 0.875rem;
+  color: #475569; /* slate-600 */
+}
+
+.form-switch a {
+  color: #10B981; /* Emerald Green */
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.form-switch a:hover {
+  text-decoration: underline;
+}

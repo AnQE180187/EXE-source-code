@@ -1,0 +1,143 @@
+/* src/pages/EventDetailPage.css */
+.event-detail-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  padding: 1rem;
+}
+
+.event-detail__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.event-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-status {
+  background-color: #10B981;
+  color: #FFFFFF;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  align-self: flex-start;
+}
+
+.event-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1E3A8A;
+  line-height: 1.2;
+}
+
+.organizer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: #475569;
+}
+
+.organizer-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.event-description {
+  line-height: 1.8;
+  color: #334155;
+}
+
+.event-description h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1E3A8A;
+  margin-bottom: 1rem;
+}
+
+.event-description p {
+  white-space: pre-wrap; /* Preserve line breaks from the description */
+}
+
+/* Sidebar */
+.event-detail__sidebar {
+  position: relative;
+}
+
+.sidebar-card {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  position: sticky;
+  top: 100px; /* Adjust based on header height */
+}
+
+.sidebar-card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.sidebar-card__content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-item strong {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.info-item span {
+  font-size: 1rem;
+  color: #1E3A8A;
+}
+
+.sidebar-card .button {
+  width: 100%;
+  text-align: center;
+}
+
+.sidebar-card__footer {
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 1rem;
+}
+.sidebar-card__footer .button {
+    flex: 1;
+}
+
+
+@media (min-width: 768px) {
+  .event-detail-page {
+    grid-template-columns: 2fr 1fr;
+  }
+}

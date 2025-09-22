@@ -1,0 +1,28 @@
+:root {
+  --header-height: 70px;
+}
+
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+}
+
+/* Default content container for all pages EXCEPT the homepage */
+.main-content--default {
+  flex-grow: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  /* Add padding-top to push content below the fixed header */
+  padding-top: calc(var(--header-height) + 2rem);
+}
+
+/* Special full-width container for the homepage */
+.main-content--home {
+  flex-grow: 1;
+  width: 100%;
+  /* The homepage itself will handle its top margin/padding for the hero section */
+}

@@ -12,6 +12,8 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { ReportsModule } from './reports/reports.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { UploadModule } from './upload/upload.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
     CommentsModule,
     ReportsModule,
     AuditLogsModule,
+    UploadModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
