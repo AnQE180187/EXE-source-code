@@ -16,8 +16,17 @@ export class RegistrationsController {
     @Req() req: Request
   ) {
     const user = req.user as User;
-    // DTO is simple, we can create it manually or adjust the controller path structure
     return this.registrationsService.create({ eventId }, user);
+  }
+
+  @Post('/confirm-deposit')
+  @UseGuards(AuthGuard('jwt'))
+  confirmDeposit(
+    @Param('eventId') eventId: string,
+    @Req() req: Request
+  ) {
+    const user = req.user as User;
+    return this.registrationsService.confirmDeposit(eventId, user);
   }
 
   @Delete()

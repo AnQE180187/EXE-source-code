@@ -77,66 +77,66 @@
     gap: 1rem;
 }
 
+/* New Post Card Design */
 .fp-card {
     display: flex;
+    align-items: flex-start;
     gap: 1rem;
     background-color: var(--fp-card-bg);
     border: 1px solid var(--fp-border);
     border-radius: 12px;
-    padding: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 1.25rem;
 }
 
-.fp-card:hover { 
-    border-color: var(--fp-primary);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+.fp-card-author {
+    flex-shrink: 0;
 }
 
-.fp-card__stats {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem;
-    color: var(--fp-text-secondary);
+.fp-author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.fp-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.fp-card__main {
+.fp-card-main {
     flex-grow: 1;
+    cursor: pointer;
 }
 
-.fp-card__title-link { text-decoration: none; }
-.fp-card__title {
+.fp-card-title {
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--fp-text-primary);
     margin: 0 0 0.5rem;
     transition: color 0.2s ease;
 }
-.fp-card__title-link:hover .fp-card__title { color: var(--fp-primary); }
+.fp-card-main:hover .fp-card-title { color: var(--fp-primary); }
 
-.fp-card__meta {
+.fp-card-meta {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.fp-card__tags {
+.fp-author-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.fp-author-name { font-weight: 600; color: var(--fp-text-primary); }
+.fp-time-ago { color: var(--fp-text-secondary); }
+
+.fp-card-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-.fp-card__tag {
+.fp-tag {
     background-color: #f1f5f9;
     color: var(--fp-text-secondary);
     padding: 0.25rem 0.75rem;
@@ -145,24 +145,31 @@
     font-weight: 500;
 }
 
-.fp-card__author-time {
-    font-size: 0.85rem;
-    color: var(--fp-text-secondary);
-    margin: 0;
-}
-.fp-card__author-time .author-name { font-weight: 600; color: var(--fp-text-primary); }
-.fp-card__author-time .time-ago { margin-left: 0.5rem; }
-
-.fp-card__author-avatar {
+.fp-card-stats {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--fp-text-secondary);
 }
 
-.fp-card__author-avatar img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
+.fp-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
+
+.fp-edit-btn {
+    background: none;
+    border: none;
+    color: var(--fp-text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+.fp-edit-btn:hover { background-color: #f1f5f9; color: var(--fp-text-primary); }
 
 .fp-message, .fp-no-results {
     text-align: center;

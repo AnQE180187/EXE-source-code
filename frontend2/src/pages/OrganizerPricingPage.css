@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+
+.pricing-container {
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 2rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.pricing-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.pricing-header h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.pricing-subtitle {
+  font-size: 1.2rem;
+  color: #4b5563;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.pricing-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card.popular {
+  border-color: #1e40af;
+  border-width: 2px;
+  transform: scale(1.05);
+}
+
+.pricing-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-card.popular:hover {
+  transform: translateY(-10px) scale(1.07);
+}
+
+.popular-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: -45px;
+  background-color: #10b981; /* Green accent */
+  color: white;
+  padding: 0.5rem 3rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1e40af;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: baseline;
+}
+
+.currency {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin-left: 0.5rem;
+}
+
+.price-period {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-left: 0.25rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.features-list li {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.feature-icon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.btn-subscribe {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background-color: #1e40af;
+  color: #ffffff;
+  text-align: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s, transform 0.2s;
+  border: 2px solid transparent;
+}
+
+.btn-subscribe:hover {
+  background-color: #1c3b8a;
+  transform: translateY(-2px);
+}
+
+.pricing-card:not(.popular) .btn-subscribe {
+    background-color: #fff;
+    color: #1e40af;
+    border-color: #1e40af;
+}
+
+.pricing-card:not(.popular) .btn-subscribe:hover {
+    background-color: #eff6ff;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+  .pricing-card.popular {
+    transform: scale(1);
+  }
+  .pricing-card:hover, .pricing-card.popular:hover {
+    transform: translateY(-10px);
+  }
+}

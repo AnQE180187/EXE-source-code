@@ -1,89 +1,134 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getPosts } from '../services/forumService';
-import { MessageSquare, ThumbsUp, Plus } from 'lucide-react';
-import ForumDetailModal from './ForumDetailModal'; // Import the modal
+import { getPosts, createPost, updatePost } from '../services/forumService';
+import { useAuth } from '../context/AuthContext';
+import { MessageSquare, ThumbsUp, Plus, Edit } from 'lucide-react';
+import ForumDetailModal from './ForumDetailModal';
+import PostModal from './PostModal';
 import './ForumPage.css';
 
-// Helper to format time since post was created
 const timeSince = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + " năm trước";
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + " tháng trước";
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + " ngày trước";
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + " giờ trước";
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + " phút trước";
+    if (seconds < 60) return "vài giây trước";
+    const intervals = {
+        năm: 31536000,
+        tháng: 2592000,
+        ngày: 86400,
+        giờ: 3600,
+        phút: 60,
+    };
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+        const interval = seconds / secondsInUnit;
+        if (interval > 1) return Math.floor(interval) + ` ${unit} trước`;
+    }
     return Math.floor(seconds) + " giây trước";
 };
 
-const PostCard = ({ post, onPostSelect }) => (
-    <div className="fp-card" onClick={() => onPostSelect(post.id)}>
-        <div className="fp-card__stats">
-            <div className="fp-stat">
-                <span>{post._count?.comments || 0}</span>
-                <MessageSquare size={20} />
-            </div>
-            {/* Placeholder for likes */}
-            <div className="fp-stat">
-                <span>0</span>
-                <ThumbsUp size={20} />
-            </div>
-        </div>
-        <div className="fp-card__main">
-            <h3 className="fp-card__title">{post.title}</h3>
-            <div className="fp-card__meta">
-                <div className="fp-card__tags">
-                    {post.tags?.map(({ tag }) => (
-                        <span key={tag.id} className="fp-card__tag">{tag.name}</span>
-                    ))}
-                </div>
-                <p className="fp-card__author-time">
-                    đăng bởi <span className="author-name">{post.author?.profile?.displayName || 'Người dùng'}</span>
-                    <span className="time-ago">{timeSince(post.createdAt)}</span>
-                </p>
-            </div>
-        </div>
-        <div className="fp-card__author-avatar">
+const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId }) => (
+    <div className="fp-card">
+        <div className="fp-card-author">
             <img 
                 src={post.author?.profile?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.email}`}
                 alt={post.author?.profile?.displayName || 'Avatar'}
+                className="fp-author-avatar"
             />
+        </div>
+        <div className="fp-card-main" onClick={() => onPostSelect(post.id)}>
+            <h3 className="fp-card-title">{post.title}</h3>
+            <div className="fp-card-meta">
+                <p className="fp-author-info">
+                    <span className="fp-author-name">{post.author?.profile?.displayName || 'Người dùng'}</span>
+                    <span className="fp-time-ago">· {timeSince(post.createdAt)}</span>
+                </p>
+                <div className="fp-card-tags">
+                    {post.tags?.map(({ tag }) => (
+                        <span key={tag.id} className="fp-tag">{tag.name}</span>
+                    ))}
+                </div>
+            </div>
+        </div>
+        <div className="fp-card-stats">
+            <div className="fp-stat-item">
+                <ThumbsUp size={16} />
+                <span>0</span>
+            </div>
+            <div className="fp-stat-item">
+                <MessageSquare size={16} />
+                <span>{post._count?.comments || 0}</span>
+            </div>
+            {currentUserId === post.authorId && (
+                <button className="fp-edit-btn" onClick={() => onEditSelect(post)}><Edit size={16}/></button>
+            )}
         </div>
     </div>
 );
 
 const ForumPage = () => {
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState('newest');
-  const [selectedPostId, setSelectedPostId] = useState(null);
+  
+  const [detailPostId, setDetailPostId] = useState(null);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
+
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getPosts();
+      setPosts(data);
+    } catch (err) {
+      setError(err.toString());
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getPosts();
-        setPosts(data);
-      } catch (err) {
-        setError(err.toString());
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
-  }, [sortOrder]);
+  }, [fetchPosts, sortOrder]);
+
+  const handleOpenCreateModal = () => {
+    setEditingPost(null);
+    setIsPostModalOpen(true);
+  };
+
+  const handleOpenEditModal = (post) => {
+    setEditingPost(post);
+    setIsPostModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsPostModalOpen(false);
+    setEditingPost(null);
+  };
+
+  const handleFormSubmit = async (data, postId) => {
+    try {
+        if (postId) {
+            await updatePost(postId, data);
+        }
+        else {
+            await createPost(data);
+        }
+        fetchPosts();
+    } catch (err) {
+        setError(err.toString());
+    }
+  };
 
   return (
     <>
-      {selectedPostId && <ForumDetailModal postId={selectedPostId} onClose={() => setSelectedPostId(null)} />}
+      {detailPostId && <ForumDetailModal postId={detailPostId} onClose={() => setDetailPostId(null)} />}
+      <PostModal 
+        isOpen={isPostModalOpen}
+        onClose={handleModalClose}
+        onComplete={handleFormSubmit}
+        initialData={editingPost}
+      />
+
       <div className="forum-page-container">
         <div className="fp-header">
           <h1>Diễn đàn cộng đồng</h1>
@@ -95,10 +140,10 @@ const ForumPage = () => {
               <button className={sortOrder === 'newest' ? 'active' : ''} onClick={() => setSortOrder('newest')}>Mới nhất</button>
               <button className={sortOrder === 'popular' ? 'active' : ''} onClick={() => setSortOrder('popular')}>Phổ biến</button>
           </div>
-          <Link to="/forum/create" className="fp-create-button">
+          <button onClick={handleOpenCreateModal} className="fp-create-button">
               <Plus size={20}/>
               <span>Tạo bài viết</span>
-          </Link>
+          </button>
         </div>
 
         <div className="fp-post-list">
@@ -107,7 +152,15 @@ const ForumPage = () => {
           ) : error ? (
             <p className="fp-message fp-message--error">{error}</p>
           ) : posts.length > 0 ? (
-            posts.map(post => <PostCard key={post.id} post={post} onPostSelect={setSelectedPostId} />)
+            posts.map(post => (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                onPostSelect={setDetailPostId} 
+                onEditSelect={handleOpenEditModal}
+                currentUserId={user?.sub}
+              />
+            ))
           ) : (
             <div className="fp-no-results">
               <h3>Chưa có bài viết nào</h3>

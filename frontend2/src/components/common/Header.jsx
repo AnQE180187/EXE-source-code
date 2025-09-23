@@ -87,7 +87,7 @@ const Header = () => {
       <NavLink to="/forum" className={navLinkClass} onClick={closeMobileMenu}>Diễn đàn</NavLink>
       <NavLink to="/about" className={navLinkClass} onClick={closeMobileMenu}>About Us</NavLink>
       {isAuthenticated && user.role === 'PARTICIPANT' && (
-        <NavLink to="/payment" className="button-organizer">
+        <NavLink to="/pricing" className="button-organizer">
           Trở thành Organizer
         </NavLink>
       )}

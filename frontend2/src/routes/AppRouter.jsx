@@ -14,19 +14,17 @@ import RegisterPage from '../pages/RegisterPage';
 import ProfilePage from '../pages/ProfilePage';
 import PaymentPage from '../pages/PaymentPage';
 import MyEventsPage from '../pages/MyEventsPage';
-import AboutPage from '../pages/AboutPage'; // Import the new page
+import AboutPage from '../pages/AboutPage';
 
 // Event Pages
 import EventsPage from '../pages/EventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
-import CreateEventPage from '../pages/CreateEventPage';
-import EditEventPage from '../pages/EditEventPage';
 
 // Forum Pages
 import ForumPage from '../pages/ForumPage';
-import CreatePostPage from '../pages/CreatePostPage';
-import EditPostPage from '../pages/EditPostPage';
 import EventManagerPage from '../pages/EventManagerPage';
+import OrganizerPricingPage from '../pages/OrganizerPricingPage';
+import OrganizerPaymentPage from '../pages/OrganizerPaymentPage';
 
 const router = createBrowserRouter([
   {
@@ -37,7 +35,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
-      { path: 'about', element: <AboutPage /> }, // Add the new route
+      { path: 'about', element: <AboutPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'events/:id', element: <EventDetailPage /> },
       { path: 'forum', element: <ForumPage /> },
@@ -56,24 +54,16 @@ const router = createBrowserRouter([
         element: <ProtectedRoute><PaymentPage /></ProtectedRoute>,
       },
       {
-        path: 'events/create',
-        element: <ProtectedRoute><CreateEventPage /></ProtectedRoute>,
-      },
-      {
-        path: 'events/:id/edit',
-        element: <ProtectedRoute><EditEventPage /></ProtectedRoute>,
-      },
-      {
-        path: 'forum/create',
-        element: <ProtectedRoute><CreatePostPage /></ProtectedRoute>,
-      },
-      {
-        path: 'forum/:id/edit',
-        element: <ProtectedRoute><EditPostPage /></ProtectedRoute>,
-      },
-      {
         path: 'manage/events',
         element: <ProtectedRoute><EventManagerPage /></ProtectedRoute>,
+      },
+      {
+        path: 'pricing',
+        element: <ProtectedRoute><OrganizerPricingPage /></ProtectedRoute>,
+      },
+      {
+        path: 'organizer-payment',
+        element: <ProtectedRoute><OrganizerPaymentPage /></ProtectedRoute>,
       },
     ],
   },

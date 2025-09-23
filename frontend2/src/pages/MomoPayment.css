@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+
+.momo-payment-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background-color: #f3f4f6;
+  padding: 2rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.momo-payment-card {
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.momo-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.momo-header .logo {
+  height: 40px;
+  margin-bottom: 1rem;
+}
+
+.momo-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #d82d8b; /* Momo Pink */
+}
+
+.payment-details {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem 0;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-row strong {
+  color: #111827;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.detail-row.total strong {
+  color: #d82d8b;
+  font-size: 1.4rem;
+}
+
+.qr-section {
+  margin-bottom: 1.5rem;
+}
+
+.qr-code-img {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  display: block;
+  border: 6px solid #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.instructions {
+  text-align: left;
+  color: #4b5563;
+  margin-bottom: 2rem;
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.instructions h4 {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.instructions ol {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.instructions li {
+  margin-bottom: 0.5rem;
+}
+
+.confirm-payment-btn {
+  width: 100%;
+  padding: 1rem;
+  background-color: #d82d8b; /* Momo Pink */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.confirm-payment-btn:hover {
+  background-color: #b72071;
+}
+
+.confirm-payment-btn:disabled {
+  background-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.back-link, .status-link {
+  color: #d82d8b;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover, .status-link:hover {
+  text-decoration: underline;
+}
+
+.payment-error {
+  color: #ef4444;
+  background-color: #fee2e2;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}

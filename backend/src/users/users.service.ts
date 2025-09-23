@@ -104,16 +104,25 @@ export class UsersService {
 
     const oldProfile = await this.prisma.profile.findUnique({ where: { userId } });
 
-    const { displayName, ...restOfDto } = updateProfileDto;
+    const { dateOfBirth, ...restOfDto } = updateProfileDto;
+
+    // Prisma expects a Date object or a full ISO string for DateTime fields.
+    // The DTO provides a string (like YYYY-MM-DD) or null. We convert it.
+    const dataForUpdate = {
+      ...restOfDto,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+    };
+
+    const dataForCreate = {
+      userId,
+      ...dataForUpdate,
+      displayName: dataForUpdate.displayName || user.email,
+    };
 
     const updatedProfile = await this.prisma.profile.upsert({
       where: { userId },
-      update: updateProfileDto, // Update with all fields
-      create: {
-        userId,
-        displayName: displayName || user.email, // Fallback for creation
-        ...restOfDto,
-      },
+      update: dataForUpdate,
+      create: dataForCreate,
     });
 
     await this.auditLogsService.log(

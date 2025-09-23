@@ -32,6 +32,7 @@ enum EventStatus {
 
 enum RegistrationStatus {
   REGISTERED
+  DEPOSITED
   CANCELLED
 }
 

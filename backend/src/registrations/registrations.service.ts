@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
-import { User, EventStatus } from '@prisma/client';
+import { User, EventStatus, RegistrationStatus } from '@prisma/client';
 
 @Injectable()
 export class RegistrationsService {
@@ -43,6 +43,34 @@ export class RegistrationsService {
       });
 
       return registration;
+    });
+  }
+
+  async confirmDeposit(eventId: string, user: User) {
+    const registration = await this.prisma.registration.findUnique({
+        where: {
+            eventId_userId: {
+                eventId: eventId,
+                userId: user.id,
+            },
+        },
+    });
+
+    if (!registration) {
+        throw new NotFoundException(`Registration for event with ID "${eventId}" not found.`);
+    }
+
+    if (registration.status === RegistrationStatus.DEPOSITED) {
+        throw new ConflictException('Deposit has already been confirmed for this registration.');
+    }
+
+    return this.prisma.registration.update({
+        where: {
+            id: registration.id,
+        },
+        data: {
+            status: RegistrationStatus.DEPOSITED,
+        },
     });
   }
 

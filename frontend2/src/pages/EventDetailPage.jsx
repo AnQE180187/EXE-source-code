@@ -43,6 +43,12 @@ const EventDetailPage = () => {
       alert(err);
     }
   };
+
+  const handleDeposit = () => {
+    if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
+    // Navigate to payment page with event info
+    navigate('/payment', { state: { event } });
+  };
   
   const handleDelete = async () => {
     try {
@@ -72,7 +78,7 @@ const EventDetailPage = () => {
         onConfirm={handleDelete}
         title="Xác nhận xóa sự kiện"
       >
-        <p>Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể hoàn tác.</p>
+        <p>Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.</p>
       </Modal>
 
       <div className="event-detail-page">
@@ -115,7 +121,12 @@ const EventDetailPage = () => {
                 </div>
               </div>
               {isAuthenticated ? (
-                <button className="button button--secondary" onClick={handleRegistration}>Đăng ký ngay</button>
+                <>
+                  <button className="button button--secondary" onClick={handleRegistration}>Đăng ký ngay</button>
+                  {event.price > 0 && (
+                    <button className="button" onClick={handleDeposit}>Đặt cọc</button>
+                  )}
+                </>
               ) : (
                 <Link to={`/login?redirect=/events/${id}`} className="button button--secondary">
                   Đăng nhập để tham gia
