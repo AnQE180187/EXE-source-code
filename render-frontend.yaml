@@ -1,0 +1,20 @@
+# render.yaml for the FRONTEND repository
+# This file defines the Frontend Static Site service.
+
+services:
+  # ------------------ Frontend (React + Vite) ------------------ #
+  - type: static
+    name: freeday-frontend
+    region: singapore
+    plan: starter
+    buildCommand: "npm install && npm run build"
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        value: "" # <-- IMPORTANT: Paste your deployed backend URL here in the Render dashboard
+
+    # Redirect all non-file requests to index.html for client-side routing
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

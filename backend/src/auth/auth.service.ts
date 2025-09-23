@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
-    const { email, password, displayName, dateOfBirth, ...restProfileData } = registerUserDto;
+    const { email, password, displayName, dateOfBirth, gender, city, bio } = registerUserDto;
 
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -23,23 +23,18 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Safely construct profile data
-    const profileCreateData: Prisma.ProfileCreateWithoutUserInput = {
-        displayName: displayName || email, // Fallback to email if no displayName
-        ...restProfileData,
-    };
-
-    // Only add dateOfBirth if it's a valid, non-empty string
-    if (dateOfBirth && dateOfBirth.length > 0) {
-        profileCreateData.dateOfBirth = new Date(dateOfBirth);
-    }
-
     const user = await this.prisma.user.create({
       data: {
         email,
         passwordHash: hashedPassword,
         profile: {
-          create: profileCreateData,
+          create: {
+            displayName: displayName || email,
+            gender,
+            city,
+            bio,
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+          },
         },
       },
       include: {

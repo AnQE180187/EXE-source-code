@@ -1,0 +1,52 @@
+# Blueprint for deploying on Render
+# See https://render.com/docs/blueprint-spec for details
+
+services:
+  # ------------------ Database (PostgreSQL) ------------------ #
+  - type: pserv
+    name: freeday-db
+    region: singapore
+    plan: free # Or 'starter' for production
+    databaseName: freeday
+    postgres:
+      version: 15
+
+  # ------------------ Backend (NestJS) ------------------ #
+  - type: web
+    name: freeday-backend
+    region: singapore
+    plan: free # Or 'starter' for production
+    buildCommand: "npm install && npx prisma migrate deploy && npm run build"
+    startCommand: "npm run start:prod"
+    healthCheckPath: /api # Or your specific health check endpoint
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: freeday-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true # Render will generate a random secret
+      - key: NODE_ENV
+        value: production
+
+  # ------------------ Frontend (React + Vite) ------------------ #
+  - type: static
+    name: freeday-frontend
+    region: singapore
+    plan: starter # 'free' plan does not support custom domains well with this setup
+    rootDir: frontend2
+    buildCommand: "npm install && npm run build"
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: freeday-backend
+          property: url # Gets the public URL of the backend service
+          
+    # Redirect all non-file requests to index.html for client-side routing
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,17 +1,1 @@
-src/users/users.service.ts:105:7 - error TS2322: Type '{ displayName?: string; avatarUrl?: string; city?: string; bio?: string; gender?: string; dateOfBirth?: string; userId: string; }' is not assignable to type '(Without<ProfileCreateInput, ProfileUncheckedCreateInput> & ProfileUncheckedCreateInput) | (Without<...> & ProfileCreateInput)'.
-  Type '{ displayName?: string; avatarUrl?: string; city?: string; bio?: string; gender?: string; dateOfBirth?: string; userId: string; }' is not assignable to type 'Without<ProfileCreateInput, ProfileUncheckedCreateInput> & ProfileUncheckedCreateInput'.
-    Type '{ displayName?: string; avatarUrl?: string; city?: string; bio?: string; gender?: string; dateOfBirth?: string; userId: string; }' is not assignable to type 'ProfileUncheckedCreateInput'.       
-      Types of property 'displayName' are incompatible.
-        Type 'string | undefined' is not assignable to type 'string'.
-          Type 'undefined' is not assignable to type 'string'.
-
-105       create: {
-          ~~~~~~
-
-
-  node_modules/.prisma/client/index.d.ts:4830:5
-    4830     create: XOR<ProfileCreateInput, ProfileUncheckedCreateInput>
-             ~~~~~~
-    The expected type comes from property 'create' which is declared here on type '{ select?: ProfileSelect<DefaultArgs> | null | undefined; omit?: ProfileOmit<DefaultArgs> | null | undefined; include?: ProfileInclude<...> | ... 1 more ... | undefined; where: ProfileWhereUniqueInput; create: (Without<...> & ProfileUncheckedCreateInput) | (Without<...> & ProfileCreateInput); update: (Without<...> &...'    
-
-Found 1 error(s).
+POST https://exe-backend-7elr.onrender.com/auth/register 404 (Not Found)
