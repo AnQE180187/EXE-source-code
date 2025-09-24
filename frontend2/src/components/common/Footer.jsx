@@ -13,7 +13,7 @@ const Footer = () => {
           <div className="footer-section">
             <h3 className="footer-heading">FreeDay</h3>
             <p className="footer-text">
-              Nền tảng kết nối và khám phá sự kiện cuối tuần, giúp bạn tìm thấy niềm vui và những người bạn mới.
+              FREEDAY – Nền tảng tổng hợp hoạt động & sự kiện cho giới trẻ Quy Nhơn. Cá nhân hóa trải nghiệm, kết nối bạn đồng hành, đảm bảo chất lượng.
             </p>
           </div>
 
@@ -53,7 +53,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} FreeDay. All rights reserved. A product of Group 4.</p>
+          <p>&copy; {new Date().getFullYear()} FreeDay. Tất cả quyền được bảo lưu. Được tạo với FreeDayTeam tại Việt Nam.</p>
         </div>
       </div>
     </footer>

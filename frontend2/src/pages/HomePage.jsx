@@ -56,7 +56,7 @@ const HomePage = () => {
 
       {/* Featured Events Section */}
       <section className="page-section">
-        <h2 className="section-heading">Sự kiện <span className="section-heading--highlight">Nổi bật</span></h2>
+        <h2 className="section-heading">SỰ KIỆN <span className="section-heading--highlight">NỔI BẬT</span></h2>
         <div className="featured-events-grid">
           {featuredEvents.map(event => (
             <Link to={`/events/${event.id}`} key={event.id} className="event-card">
@@ -72,7 +72,7 @@ const HomePage = () => {
 
       {/* How It Works Section */}
       <section className="page-section how-it-works">
-        <h2 className="section-heading">Bắt đầu <span className="section-heading--highlight">Dễ dàng</span></h2>
+        <h2 className="section-heading">BẮT ĐẦU <span className="section-heading--highlight">DỄ DÀNG</span></h2>
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-card__icon-wrapper"><Search size={32} /></div>
@@ -99,7 +99,7 @@ const HomePage = () => {
 
       {/* Community Forum Section */}
       <section className="page-section">
-        <h2 className="section-heading">Cộng đồng <span className="section-heading--highlight"> sôi động</span></h2>
+        <h2 className="section-heading">CỘNG ĐỒNG <span className="section-heading--highlight"> SÔI ĐỘNG</span></h2>
         <div className="forum-preview">
             <ul className="post-list">
                 {recentPosts.map(post => (

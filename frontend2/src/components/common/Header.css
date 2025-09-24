@@ -138,7 +138,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
-  background-color: var(--primary-color);
+  background-color: #08BAA1;
   color: white;
   border: none;
   border-radius: 8px;
@@ -147,9 +147,11 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
+.button-primary span {
+color: white;
+}
 .button-primary:hover {
-  background-color: var(--primary-hover);
+  background-color: #023334;
 }
 
 /* Profile Menu */
