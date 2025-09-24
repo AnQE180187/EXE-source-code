@@ -78,16 +78,12 @@
 .hero__content { max-width: 800px; margin: 0 auto; }
 
 .hero__title {
-  font-size: 3.5rem;
-  font-weight: 800;
+  font-size: 2.9rem;
   color: #fff;
   line-height: 1.2;
   margin-bottom: 1rem;
-  letter-spacing: -1.5px;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
-.hero__title--highlight { color: #fff; text-decoration: underline; text-decoration-color: #b6fff2; }
 
 .hero__subtitle {
   font-size: 1.15rem;
