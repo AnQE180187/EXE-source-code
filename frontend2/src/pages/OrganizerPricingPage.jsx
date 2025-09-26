@@ -6,37 +6,26 @@ import './OrganizerPricingPage.css';
 const OrganizerPricingPage = () => {
   const packages = [
     {
-      name: 'Gói Tuần',
-      price: '100.000',
-      period: 'tuần',
+      name: 'Gói Business Pro',
+      price: '150.000',
+      period: 'tháng',
       features: [
-        'Tạo tối đa 5 sự kiện',
-        'Thống kê cơ bản',
-        'Hỗ trợ qua email',
+        'Ưu tiên hiển thị lên đầu( luôn nằm trong top )',
+
       ],
     },
     {
-      name: 'Gói Tháng',
-      price: '350.000',
+      name: 'Gói Premium',
+      price: '250.000',
       period: 'tháng',
       popular: true,
       features: [
-        'Tạo sự kiện không giới hạn',
-        'Thống kê nâng cao',
-        'Hỗ trợ ưu tiên qua email',
-        'Làm nổi bật sự kiện',
+        'Đăng nhiều sự kiện',
+        'Quảng bá trên fanpage',
+        'Ưu tiên hiển thị & xem dữ liệu khách hàng',
       ],
-    },
-    {
-      name: 'Gói Năm',
-      price: '3.500.000',
-      period: 'năm',
-      features: [
-        'Tất cả tính năng gói tháng',
-        'Quản lý tài khoản riêng',
-        'Hỗ trợ 24/7 qua điện thoại',
-      ],
-    },
+    }
+    
   ];
 
   return (
@@ -50,7 +39,7 @@ const OrganizerPricingPage = () => {
       <div className="pricing-grid">
         {packages.map((pkg) => (
           <div key={pkg.name} className={`pricing-card ${pkg.popular ? 'popular' : ''}`}>
-            {pkg.popular && <div className="popular-badge">Phổ biến</div>}
+         
             <div className="card-header">
               <h2>{pkg.name}</h2>
               <p className="price">

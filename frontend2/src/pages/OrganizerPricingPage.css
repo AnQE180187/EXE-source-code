@@ -27,10 +27,12 @@
 }
 
 .pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  display: flex;
+  justify-content: center; 
+  gap: 2rem;             
+  flex-wrap: wrap;       
 }
+
 
 .pricing-card {
   background-color: #ffffff;
