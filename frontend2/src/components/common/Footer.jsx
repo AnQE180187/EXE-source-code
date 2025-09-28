@@ -24,7 +24,7 @@ const Footer = () => {
               <li><Link to="/about">Về chúng tôi</Link></li>
               <li><Link to="/events">Sự kiện</Link></li>
               <li><Link to="/forum">Diễn đàn</Link></li>
-              <li><Link to="/contact">Liên hệ</Link></li>
+              <li><a href="https://www.facebook.com/profile.php?id=61577315172960">Liên Hệ</a></li>
             </ul>
           </div>
 
@@ -32,7 +32,7 @@ const Footer = () => {
           <div className="footer-section">
             <h3 className="footer-heading">Mạng xã hội</h3>
             <div className="social-links">
-              <a href="#" className="social-link" aria-label="Facebook"><Facebook size={20} /></a>
+              <a href="https://www.facebook.com/profile.php?id=61577315172960" className="social-link" aria-label="Facebook"><Facebook size={20} /></a>
               <a href="#" className="social-link" aria-label="Twitter"><Twitter size={20} /></a>
               <a href="#" className="social-link" aria-label="Instagram"><Instagram size={20} /></a>
             </div>
