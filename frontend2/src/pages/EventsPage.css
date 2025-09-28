@@ -19,7 +19,7 @@
     margin-bottom: 2.5rem;
 }
 
-.ep-header h1 { font-size: 2.5rem; font-weight: 700; color: var(--ep-text-primary); }
+.ep-header h1 { font-size: 2.5rem; font-weight: 700; color: #08BAA1;}
 .ep-header p { font-size: 1.1rem; color: var(--ep-text-secondary); margin-top: 0.5rem; }
 
 /* Filter Bar */
