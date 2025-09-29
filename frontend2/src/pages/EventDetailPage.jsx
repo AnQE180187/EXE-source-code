@@ -22,6 +22,7 @@ const EventDetailPage = () => {
   const [loadingRegistration, setLoadingRegistration] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -136,12 +137,13 @@ const EventDetailPage = () => {
   
   const handleDelete = async () => {
     try {
+      setLoadingDelete(true);
       await deleteEvent(id);
-      alert('Đã xóa sự kiện thành công.');
       navigate('/events');
-    } catch {
-      setError('Không thể xóa sự kiện.');
+    } catch (error) {
+      setError('Không thể xóa sự kiện: ' + (error.message || error));
     } finally {
+      setLoadingDelete(false);
       setIsDeleteModalOpen(false);
     }
   };
@@ -284,7 +286,13 @@ const EventDetailPage = () => {
              {isOrganizer && (
                 <div className="sidebar-card__footer">
                   <Link to={`/events/${id}/edit`} className="button">Chỉnh sửa</Link>
-                  <button className="button button--ghost" onClick={() => setIsDeleteModalOpen(true)}>Xóa</button>
+                  <button 
+                    className="button button--ghost" 
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    disabled={loadingDelete}
+                  >
+                    {loadingDelete ? 'Đang xóa...' : 'Xóa'}
+                  </button>
                 </div>
               )}
           </div>

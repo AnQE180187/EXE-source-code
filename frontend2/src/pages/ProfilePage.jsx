@@ -143,6 +143,33 @@ const ProfilePage = () => {
               <label htmlFor="city">Thành phố</label>
               <input id="city" {...register('city')} readOnly={!isEditMode} />
             </div>
+            {/* Phone */}
+            <div className="p-form-group">
+              <label htmlFor="phone">Số điện thoại</label>
+              <input 
+                id="phone" 
+                type="tel" 
+                placeholder="0123456789 (10 số)"
+                {...register('phone', {
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: 'Số điện thoại phải có đúng 10 số'
+                  }
+                })} 
+                readOnly={!isEditMode} 
+              />
+              {errors.phone && <span className="error-text">{errors.phone.message}</span>}
+            </div>
+            {/* Address */}
+            <div className="p-form-group p-form-group-full">
+              <label htmlFor="address">Địa chỉ</label>
+              <input 
+                id="address" 
+                placeholder="Nhập địa chỉ"
+                {...register('address')} 
+                readOnly={!isEditMode} 
+              />
+            </div>
             {/* Bio */}
             <div className="p-form-group p-form-group-full">
               <label htmlFor="bio">Tiểu sử</label>
