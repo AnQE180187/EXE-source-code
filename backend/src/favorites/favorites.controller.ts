@@ -1,4 +1,4 @@
-import { Controller, Post, Param, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -14,5 +14,12 @@ export class FavoritesController {
   toggle(@Param('eventId') eventId: string, @Req() req: Request) {
     const user = req.user as User;
     return this.favoritesService.toggleFavorite(eventId, user.id);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  getStatus(@Param('eventId') eventId: string, @Req() req: Request) {
+    const user = req.user as User;
+    return this.favoritesService.getFavoriteStatus(eventId, user.id);
   }
 }

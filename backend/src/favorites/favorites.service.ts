@@ -26,7 +26,7 @@ export class FavoritesService {
           where: { id: eventId },
           data: { favoritesCount: { decrement: 1 } },
         });
-        return { favorited: false };
+        return { isFavorited: false };
       } else {
         // User has not favorited, so favorite it
         await tx.favorite.create({
@@ -36,8 +36,15 @@ export class FavoritesService {
           where: { id: eventId },
           data: { favoritesCount: { increment: 1 } },
         });
-        return { favorited: true };
+        return { isFavorited: true };
       }
     });
+  }
+
+  async getFavoriteStatus(eventId: string, userId: string) {
+    const favorite = await this.prisma.favorite.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+    return { isFavorited: !!favorite };
   }
 }

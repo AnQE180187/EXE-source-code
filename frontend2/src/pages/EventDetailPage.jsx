@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import { getEventById, deleteEvent } from '../services/eventService';
 import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
+import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
 import './EventDetailPage.css';
@@ -18,6 +20,8 @@ const EventDetailPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState(null);
   const [loadingRegistration, setLoadingRegistration] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -45,6 +49,19 @@ const EventDetailPage = () => {
     }
   }, [id, isAuthenticated]);
 
+  const fetchFavoriteStatus = useCallback(async () => {
+    if (!isAuthenticated) {
+      setIsFavorited(false);
+      return;
+    }
+    try {
+      const status = await getFavoriteStatus(id);
+      setIsFavorited(status.isFavorited || false);
+    } catch {
+      setIsFavorited(false);
+    }
+  }, [id, isAuthenticated]);
+
   useEffect(() => {
     fetchEvent();
   }, [fetchEvent]);
@@ -52,6 +69,10 @@ const EventDetailPage = () => {
   useEffect(() => {
     fetchRegistrationStatus();
   }, [fetchRegistrationStatus]);
+
+  useEffect(() => {
+    fetchFavoriteStatus();
+  }, [fetchFavoriteStatus]);
 
   const handleRegistration = async () => {
     if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
@@ -99,13 +120,26 @@ const EventDetailPage = () => {
     // Navigate to payment page with event info
     navigate('/payment', { state: { event } });
   };
+
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
+    try {
+      setLoadingFavorite(true);
+      const result = await toggleFavorite(id);
+      setIsFavorited(result.isFavorited);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
   
   const handleDelete = async () => {
     try {
       await deleteEvent(id);
       alert('Đã xóa sự kiện thành công.');
       navigate('/events');
-    } catch (err) {
+    } catch {
       setError('Không thể xóa sự kiện.');
     } finally {
       setIsDeleteModalOpen(false);
@@ -170,6 +204,24 @@ const EventDetailPage = () => {
                   <span>{event.price > 0 ? `${event.price.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}</span>
                 </div>
               </div>
+
+              {/* Favorite Button */}
+              {isAuthenticated && (
+                <button
+                  className={`favorite-button ${isFavorited ? 'favorited' : ''}`}
+                  onClick={handleToggleFavorite}
+                  disabled={loadingFavorite}
+                  title={isFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                >
+                  <Heart 
+                    size={20} 
+                    fill={isFavorited ? '#e74c3c' : 'none'} 
+                    color={isFavorited ? '#e74c3c' : '#666'}
+                  />
+                  {loadingFavorite ? '...' : (isFavorited ? 'Đã yêu thích' : 'Yêu thích')}
+                </button>
+              )}
+
               {isAuthenticated ? (
                 <>
                   {registrationStatus?.isRegistered ? (
