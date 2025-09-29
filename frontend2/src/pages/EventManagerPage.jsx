@@ -91,6 +91,43 @@ const EventManagerPage = () => {
     return <span className={`badge ${statusClasses[status] || 'badge--default'}`}>{status}</span>;
   };
 
+  const registrationStatusBadge = (status) => {
+    const statusConfig = {
+      REGISTERED: { 
+        class: 'badge--registered', 
+        text: 'Đăng ký', 
+        icon: '📝' 
+      },
+      DEPOSITED: { 
+        class: 'badge--deposited', 
+        text: 'Đã cọc', 
+        icon: '💰' 
+      },
+    };
+    const config = statusConfig[status] || { 
+      class: 'badge--default', 
+      text: status, 
+      icon: '❓' 
+    };
+    return (
+      <span className={`badge ${config.class}`}>
+        <span className="badge-icon">{config.icon}</span>
+        {config.text}
+      </span>
+    );
+  };
+
+  // Calculate registration statistics
+  const getRegistrationStats = () => {
+    if (!registrations.length) return null;
+    
+    const total = registrations.length;
+    const deposited = registrations.filter(reg => reg.status === 'DEPOSITED').length;
+    const registered = registrations.filter(reg => reg.status === 'REGISTERED').length;
+    
+    return { total, deposited, registered };
+  };
+
   return (
     <>
       <EventModal 
@@ -110,7 +147,7 @@ const EventManagerPage = () => {
 
         {error && <p className="error-message">{error}</p>}
 
-        <div className="manager-layout">
+        <div className="manager-content">
           {/* Left Column: Event List */}
           <div className="event-list-column">
             {loadingEvents ? (
@@ -171,6 +208,27 @@ const EventManagerPage = () => {
                           <div className="stat-item"><MapPin size={20}/> <span>{selectedEvent.locationText}</span></div>
                       </div>
 
+                      {/* Registration Statistics */}
+                      {registrations.length > 0 && (
+                        <div className="registration-stats">
+                          <h3 className="stats-title">Thống kê đăng ký</h3>
+                          <div className="stats-summary">
+                            <div className="stat-card stat-card--total">
+                              <span className="stat-number">{getRegistrationStats().total}</span>
+                              <span className="stat-label">Tổng số</span>
+                            </div>
+                            <div className="stat-card stat-card--registered">
+                              <span className="stat-number">{getRegistrationStats().registered}</span>
+                              <span className="stat-label">Đăng ký</span>
+                            </div>
+                            <div className="stat-card stat-card--deposited">
+                              <span className="stat-number">{getRegistrationStats().deposited}</span>
+                              <span className="stat-label">Đã cọc</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Participant List */}
                       <div className="participants-section">
                           <h3 className="section-title">Danh sách người tham gia</h3>
@@ -184,14 +242,23 @@ const EventManagerPage = () => {
                                       </li>
                                       {registrations.map(reg => (
                                           <li key={reg.id} className="participants-list__item">
-                                              <span>{reg.user.profile?.displayName || 'N/A'}</span>
-                                              <span>{reg.user.email}</span>
-                                              <span><span className="badge badge--registered">{reg.status}</span></span>
+                                              <span className="participant-name">
+                                                {reg.user.profile?.displayName || 'N/A'}
+                                              </span>
+                                              <span className="participant-email">
+                                                {reg.user.email}
+                                              </span>
+                                              <span className="participant-status">
+                                                {registrationStatusBadge(reg.status)}
+                                              </span>
                                           </li>
                                       ))}
                                   </ul>
                               ) : (
-                                  <p>Chưa có ai đăng ký sự kiện này.</p>
+                                  <div className="no-participants">
+                                    <Users size={48} />
+                                    <p>Chưa có ai đăng ký sự kiện này.</p>
+                                  </div>
                               )}
                           </div>
                       </div>
