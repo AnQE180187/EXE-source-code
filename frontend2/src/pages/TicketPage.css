@@ -1,0 +1,435 @@
+/* TicketPage.css */
+.ticket-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 1rem 1rem 3rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 2rem;
+}
+
+.ticket-container {
+  background: white;
+  border-radius: 16px;
+  border: 3px solid #10B981; /* Green border like in the image */
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin-top: 0;
+}
+
+.ticket-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-title {
+  color: #10B981;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ticket-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Event Info Section */
+.event-info-section {
+  background-color: #f1f5f9;
+  padding: 1.25rem;
+  border-radius: 12px;
+}
+
+.event-name {
+  color: #10B981;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-details .detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.event-details .detail-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.event-details .detail-label {
+  font-weight: 600;
+  color: #333;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.event-details .detail-value {
+  color: #666;
+  text-align: right;
+  flex: 1;
+}
+
+/* Deposit Info Section */
+.deposit-info-section {
+  background-color: #ecfdf5; /* Light green background */
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 2px dashed #10B981;
+}
+
+.deposit-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.deposit-label {
+  font-weight: 600;
+  color: #059669;
+}
+
+.deposit-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.deposit-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.date-label {
+  color: #6b7280;
+}
+
+.date-value {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Combined Info Section */
+.combined-info-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.deposit-info {
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.deposit-info .deposit-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.deposit-info .deposit-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.deposit-info .deposit-value {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.deposit-info .deposit-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.deposit-info .date-label {
+  color: #666;
+}
+
+.deposit-info .date-value {
+  color: #333;
+}
+
+.customer-info .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.customer-info .info-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+}
+
+.customer-info .info-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* QR Code Section */
+.qr-section {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.qr-placeholder {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  text-align: center;
+}
+
+.qr-placeholder p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.qr-placeholder small {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* Action Buttons */
+.ticket-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ticket-actions .button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.ticket-actions .button--primary {
+  background-color: #10B981;
+  color: white;
+}
+
+.ticket-actions .button--primary:hover {
+  background-color: #059669;
+}
+
+.ticket-actions .button--secondary {
+  background-color: #f8fafc;
+  color: #10B981;
+  border: 1px solid #10B981;
+}
+
+.ticket-actions .button--secondary:hover {
+  background-color: #10B981;
+  color: white;
+}
+
+/* Important Notes */
+.ticket-notes {
+  background: #fff3cd;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+  margin-bottom: 20px;
+}
+
+.ticket-notes p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* Print Styles */
+@media print {
+  .ticket-page {
+    padding: 0;
+    background: white;
+  }
+  
+  .ticket-container {
+    box-shadow: none;
+    border: 2px solid #10B981;
+  }
+  
+  .ticket-actions {
+    display: none;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ticket-page {
+    padding: 0.5rem 0.5rem 2rem 0.5rem;
+    padding-top: 1rem;
+  }
+  
+  .ticket-container {
+    margin: 0;
+    padding: 1rem;
+    border-radius: 12px;
+    max-width: 100%;
+  }
+  
+  .ticket-title {
+    font-size: 1.5rem;
+  }
+  
+  .ticket-header {
+    margin-bottom: 1rem;
+  }
+  
+  .ticket-content {
+    gap: 1rem;
+  }
+  
+  .event-info-section {
+    padding: 1rem;
+  }
+  
+  .event-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .combined-info-section {
+    padding: 1rem;
+  }
+  
+  .deposit-info {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .event-details .detail-row,
+  .combined-info-section .deposit-amount,
+  .combined-info-section .deposit-date,
+  .combined-info-section .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 10px;
+    padding: 6px 0;
+  }
+  
+  .event-details .detail-label,
+  .deposit-info .deposit-label,
+  .deposit-info .date-label,
+  .customer-info .info-label {
+    min-width: auto;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 2px;
+  }
+  
+  .event-details .detail-value,
+  .deposit-info .deposit-value,
+  .deposit-info .date-value,
+  .customer-info .info-value {
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  
+  .deposit-info .deposit-value {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  .ticket-notes {
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .ticket-notes p {
+    font-size: 0.85rem;
+  }
+  
+  .ticket-actions {
+    margin-top: 0.5rem;
+  }
+  
+  .ticket-actions .button {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ticket-page {
+    padding: 0.25rem 0.25rem 1.5rem 0.25rem;
+    padding-top: 0.5rem;
+  }
+  
+  .ticket-container {
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+  
+  .ticket-title {
+    font-size: 1.25rem;
+  }
+  
+  .event-name {
+    font-size: 1rem;
+  }
+  
+  .event-info-section,
+  .combined-info-section {
+    padding: 0.75rem;
+  }
+  
+  .ticket-notes {
+    padding: 10px;
+  }
+  
+  .ticket-actions .button {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ticket-actions {
+    flex-direction: column;
+  }
+}
