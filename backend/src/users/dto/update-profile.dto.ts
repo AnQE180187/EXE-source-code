@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUrl, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsUrl, IsDateString, Matches } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
@@ -24,4 +24,13 @@ export class UpdateProfileDto {
   @IsDateString()
   @IsOptional()
   dateOfBirth?: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^[0-9]{10}$/, { message: 'Phone number must be exactly 10 digits' })
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 }
