@@ -53,6 +53,12 @@ enum ReportStatus {
   REJECTED
 }
 
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 // MODELS based on SRS ERD and DDL
 model User {
   id            String        @id @default(uuid())
@@ -75,6 +81,7 @@ model User {
   notifications Notification[]
   auditLogs     AuditLog[]    @relation("AuditActor")
   waitlists     EventWaitlist[]
+  transactions  Transaction[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -274,4 +281,19 @@ model EventWaitlist {
 
   @@unique([eventId, userId])
   @@map("event_waitlist")
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  userId      String            @map("user_id")
+  amount      Float
+  description String
+  status      TransactionStatus @default(PENDING)
+  orderCode   String            @unique @map("order_code")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
 }
