@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getMyEvents } from '../services/userService';
 import { getRegistrationsForEvent } from '../services/registrationService';
-import { createEvent, updateEvent } from '../services/eventService';
+import { createEvent, updateEvent, deleteEvent } from '../services/eventService';
 import { PlusCircle, Edit, Trash2, Users, BarChart2, Info, Calendar, MapPin } from 'lucide-react';
 import EventModal from './EventModal'; // Import the modal
 import './EventManagerPage.css';
@@ -17,13 +17,16 @@ const EventManagerPage = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingEvent, setDeletingEvent] = useState(null);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const fetchManagedEvents = useCallback(async () => {
     try {
       setLoadingEvents(true);
       const data = await getMyEvents();
       setEvents(data.organized || []);
-    } catch (err) {
+    } catch {
       setError('Không thể tải danh sách sự kiện của bạn.');
     } finally {
       setLoadingEvents(false);
@@ -45,7 +48,7 @@ const EventManagerPage = () => {
     try {
       const registrationData = await getRegistrationsForEvent(event.id);
       setRegistrations(registrationData || []);
-    } catch (err) {
+    } catch {
       setError('Không thể tải chi tiết sự kiện.');
       setRegistrations([]);
     } finally {
@@ -78,6 +81,43 @@ const EventManagerPage = () => {
         fetchManagedEvents(); // Refetch events on success
     } catch (err) {
         setError(err.toString());
+    }
+  };
+
+  const handleOpenDeleteModal = (event) => {
+    setDeletingEvent(event);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingEvent(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingEvent) return;
+
+    try {
+      setLoadingDelete(true);
+      await deleteEvent(deletingEvent.id);
+      
+      // Reset selected event if it's the one being deleted
+      if (selectedEvent?.id === deletingEvent.id) {
+        setSelectedEvent(null);
+        setRegistrations([]);
+      }
+      
+      // Refresh events list
+      await fetchManagedEvents();
+      setIsDeleteModalOpen(false);
+      setDeletingEvent(null);
+      
+      // Show success message
+      setError(null);
+    } catch (err) {
+      setError(err.toString());
+    } finally {
+      setLoadingDelete(false);
     }
   };
 
@@ -136,6 +176,34 @@ const EventManagerPage = () => {
         onComplete={handleFormSubmit}
         initialData={editingEvent}
       />
+      
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="delete-modal-overlay" onClick={handleCloseDeleteModal}>
+          <div className="delete-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Xác nhận xóa sự kiện</h3>
+            <p>Bạn có chắc chắn muốn xóa sự kiện <strong>"{deletingEvent?.title}"</strong>?</p>
+            <p className="delete-warning-text">Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.</p>
+            <div className="delete-modal-actions">
+              <button 
+                onClick={handleCloseDeleteModal} 
+                className="delete-button delete-button--secondary"
+                disabled={loadingDelete}
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={handleConfirmDelete} 
+                className="delete-button delete-button--danger"
+                disabled={loadingDelete}
+              >
+                {loadingDelete ? 'Đang xóa...' : 'Xóa sự kiện'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="event-manager-page">
         <div className="manager-header">
           <h1 className="manager-title">Quản lý sự kiện</h1>
@@ -194,7 +262,13 @@ const EventManagerPage = () => {
                           <h2 className="details-title">{selectedEvent.title}</h2>
                           <div className="details-actions">
                               <button onClick={() => handleOpenEditModal(selectedEvent)} className="action-button"><Edit size={16}/> Sửa</button>
-                              <button className="action-button action-button--danger"><Trash2 size={16}/> Xóa</button>
+                              <button 
+                                onClick={() => handleOpenDeleteModal(selectedEvent)} 
+                                className="action-button action-button--danger"
+                                disabled={loadingDelete}
+                              >
+                                <Trash2 size={16}/> {loadingDelete ? 'Đang xóa...' : 'Xóa'}
+                              </button>
                           </div>
                       </div>
                   </div>
