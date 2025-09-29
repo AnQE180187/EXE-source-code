@@ -42,9 +42,13 @@ export class AuthService {
       },
     });
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
-      accessToken: this.jwtService.sign(payload),
+      message: 'User registered successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        profile: user.profile
+      }
     };
   }
 
