@@ -16,6 +16,8 @@ const registerSchema = z.object({
   dateOfBirth: z.string().optional(),
   city: z.string().optional(),
   bio: z.string().optional(),
+  phone: z.string().regex(/^[0-9]{10}$/, { message: 'Số điện thoại phải có đúng 10 chữ số.' }).optional().or(z.literal('')),
+  address: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Mật khẩu xác nhận không khớp.",
   path: ["confirmPassword"],
@@ -96,9 +98,31 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="city">Thành phố</label>
+              <input id="city" {...register('city')} placeholder="VD: Hồ Chí Minh" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="phone">Số điện thoại</label>
+              <input 
+                id="phone" 
+                {...register('phone')} 
+                placeholder="VD: 0123456789"
+                maxLength="10"
+              />
+              {errors.phone && <p className="form-error">{errors.phone.message}</p>}
+            </div>
+          </div>
+
           <div className="form-group">
-            <label htmlFor="city">Thành phố</label>
-            <input id="city" {...register('city')} placeholder="VD: Hồ Chí Minh" />
+            <label htmlFor="address">Địa chỉ</label>
+            <input 
+              id="address" 
+              {...register('address')} 
+              placeholder="VD: 123 Nguyễn Văn A, Quận 1, TP.HCM" 
+            />
+            {errors.address && <p className="form-error">{errors.address.message}</p>}
           </div>
 
           <div className="form-group">

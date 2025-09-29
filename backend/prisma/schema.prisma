@@ -89,6 +89,8 @@ model Profile {
   interests   Json?
   gender      String?   // Add gender
   dateOfBirth DateTime? @map("date_of_birth") // Add date of birth
+  phone       String?   // Add phone number
+  address     String?   // Add address
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 

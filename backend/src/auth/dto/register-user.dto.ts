@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsDateString } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsDateString, Matches } from 'class-validator';
 
 export class RegisterUserDto {
   @IsEmail()
@@ -27,4 +27,12 @@ export class RegisterUserDto {
   @IsString()
   @IsOptional()
   bio?: string;
+
+  @Matches(/^[0-9]{10}$/, { message: 'Phone number must be exactly 10 digits' })
+  @IsOptional()
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 }
