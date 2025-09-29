@@ -18,7 +18,7 @@ export const register = async (userData) => {
         const response = await api.post('/auth/register', userData);
         return response.data;
     } catch (error) {
-        throw error.response.data.message || 'Đã có lỗi xảy ra';
+        throw error.response?.data?.message || 'Đã có lỗi xảy ra';
     }
 };
 

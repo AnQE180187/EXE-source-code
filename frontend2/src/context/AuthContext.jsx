@@ -34,11 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (credentials) => {
     const response = await registerService(credentials);
-    const { accessToken } = response; // Correctly get token from service response
-    localStorage.setItem('token', accessToken);
-    const decodedUser = jwtDecode(accessToken);
-    setUser(decodedUser);
-    return decodedUser;
+    return response;
   };
 
   const logout = () => {

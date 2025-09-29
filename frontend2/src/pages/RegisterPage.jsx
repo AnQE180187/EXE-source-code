@@ -32,7 +32,7 @@ const RegisterPage = () => {
     setApiError(null);
     try {
       // Exclude confirmPassword from the data sent to the backend
-      const { confirmPassword, ...submissionData } = data;
+      const { confirmPassword: _confirmPassword, ...submissionData } = data;
       if (submissionData.dateOfBirth === '') {
         submissionData.dateOfBirth = null;
       }
