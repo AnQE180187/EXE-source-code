@@ -1,5 +1,14 @@
 import api from './api';
 
+export const getRegistrationStatus = async (eventId) => {
+  try {
+    const response = await api.get(`/events/${eventId}/registration`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Không thể kiểm tra trạng thái đăng ký.';
+  }
+};
+
 export const createRegistration = async (eventId) => {
   try {
     const response = await api.post(`/events/${eventId}/registration`);

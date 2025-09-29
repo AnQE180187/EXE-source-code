@@ -19,6 +19,7 @@ import AboutPage from '../pages/AboutPage';
 // Event Pages
 import EventsPage from '../pages/EventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
+import TicketPage from '../pages/TicketPage';
 
 // Forum Pages
 import ForumPage from '../pages/ForumPage';
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       { path: 'about', element: <AboutPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'events/:id', element: <EventDetailPage /> },
+      { path: 'events/:id/ticket', element: <ProtectedRoute><TicketPage /></ProtectedRoute> },
       { path: 'forum', element: <ForumPage /> },
 
       // Protected Routes

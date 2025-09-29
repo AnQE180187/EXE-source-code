@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getEventById, toggleFavorite, deleteEvent } from '../services/eventService';
-import { createRegistration } from '../services/registrationService';
+import { getEventById, deleteEvent } from '../services/eventService';
+import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
 import './EventDetailPage.css';
@@ -16,6 +16,8 @@ const EventDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [loadingRegistration, setLoadingRegistration] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -29,18 +31,66 @@ const EventDetailPage = () => {
     }
   }, [id]);
 
+  const fetchRegistrationStatus = useCallback(async () => {
+    if (!isAuthenticated) {
+      setRegistrationStatus(null);
+      return;
+    }
+    try {
+      const status = await getRegistrationStatus(id);
+      setRegistrationStatus(status);
+    } catch {
+      // If error (like 401), user is not registered
+      setRegistrationStatus({ isRegistered: false, status: null });
+    }
+  }, [id, isAuthenticated]);
+
   useEffect(() => {
     fetchEvent();
   }, [fetchEvent]);
 
+  useEffect(() => {
+    fetchRegistrationStatus();
+  }, [fetchRegistrationStatus]);
+
   const handleRegistration = async () => {
     if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
     try {
+      setLoadingRegistration(true);
       await createRegistration(id);
       alert('Đăng ký thành công!');
-      fetchEvent();
-    } catch (err) {
-      alert(err);
+      await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoadingRegistration(false);
+    }
+  };
+
+  const handleCancelRegistration = async () => {
+    if (!isAuthenticated) return;
+    
+    const isConfirmed = window.confirm(
+      registrationStatus.status === 'DEPOSITED' 
+        ? 'Bạn có chắc chắn muốn hủy đặt cọc không? Tiền cọc sẽ được hoàn lại.'
+        : 'Bạn có chắc chắn muốn hủy đăng ký không?'
+    );
+    
+    if (!isConfirmed) return;
+    
+    try {
+      setLoadingRegistration(true);
+      await cancelRegistration(id);
+      alert(
+        registrationStatus.status === 'DEPOSITED' 
+          ? 'Hủy đặt cọc thành công! Tiền sẽ được hoàn lại trong 3-5 ngày.'
+          : 'Hủy đăng ký thành công!'
+      );
+      await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoadingRegistration(false);
     }
   };
 
@@ -122,9 +172,55 @@ const EventDetailPage = () => {
               </div>
               {isAuthenticated ? (
                 <>
-                  <button className="button button--secondary" onClick={handleRegistration}>Đăng ký ngay</button>
-                  {event.price > 0 && (
-                    <button className="button" onClick={handleDeposit}>Đặt cọc</button>
+                  {registrationStatus?.isRegistered ? (
+                    <>
+                      {registrationStatus.status === 'DEPOSITED' ? (
+                        <>
+                          <button className="button button--success" disabled>
+                            ✓ Đã đặt cọc
+                          </button>
+                          <Link 
+                            to={`/events/${id}/ticket`}
+                            className="button button--secondary"
+                          >
+                            Xem vé của tôi
+                          </Link>
+                          <button 
+                            className="button button--ghost" 
+                            onClick={handleCancelRegistration}
+                            disabled={loadingRegistration}
+                          >
+                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đặt cọc'}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="button button--success" disabled>
+                            ✓ Đã đăng ký
+                          </button>
+                          {event.price > 0 && (
+                            <button className="button" onClick={handleDeposit}>
+                              Đặt cọc
+                            </button>
+                          )}
+                          <button 
+                            className="button button--ghost" 
+                            onClick={handleCancelRegistration}
+                            disabled={loadingRegistration}
+                          >
+                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đăng ký'}
+                          </button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <button 
+                      className="button button--secondary" 
+                      onClick={handleRegistration}
+                      disabled={loadingRegistration}
+                    >
+                      {loadingRegistration ? 'Đang đăng ký...' : 'Đăng ký ngay'}
+                    </button>
                   )}
                 </>
               ) : (

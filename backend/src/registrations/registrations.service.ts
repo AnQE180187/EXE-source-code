@@ -7,6 +7,19 @@ import { User, EventStatus, RegistrationStatus } from '@prisma/client';
 export class RegistrationsService {
   constructor(private prisma: PrismaService) {}
 
+  async getRegistrationStatus(eventId: string, user: User) {
+    const registration = await this.prisma.registration.findUnique({
+      where: { eventId_userId: { eventId, userId: user.id } },
+      select: { status: true, createdAt: true }
+    });
+
+    return {
+      isRegistered: !!registration,
+      status: registration?.status || null,
+      registeredAt: registration?.createdAt || null
+    };
+  }
+
   async create(createRegistrationDto: CreateRegistrationDto, user: User) {
     const { eventId } = createRegistrationDto;
 
