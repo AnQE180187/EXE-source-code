@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getMyEvents } from '../services/userService';
+import { getManagedEvents } from '../services/userService';
 import { getRegistrationsForEvent } from '../services/registrationService';
 import { createEvent, updateEvent, deleteEvent } from '../services/eventService';
 import { PlusCircle, Edit, Trash2, Users, BarChart2, Info, Calendar, MapPin } from 'lucide-react';
@@ -24,9 +24,9 @@ const EventManagerPage = () => {
   const fetchManagedEvents = useCallback(async () => {
     try {
       setLoadingEvents(true);
-      const data = await getMyEvents();
-      setEvents(data.organized || []);
-    } catch {
+      const data = await getManagedEvents();
+      setEvents(data || []);
+    } catch (err) {
       setError('Không thể tải danh sách sự kiện của bạn.');
     } finally {
       setLoadingEvents(false);

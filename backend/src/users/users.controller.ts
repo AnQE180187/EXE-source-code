@@ -10,8 +10,10 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UsersService } from './users.service';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -38,11 +40,19 @@ export class UsersController {
     return this.usersService.findUserWithProfile(user.id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('me/events')
-  getMyEvents(@Req() req: Request) {
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ORGANIZER)
+  @Get('me/managed-events')
+  getMyManagedEvents(@Req() req: Request) {
     const user = req.user as User;
-    return this.usersService.findMyEvents(user.id);
+    return this.usersService.findMyManagedEvents(user.id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/my-events')
+  getMyActivityEvents(@Req() req: Request) {
+    const user = req.user as User;
+    return this.usersService.findUserActivityEvents(user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -267,4 +267,16 @@ export class EventsService {
 
     return { message: 'Event deleted successfully' };
   }
+
+  findManagedByMe(organizer: User) {
+    return this.prisma.event.findMany({
+      where: { organizerId: organizer.id },
+      include: {
+        _count: {
+          select: { registrations: true },
+        },
+      },
+      orderBy: { startAt: 'desc' },
+    });
+  }
 }

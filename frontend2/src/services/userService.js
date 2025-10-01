@@ -20,10 +20,19 @@ export const updateProfile = async (profileData) => {
 
 export const getMyEvents = async () => {
   try {
-    const response = await api.get('/users/me/events');
-    return response.data; // { registered: [], favorited: [], organized: [] }
+    const response = await api.get('/users/me/my-events');
+    return response.data; // { registered: [], favorited: [] }
   } catch (error) {
     throw error.response.data.message || 'Không thể tải danh sách sự kiện.';
+  }
+};
+
+export const getManagedEvents = async () => {
+  try {
+    const response = await api.get('/users/me/managed-events');
+    return response.data;
+  } catch (error) {
+    throw error.response.data.message || 'Không thể tải danh sách sự kiện quản lý.';
   }
 };
 

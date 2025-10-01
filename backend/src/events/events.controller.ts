@@ -25,6 +25,14 @@ export class EventsController {
     return this.eventsService.create(createEventDto, organizer);
   }
 
+  @Get('managed-by-me')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ORGANIZER)
+  findManagedByMe(@Req() req: Request) {
+    const user = req.user as User;
+    return this.eventsService.findManagedByMe(user);
+  }
+
   @Get()
   findAll(@Query() query: { search?: string; price?: string }) {
     return this.eventsService.findAll(query);

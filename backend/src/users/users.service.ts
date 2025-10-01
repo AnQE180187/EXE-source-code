@@ -67,18 +67,8 @@ export class UsersService {
     return user;
   }
 
-  async findMyEvents(userId: string) {
-    const registeredPromise = this.prisma.registration.findMany({
-      where: { userId },
-      include: { event: true },
-    });
-
-    const favoritedPromise = this.prisma.favorite.findMany({
-      where: { userId },
-      include: { event: true },
-    });
-
-    const organizedPromise = this.prisma.event.findMany({
+  findMyManagedEvents(userId: string) {
+    return this.prisma.event.findMany({
       where: { organizerId: userId },
       include: {
         _count: {
@@ -87,19 +77,32 @@ export class UsersService {
       },
       orderBy: { startAt: 'desc' },
     });
+  }
 
-    const [registered, favorited, organized] = await Promise.all([
+  async findUserActivityEvents(userId: string) {
+    const registeredPromise = this.prisma.registration.findMany({
+      where: { userId },
+      include: { event: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const favoritedPromise = this.prisma.favorite.findMany({
+      where: { userId },
+      include: { event: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const [registered, favorited] = await Promise.all([
       registeredPromise,
       favoritedPromise,
-      organizedPromise,
     ]);
 
     return {
       registered: registered.map((r) => r.event),
       favorited: favorited.map((f) => f.event),
-      organized: organized,
     };
   }
+
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
