@@ -38,7 +38,7 @@ const HomePage = () => {
       <section className="hero">
         <div className="hero__content">
           <h1 className="hero__title">
-            Tìm kiếm. Kết nối. <span className="hero__title--highlight">Trải nghiệm.</span>
+            Tìm kiếm - Kết nối - <span className="hero__title--highlight">Trải nghiệm</span>
           </h1>
           <p className="hero__subtitle">
             Khám phá hàng ngàn sự kiện cuối tuần thú vị và tham gia cùng cộng đồng những người cùng sở thích. Cuộc sống là những chuyến đi!
