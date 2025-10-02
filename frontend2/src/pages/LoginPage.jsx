@@ -60,6 +60,9 @@ const LoginPage = () => {
           <p className="login-link">
             Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
           </p>
+          <p className="login-link">
+            Quên mật khẩu? <Link to="/forgot-password">Khôi phục ngay</Link>
+          </p>
         </form>
       </div>
     </div>

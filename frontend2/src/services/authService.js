@@ -25,3 +25,30 @@ export const register = async (userData) => {
 export const logout = () => {
     localStorage.removeItem('token');
 };
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Đã có lỗi xảy ra';
+  }
+};
+
+export const resetPassword = async ({ token, password }) => {
+  try {
+    const response = await api.post('/auth/reset-password', { token, password });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Đã có lỗi xảy ra';
+  }
+};
+
+export const verifyForgotOtp = async ({ email, otp }) => {
+  try {
+    const response = await api.post('/auth/forgot-password/otp', { email, otp });
+    return response.data; // { token }
+  } catch (error) {
+    throw error.response?.data?.message || 'Đã có lỗi xảy ra';
+  }
+};
