@@ -1,41 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { createUpgradeTransaction } from '../services/transactionService';
+import { getProfile } from '../services/userService';
+import { useAuth } from '../context/AuthContext';
 import './MomoPayment.css'; // Reusing styles
 
 const OrganizerPaymentPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, refreshUser } = useAuth();
   const selectedPackage = location.state?.package || { name: 'Gói Tháng', price: '350.000', period: 'tháng' };
 
   const [qrData, setQrData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const checkTimeoutRef = useRef(null);
+  const overallTimeoutRef = useRef(null);
+
+  const stopPolling = useCallback(() => {
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+    }
+    if (overallTimeoutRef.current) {
+      clearTimeout(overallTimeoutRef.current);
+    }
+    console.log("Polling stopped.");
+  }, []);
+
+  const runCheck = useCallback(async () => {
+    if (document.hidden) { // Don't poll if the tab is not active
+      scheduleNextCheck();
+      return;
+    }
+
+    try {
+      console.log("Polling for profile update...");
+      const latestProfile = await getProfile();
+      if (latestProfile.role === 'ORGANIZER') {
+        stopPolling();
+        toast.success('Thanh toán thành công! Tài khoản của bạn đã được nâng cấp.');
+        await refreshUser();
+        navigate('/manage/events');
+      } else {
+        scheduleNextCheck(); // Schedule the next check if not upgraded yet
+      }
+    } catch (pollError) {
+      console.error("Polling error:", pollError);
+      scheduleNextCheck(); // Still schedule the next check even if there was a network error
+    }
+  }, [refreshUser, navigate, stopPolling]);
+
+  const scheduleNextCheck = useCallback(() => {
+    const now = new Date();
+    const currentMinutes = now.getMinutes();
+    const minutesUntilNextMark = 5 - (currentMinutes % 5);
+    
+    const nextMark = new Date(now);
+    nextMark.setMinutes(currentMinutes + minutesUntilNextMark);
+    nextMark.setSeconds(0, 0);
+
+    // Schedule the check 2 seconds after the next 5-minute mark
+    const checkTime = new Date(nextMark.getTime() + 2000);
+    const delay = Math.max(0, checkTime.getTime() - Date.now());
+
+    console.log(`Next check scheduled in ${(delay / 1000).toFixed(1)}s at: ${checkTime.toLocaleTimeString()}`);
+
+    checkTimeoutRef.current = setTimeout(runCheck, delay);
+  }, [runCheck]);
+
   useEffect(() => {
     const generateQrCode = async () => {
       setLoading(true);
       const toastId = toast.loading('Đang tạo mã QR...');
       try {
-        // 1. Create transaction on our backend to get payment details
         const transactionDetails = await createUpgradeTransaction({
           packageName: selectedPackage.name,
           packagePrice: selectedPackage.price,
         });
 
-        // 2. Construct the direct image URL for VietQR
         const { amount, description, bankBin, accountNumber, accountName } = transactionDetails;
-        const template = 'compact'; // Or compact2
+        const template = 'compact';
         const imageUrl = `https://img.vietqr.io/image/${bankBin}-${accountNumber}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
 
-        setQrData({
-          qrUrl: imageUrl,
-          amount,
-          description,
-          accountName,
-        });
+        setQrData({ qrUrl: imageUrl, amount, description, accountName });
+        toast.success('Tạo mã QR thành công! Đang chờ xác nhận thanh toán.', { id: toastId, duration: 5000 });
 
-        toast.success('Tạo mã QR thành công!', { id: toastId });
+        // Start smart polling
+        scheduleNextCheck();
+
+        // Set an overall timeout for polling
+        overallTimeoutRef.current = setTimeout(() => {
+          stopPolling();
+          toast.error('Không nhận được xác nhận thanh toán. Vui lòng đăng nhập lại hoặc liên hệ hỗ trợ.', { duration: 10000 });
+        }, 6 * 60 * 1000); // 6 minutes overall timeout to be safe
+
       } catch (err) {
         const errorMessage = err.toString() || 'Không thể tạo mã thanh toán. Vui lòng thử lại.';
         setError(errorMessage);
@@ -44,8 +104,13 @@ const OrganizerPaymentPage = () => {
       setLoading(false);
     };
 
-    generateQrCode();
-  }, [selectedPackage]);
+    if (user && user.role !== 'ORGANIZER') {
+      generateQrCode();
+    }
+
+    // Cleanup on component unmount
+    return () => stopPolling();
+  }, [selectedPackage, user, scheduleNextCheck, stopPolling]);
 
   return (
     <div className="momo-payment-container">
@@ -85,7 +150,8 @@ const OrganizerPaymentPage = () => {
                 <li>Mở ứng dụng ngân hàng của bạn và chọn tính năng <strong>QR Pay</strong>.</li>
                 <li>Quét mã QR ở trên để thanh toán.</li>
                 <li>Giữ nguyên nội dung chuyển khoản là <strong>{qrData.description}</strong> để được xử lý tự động.</li>
-                <li>Sau khi thanh toán thành công, vai trò của bạn sẽ được <strong>tự động nâng cấp</strong> sau vài phút.</li>
+                <li>Hệ thống sẽ kiểm tra thanh toán sau mỗi 5 phút. Vai trò của bạn sẽ được tự động nâng cấp ngay sau đó.</li>
+                <li style={{ color: '#007bff' }}><strong>Vui lòng không rời khỏi trang này</strong> để hệ thống tự động cập nhật.</li>
               </ol>
             </div>
           </>
