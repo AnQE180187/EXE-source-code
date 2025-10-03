@@ -11,24 +11,61 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const fetchFullUser = async (decodedUser) => {
+      try {
+        const response = await api.get('/users/me');
+        setUser({
+          ...decodedUser,
+          avatarUrl: response.data.profile?.avatarUrl,
+          displayName: response.data.profile?.displayName,
+        });
+      } catch (error) {
+        setUser(decodedUser);
+      } finally {
+        setLoading(false);
+      }
+    };
     if (token) {
       try {
         const decodedUser = jwtDecode(token);
-        setUser(decodedUser);
+        fetchFullUser(decodedUser);
       } catch (error) {
         console.error("Invalid token");
         localStorage.removeItem('token');
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
+
+  // Hàm refreshUser: lấy lại profile từ API và cập nhật avatarUrl vào user context
+  const refreshUser = async () => {
+    try {
+      const response = await api.get('/users/me');
+      // Cập nhật avatarUrl vào user context
+      setUser((prev) => ({ ...prev, avatarUrl: response.data.profile?.avatarUrl }));
+    } catch (error) {
+      // Không cập nhật nếu lỗi
+    }
+  };
 
   const login = async (credentials) => {
     const response = await api.post('/auth/login', credentials);
-    const { accessToken } = response.data; // Corrected from access_token
+    const { accessToken } = response.data;
     localStorage.setItem('token', accessToken);
     const decodedUser = jwtDecode(accessToken);
-    setUser(decodedUser);
+    // Lấy thông tin profile đầy đủ
+    try {
+      const profileRes = await api.get('/users/me');
+      setUser({
+        ...decodedUser,
+        avatarUrl: profileRes.data.profile?.avatarUrl,
+        displayName: profileRes.data.profile?.displayName,
+      });
+    } catch (error) {
+      setUser(decodedUser);
+    }
     return decodedUser;
   };
 
@@ -43,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

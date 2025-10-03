@@ -7,7 +7,7 @@ import { User, Calendar as CalendarIcon, MapPin, Edit3, Save, X } from 'lucide-r
 import './ProfilePage.css';
 
 const ProfilePage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm();
   
   const [isEditMode, setIsEditMode] = useState(false);
@@ -64,6 +64,11 @@ const ProfilePage = () => {
       reset({ ...updatedProfile, dateOfBirth: formatDateForInput(updatedProfile.dateOfBirth) });
       setAvatarPreview(updatedProfile.avatarUrl);
       setIsEditMode(false);
+
+      // Gọi refreshUser để cập nhật avatar ở header
+      if (typeof refreshUser === 'function') {
+        await refreshUser();
+      }
     } catch (error) {
       setApiError(error.toString());
     } finally {
