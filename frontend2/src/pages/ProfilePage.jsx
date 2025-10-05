@@ -7,7 +7,7 @@ import { User, Calendar as CalendarIcon, MapPin, Edit3, Save, X } from 'lucide-r
 import './ProfilePage.css';
 
 const ProfilePage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm();
   
   const [isEditMode, setIsEditMode] = useState(false);
@@ -64,6 +64,11 @@ const ProfilePage = () => {
       reset({ ...updatedProfile, dateOfBirth: formatDateForInput(updatedProfile.dateOfBirth) });
       setAvatarPreview(updatedProfile.avatarUrl);
       setIsEditMode(false);
+
+      // Gọi refreshUser để cập nhật avatar ở header
+      if (typeof refreshUser === 'function') {
+        await refreshUser();
+      }
     } catch (error) {
       setApiError(error.toString());
     } finally {
@@ -142,6 +147,33 @@ const ProfilePage = () => {
             <div className="p-form-group">
               <label htmlFor="city">Thành phố</label>
               <input id="city" {...register('city')} readOnly={!isEditMode} />
+            </div>
+            {/* Phone */}
+            <div className="p-form-group">
+              <label htmlFor="phone">Số điện thoại</label>
+              <input 
+                id="phone" 
+                type="tel" 
+                placeholder="0123456789 (10 số)"
+                {...register('phone', {
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: 'Số điện thoại phải có đúng 10 số'
+                  }
+                })} 
+                readOnly={!isEditMode} 
+              />
+              {errors.phone && <span className="error-text">{errors.phone.message}</span>}
+            </div>
+            {/* Address */}
+            <div className="p-form-group p-form-group-full">
+              <label htmlFor="address">Địa chỉ</label>
+              <input 
+                id="address" 
+                placeholder="Nhập địa chỉ"
+                {...register('address')} 
+                readOnly={!isEditMode} 
+              />
             </div>
             {/* Bio */}
             <div className="p-form-group p-form-group-full">

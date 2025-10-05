@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getEventById, toggleFavorite, deleteEvent } from '../services/eventService';
-import { createRegistration } from '../services/registrationService';
+import { Heart } from 'lucide-react';
+import { getEventById, deleteEvent } from '../services/eventService';
+import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
+import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
 import './EventDetailPage.css';
@@ -16,6 +18,11 @@ const EventDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [loadingRegistration, setLoadingRegistration] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -29,18 +36,83 @@ const EventDetailPage = () => {
     }
   }, [id]);
 
+  const fetchRegistrationStatus = useCallback(async () => {
+    if (!isAuthenticated) {
+      setRegistrationStatus(null);
+      return;
+    }
+    try {
+      const status = await getRegistrationStatus(id);
+      setRegistrationStatus(status);
+    } catch {
+      // If error (like 401), user is not registered
+      setRegistrationStatus({ isRegistered: false, status: null });
+    }
+  }, [id, isAuthenticated]);
+
+  const fetchFavoriteStatus = useCallback(async () => {
+    if (!isAuthenticated) {
+      setIsFavorited(false);
+      return;
+    }
+    try {
+      const status = await getFavoriteStatus(id);
+      setIsFavorited(status.isFavorited || false);
+    } catch {
+      setIsFavorited(false);
+    }
+  }, [id, isAuthenticated]);
+
   useEffect(() => {
     fetchEvent();
   }, [fetchEvent]);
 
+  useEffect(() => {
+    fetchRegistrationStatus();
+  }, [fetchRegistrationStatus]);
+
+  useEffect(() => {
+    fetchFavoriteStatus();
+  }, [fetchFavoriteStatus]);
+
   const handleRegistration = async () => {
     if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
     try {
+      setLoadingRegistration(true);
       await createRegistration(id);
       alert('Đăng ký thành công!');
-      fetchEvent();
-    } catch (err) {
-      alert(err);
+      await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoadingRegistration(false);
+    }
+  };
+
+  const handleCancelRegistration = async () => {
+    if (!isAuthenticated) return;
+    
+    const isConfirmed = window.confirm(
+      registrationStatus.status === 'DEPOSITED' 
+        ? 'Bạn có chắc chắn muốn hủy đặt cọc không? Tiền cọc sẽ được hoàn lại.'
+        : 'Bạn có chắc chắn muốn hủy đăng ký không?'
+    );
+    
+    if (!isConfirmed) return;
+    
+    try {
+      setLoadingRegistration(true);
+      await cancelRegistration(id);
+      alert(
+        registrationStatus.status === 'DEPOSITED' 
+          ? 'Hủy đặt cọc thành công! Tiền sẽ được hoàn lại trong 3-5 ngày.'
+          : 'Hủy đăng ký thành công!'
+      );
+      await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoadingRegistration(false);
     }
   };
 
@@ -49,15 +121,29 @@ const EventDetailPage = () => {
     // Navigate to payment page with event info
     navigate('/payment', { state: { event } });
   };
+
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
+    try {
+      setLoadingFavorite(true);
+      const result = await toggleFavorite(id);
+      setIsFavorited(result.isFavorited);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
   
   const handleDelete = async () => {
     try {
+      setLoadingDelete(true);
       await deleteEvent(id);
-      alert('Đã xóa sự kiện thành công.');
       navigate('/events');
-    } catch (err) {
-      setError('Không thể xóa sự kiện.');
+    } catch (error) {
+      setError('Không thể xóa sự kiện: ' + (error.message || error));
     } finally {
+      setLoadingDelete(false);
       setIsDeleteModalOpen(false);
     }
   };
@@ -87,7 +173,7 @@ const EventDetailPage = () => {
             <span className="event-status">{event.status}</span>
             <h1 className="event-title">{event.title}</h1>
             <div className="organizer-info">
-              <img src={event.organizer.profile?.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} alt={event.organizer.name} className="organizer-avatar" />
+              <img src={event.organizer.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} alt={event.organizer.name} className="organizer-avatar" />
               <span>Tổ chức bởi <strong>{event.organizer.name}</strong></span>
             </div>
           </div>
@@ -120,11 +206,75 @@ const EventDetailPage = () => {
                   <span>{event.price > 0 ? `${event.price.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}</span>
                 </div>
               </div>
+
+              {/* Favorite Button */}
+              {isAuthenticated && (
+                <button
+                  className={`favorite-button ${isFavorited ? 'favorited' : ''}`}
+                  onClick={handleToggleFavorite}
+                  disabled={loadingFavorite}
+                  title={isFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                >
+                  <Heart 
+                    size={20} 
+                    fill={isFavorited ? '#fff' : 'none'} 
+                    color={isFavorited ? '#fff' : '#666'}
+                  />
+                  {loadingFavorite ? '...' : (isFavorited ? 'Đã yêu thích' : 'Yêu thích')}
+                </button>
+              )}
+
               {isAuthenticated ? (
                 <>
-                  <button className="button button--secondary" onClick={handleRegistration}>Đăng ký ngay</button>
-                  {event.price > 0 && (
-                    <button className="button" onClick={handleDeposit}>Đặt cọc</button>
+                  {registrationStatus?.isRegistered ? (
+                    <>
+                      {registrationStatus.status === 'DEPOSITED' ? (
+                        <>
+                          <button className="button button--success" disabled>
+                            ✓ Đã đặt cọc
+                          </button>
+                          <Link 
+                            to={`/events/${id}/ticket`}
+                            className="button button--secondary"
+                          >
+                            Xem vé của tôi
+                          </Link>
+                          <button 
+                            className="button button--ghost" 
+                            onClick={handleCancelRegistration}
+                            disabled={loadingRegistration}
+                          >
+                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đặt cọc'}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="button button--success" disabled>
+                            ✓ Đã đăng ký
+                          </button>
+                          {event.price > 0 && (
+                            <button className="button" onClick={handleDeposit}>
+                              Đặt cọc
+                            </button>
+                          )}
+                          <button 
+                            className="button button--ghost" 
+                            onClick={handleCancelRegistration}
+                            disabled={loadingRegistration}
+                          >
+                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đăng ký'}
+                          </button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <button 
+                      className="button button--secondary" 
+                      onClick={handleRegistration}
+                      disabled={loadingRegistration}
+                    >
+                      {loadingRegistration ? 'Đang đăng ký...' : 'Đăng ký ngay'}
+                    </button>
                   )}
                 </>
               ) : (
@@ -136,7 +286,13 @@ const EventDetailPage = () => {
              {isOrganizer && (
                 <div className="sidebar-card__footer">
                   <Link to={`/events/${id}/edit`} className="button">Chỉnh sửa</Link>
-                  <button className="button button--ghost" onClick={() => setIsDeleteModalOpen(true)}>Xóa</button>
+                  <button 
+                    className="button button--ghost" 
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    disabled={loadingDelete}
+                  >
+                    {loadingDelete ? 'Đang xóa...' : 'Xóa'}
+                  </button>
                 </div>
               )}
           </div>

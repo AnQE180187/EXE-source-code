@@ -11,6 +11,8 @@ import ProtectedRoute from './ProtectedRoute';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import ForgotPasswordPage from '../pages/ForgotPasswordPage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 import ProfilePage from '../pages/ProfilePage';
 import PaymentPage from '../pages/PaymentPage';
 import MyEventsPage from '../pages/MyEventsPage';
@@ -19,6 +21,7 @@ import AboutPage from '../pages/AboutPage';
 // Event Pages
 import EventsPage from '../pages/EventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
+import TicketPage from '../pages/TicketPage';
 
 // Forum Pages
 import ForumPage from '../pages/ForumPage';
@@ -35,9 +38,12 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
+      { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'events/:id', element: <EventDetailPage /> },
+      { path: 'events/:id/ticket', element: <ProtectedRoute><TicketPage /></ProtectedRoute> },
       { path: 'forum', element: <ForumPage /> },
 
       // Protected Routes

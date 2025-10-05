@@ -19,7 +19,8 @@ const PaymentPage = () => {
       // Here, we just simulate it.
       await confirmDeposit(event.id);
       alert('Thanh toán và đặt cọc thành công!');
-      navigate('/my-events');
+      // Navigate to ticket page to show the ticket details
+      navigate(`/events/${event.id}/ticket`);
     } catch (err) {
       setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {

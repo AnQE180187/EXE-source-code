@@ -178,3 +178,195 @@
 }
 .fp-no-results h3 { font-size: 1.2rem; font-weight: 600; color: var(--fp-text-primary); }
 .fp-no-results p { margin-top: 0.5rem; }
+
+/* ========= Mobile Responsive ========= */
+
+/* Tablet */
+@media (max-width: 768px) {
+    .forum-page-container {
+        padding: 1.5rem;
+    }
+    
+    .fp-header h1 {
+        font-size: 2rem;
+    }
+    
+    .fp-header p {
+        font-size: 1rem;
+    }
+    
+    .fp-controls {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .fp-sort-buttons {
+        justify-content: center;
+    }
+    
+    .fp-create-button {
+        align-self: center;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .fp-card {
+        gap: 0.875rem;
+        padding: 1rem;
+    }
+    
+    .fp-author-avatar {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .fp-card-title {
+        font-size: 1.1rem;
+    }
+    
+    .fp-card-stats {
+        gap: 0.75rem;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .forum-page-container {
+        padding: 1rem;
+    }
+    
+    .fp-header {
+        margin-bottom: 2rem;
+    }
+    
+    .fp-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .fp-header p {
+        font-size: 0.95rem;
+    }
+    
+    .fp-controls {
+        margin-bottom: 1.5rem;
+        gap: 0.875rem;
+    }
+    
+    .fp-sort-buttons {
+        padding: 0.2rem;
+        width: 100%;
+    }
+    
+    .fp-sort-buttons button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        flex: 1;
+    }
+    
+    .fp-create-button {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9rem;
+        gap: 0.375rem;
+    }
+    
+    .fp-card {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.875rem;
+        border-radius: 10px;
+    }
+    
+    .fp-card-author {
+        align-self: flex-start;
+    }
+    
+    .fp-author-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .fp-card-main {
+        width: 100%;
+    }
+    
+    .fp-card-title {
+        font-size: 1rem;
+        margin-bottom: 0.625rem;
+    }
+    
+    .fp-card-meta {
+        gap: 0.625rem;
+    }
+    
+    .fp-author-info {
+        font-size: 0.85rem;
+    }
+    
+    .fp-card-tags {
+        gap: 0.375rem;
+    }
+    
+    .fp-tag {
+        padding: 0.2rem 0.625rem;
+        font-size: 0.7rem;
+    }
+    
+    .fp-card-stats {
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--fp-border);
+        margin-top: 0.5rem;
+    }
+    
+    .fp-stat-item {
+        font-size: 0.85rem;
+        gap: 0.375rem;
+    }
+    
+    .fp-message, .fp-no-results {
+        padding: 2.5rem 0.75rem;
+    }
+    
+    .fp-no-results h3 {
+        font-size: 1.1rem;
+    }
+    
+    .fp-no-results p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Extra small mobile */
+@media (max-width: 360px) {
+    .forum-page-container {
+        padding: 0.75rem;
+    }
+    
+    .fp-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .fp-card {
+        padding: 0.75rem;
+    }
+    
+    .fp-author-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .fp-card-title {
+        font-size: 0.95rem;
+    }
+    
+    .fp-sort-buttons button {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .fp-create-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}

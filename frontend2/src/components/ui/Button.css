@@ -29,3 +29,31 @@
 .button.button--secondary:hover {
   background-color: #0e9a6e; /* Darker Green */
 }
+
+/* Success button style */
+.button.button--success {
+  background-color: #22C55E; /* Green */
+  color: #FFFFFF; /* White */
+  cursor: default;
+}
+
+.button.button--success:hover {
+  background-color: #22C55E; /* Same Green - no hover effect for disabled state */
+}
+
+.button.button--success:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+/* Ghost button style */
+.button.button--ghost {
+  background-color: transparent;
+  color: #DC2626; /* Red */
+  border: 1px solid #DC2626;
+}
+
+.button.button--ghost:hover {
+  background-color: #DC2626; /* Red */
+  color: #FFFFFF; /* White */
+}

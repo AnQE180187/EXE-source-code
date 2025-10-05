@@ -27,10 +27,12 @@
 }
 
 .pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: center;
   gap: 2rem;
+  flex-wrap: wrap;
 }
+
 
 .pricing-card {
   background-color: #ffffff;
@@ -63,13 +65,14 @@
   position: absolute;
   top: 1.5rem;
   right: -45px;
-  background-color: #10b981; /* Green accent */
+  background-color: #10b981;
+  /* Green accent */
   color: white;
   padding: 0.5rem 3rem;
   font-weight: 600;
   font-size: 0.875rem;
   transform: rotate(45deg);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .card-header h2 {
@@ -142,13 +145,13 @@
 }
 
 .pricing-card:not(.popular) .btn-subscribe {
-    background-color: #fff;
-    color: #1e40af;
-    border-color: #1e40af;
+  background-color: #fff;
+  color: #1e40af;
+  border-color: #1e40af;
 }
 
 .pricing-card:not(.popular) .btn-subscribe:hover {
-    background-color: #eff6ff;
+  background-color: #eff6ff;
 }
 
 /* Responsive */
@@ -156,10 +159,13 @@
   .pricing-grid {
     grid-template-columns: 1fr;
   }
+
   .pricing-card.popular {
     transform: scale(1);
   }
-  .pricing-card:hover, .pricing-card.popular:hover {
+
+  .pricing-card:hover,
+  .pricing-card.popular:hover {
     transform: translateY(-10px);
   }
 }

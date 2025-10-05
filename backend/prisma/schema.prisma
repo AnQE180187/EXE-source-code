@@ -1,16 +1,238 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model User {
+  id              String          @id @default(uuid())
+  email           String          @unique
+  passwordHash    String?
+  provider        String          @default("local")
+  providerId      String?
+  role            Role            @default(PARTICIPANT)
+  status          AccountStatus   @default(ACTIVE)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  auditLogs       AuditLog[]      @relation("AuditActor")
+  comments        Comment[]
+  waitlists       EventWaitlist[]
+  organizedEvents Event[]         @relation("OrganizerEvents")
+  favorites       Favorite[]
+  notifications   Notification[]
+  posts           Post[]
+  profile         Profile?
+  registrations   Registration[]
+  reports         Report[]
+  transactions    Transaction[]
+  passwordResets  PasswordReset[]
+
+  @@unique([provider, providerId])
+  @@map("users")
 }
 
-// ENUMS based on SRS
+model Profile {
+  userId      String    @id @map("user_id")
+  displayName String    @map("display_name")
+  avatarUrl   String?   @map("avatar_url")
+  city        String?
+  bio         String?
+  interests   Json?
+  dateOfBirth DateTime? @map("date_of_birth")
+  gender      String?
+  address     String?
+  phone       String?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Event {
+  id              String          @id @default(uuid())
+  organizerId     String          @map("organizer_id")
+  title           String
+  slug            String?         @unique
+  description     String
+  locationText    String          @map("location_text")
+  lat             Float?
+  lng             Float?
+  startAt         DateTime        @map("start_at")
+  endAt           DateTime        @map("end_at")
+  price           Float?
+  capacity        Int             @default(0)
+  status          EventStatus     @default(DRAFT)
+  favoritesCount  Int             @default(0) @map("favorites_count")
+  registeredCount Int             @default(0) @map("registered_count")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  imageUrl        String?         @map("image_url")
+  tags            EventTag[]
+  waitlists       EventWaitlist[]
+  organizer       User            @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  favorites       Favorite[]
+  registrations   Registration[]
+  reports         Report[]        @relation("ReportedEvent")
+
+  @@map("events")
+}
+
+model Tag {
+  id     String     @id @default(uuid())
+  name   String     @unique
+  events EventTag[]
+  posts  PostTag[]
+
+  @@map("tags")
+}
+
+model EventTag {
+  eventId String @map("event_id")
+  tagId   String @map("tag_id")
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, tagId])
+  @@map("event_tags")
+}
+
+model Registration {
+  id        String             @id @default(uuid())
+  eventId   String             @map("event_id")
+  userId    String             @map("user_id")
+  status    RegistrationStatus @default(REGISTERED)
+  createdAt DateTime           @default(now()) @map("created_at")
+  event     Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("registrations")
+}
+
+model Favorite {
+  userId    String   @map("user_id")
+  eventId   String   @map("event_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+  @@map("favorites")
+}
+
+model Post {
+  id        String           @id @default(uuid())
+  authorId  String           @map("author_id")
+  title     String
+  content   String
+  status    VisibilityStatus @default(VISIBLE)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  comments  Comment[]
+  tags      PostTag[]
+  author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reports   Report[]         @relation("ReportedPost")
+
+  @@map("posts")
+}
+
+model PostTag {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Comment {
+  id        String           @id @default(uuid())
+  postId    String           @map("post_id")
+  authorId  String           @map("author_id")
+  content   String
+  status    VisibilityStatus @default(VISIBLE)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reports   Report[]         @relation("ReportedComment")
+
+  @@map("comments")
+}
+
+model Report {
+  id              String       @id @default(uuid())
+  reporterId      String       @map("reporter_id")
+  targetEventId   String?      @map("target_event_id")
+  targetPostId    String?      @map("target_post_id")
+  targetCommentId String?      @map("target_comment_id")
+  reason          String
+  status          ReportStatus @default(OPEN)
+  note            String?
+  createdAt       DateTime     @default(now()) @map("created_at")
+  reporter        User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  targetComment   Comment?     @relation("ReportedComment", fields: [targetCommentId], references: [id], onDelete: Cascade)
+  targetEvent     Event?       @relation("ReportedEvent", fields: [targetEventId], references: [id], onDelete: Cascade)
+  targetPost      Post?        @relation("ReportedPost", fields: [targetPostId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      String
+  payload   Json
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model EventWaitlist {
+  id        String   @id @default(uuid())
+  eventId   String   @map("event_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_waitlist")
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  userId      String            @map("user_id")
+  amount      Float
+  description String
+  status      TransactionStatus @default(PENDING)
+  orderCode   String            @unique @map("order_code")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
 enum Role {
   PARTICIPANT
   ORGANIZER
@@ -32,20 +254,20 @@ enum EventStatus {
 
 enum RegistrationStatus {
   REGISTERED
-  DEPOSITED
   CANCELLED
+  DEPOSITED
 }
 
 enum VisibilityStatus {
   VISIBLE
   HIDDEN
 }
+
 enum UserStatus {
   ACTIVE
   INACTIVE
   BANNED
 }
-
 
 enum ReportStatus {
   OPEN
@@ -53,225 +275,25 @@ enum ReportStatus {
   REJECTED
 }
 
-// MODELS based on SRS ERD and DDL
-model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  passwordHash  String?
-  provider      String        @default("local") // local, google, facebook
-  providerId    String?
-  role          Role          @default(PARTICIPANT)
-  status        AccountStatus @default(ACTIVE)
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-
-  profile       Profile?
-  organizedEvents Event[]     @relation("OrganizerEvents")
-  registrations Registration[]
-  favorites     Favorite[]
-  posts         Post[]
-  comments      Comment[]
-  reports       Report[]
-  notifications Notification[]
-  auditLogs     AuditLog[]    @relation("AuditActor")
-  waitlists     EventWaitlist[]
-
-  @@unique([provider, providerId])
-  @@map("users")
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
 
-model Profile {
-  userId      String    @id @map("user_id")
-  displayName String    @map("display_name")
-  avatarUrl   String?   @map("avatar_url")
-  city        String?
-  bio         String?
-  interests   Json?
-  gender      String?   // Add gender
-  dateOfBirth DateTime? @map("date_of_birth") // Add date of birth
+model PasswordReset {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  tokenHash  String?  @map("token_hash")
+  expiresAt  DateTime? @map("expires_at")
+  otpHash    String?  @map("otp_hash")
+  otpExpiresAt DateTime? @map("otp_expires_at")
+  verifiedAt DateTime? @map("verified_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("profiles")
-}
-
-model Event {
-  id              String        @id @default(uuid())
-  organizerId     String        @map("organizer_id")
-  title           String
-  slug            String?       @unique
-  description     String
-  locationText    String        @map("location_text")
-  lat             Float?
-  lng             Float?
-  startAt         DateTime      @map("start_at")
-  endAt           DateTime      @map("end_at")
-  price           Float?
-  capacity        Int           @default(0)
-  status          EventStatus   @default(DRAFT)
-  imageUrl        String?       @map("image_url")
-  favoritesCount  Int           @default(0) @map("favorites_count")
-  registeredCount Int           @default(0) @map("registered_count")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
-
-  organizer       User          @relation("OrganizerEvents", fields: [organizerId], references: [id], onDelete: Restrict)
-  tags            EventTag[]
-  registrations   Registration[]
-  favorites       Favorite[]
-  reports         Report[]      @relation("ReportedEvent")
-  waitlists       EventWaitlist[]
-
-  @@map("events")
-}
-
-model Tag {
-  id        String      @id @default(uuid())
-  name      String      @unique
-
-  events    EventTag[]
-  posts     PostTag[]
-
-  @@map("tags")
-}
-
-model EventTag {
-  eventId String @map("event_id")
-  tagId   String @map("tag_id")
-
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([eventId, tagId])
-  @@map("event_tags")
-}
-
-model Registration {
-  id        String              @id @default(uuid())
-  eventId   String              @map("event_id")
-  userId    String              @map("user_id")
-  status    RegistrationStatus  @default(REGISTERED)
-  createdAt DateTime            @default(now()) @map("created_at")
-
-  event     Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([eventId, userId])
-  @@map("registrations")
-}
-
-model Favorite {
-  userId    String   @map("user_id")
-  eventId   String   @map("event_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@id([userId, eventId])
-  @@map("favorites")
-}
-
-model Post {
-  id        String            @id @default(uuid())
-  authorId  String            @map("author_id")
-  title     String
-  content   String
-  status    VisibilityStatus  @default(VISIBLE)
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @updatedAt @map("updated_at")
-
-  author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  tags      PostTag[]
-  comments  Comment[]
-  reports   Report[]          @relation("ReportedPost")
-
-  @@map("posts")
-}
-
-model PostTag {
-  postId String @map("post_id")
-  tagId  String @map("tag_id")
-
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([postId, tagId])
-  @@map("post_tags")
-}
-
-model Comment {
-  id        String            @id @default(uuid())
-  postId    String            @map("post_id")
-  authorId  String            @map("author_id")
-  content   String
-  status    VisibilityStatus  @default(VISIBLE)
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @updatedAt @map("updated_at")
-
-  post      Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  reports   Report[]          @relation("ReportedComment")
-
-  @@map("comments")
-}
-
-model Report {
-  id              String        @id @default(uuid())
-  reporterId      String        @map("reporter_id")
-  targetEventId   String?       @map("target_event_id")
-  targetPostId    String?       @map("target_post_id")
-  targetCommentId String?       @map("target_comment_id")
-  reason          String
-  status          ReportStatus  @default(OPEN)
-  note            String?
-  createdAt       DateTime      @default(now()) @map("created_at")
-
-  reporter        User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  targetEvent     Event?        @relation("ReportedEvent", fields: [targetEventId], references: [id], onDelete: Cascade)
-  targetPost      Post?         @relation("ReportedPost", fields: [targetPostId], references: [id], onDelete: Cascade)
-  targetComment   Comment?      @relation("ReportedComment", fields: [targetCommentId], references: [id], onDelete: Cascade)
-
-  @@map("reports")
-}
-
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  type      String
-  payload   Json
-  readAt    DateTime? @map("read_at")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-model AuditLog {
-  id          String   @id @default(uuid())
-  actorId     String?  @map("actor_id")
-  action      String
-  entityType  String   @map("entity_type")
-  entityId    String?  @map("entity_id")
-  before      Json?
-  after       Json?
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  actor       User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
-
-  @@map("audit_logs")
-}
-
-model EventWaitlist {
-  id        String   @id @default(uuid())
-  eventId   String   @map("event_id")
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([eventId, userId])
-  @@map("event_waitlist")
+  @@index([userId])
+  @@unique([tokenHash])
+  @@map("password_resets")
 }
