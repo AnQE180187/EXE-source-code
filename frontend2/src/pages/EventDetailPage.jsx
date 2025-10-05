@@ -173,7 +173,7 @@ const EventDetailPage = () => {
             <span className="event-status">{event.status}</span>
             <h1 className="event-title">{event.title}</h1>
             <div className="organizer-info">
-              <img src={event.organizer.profile?.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} alt={event.organizer.name} className="organizer-avatar" />
+              <img src={event.organizer.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} alt={event.organizer.name} className="organizer-avatar" />
               <span>Tổ chức bởi <strong>{event.organizer.name}</strong></span>
             </div>
           </div>
@@ -217,8 +217,8 @@ const EventDetailPage = () => {
                 >
                   <Heart 
                     size={20} 
-                    fill={isFavorited ? '#e74c3c' : 'none'} 
-                    color={isFavorited ? '#e74c3c' : '#666'}
+                    fill={isFavorited ? '#fff' : 'none'} 
+                    color={isFavorited ? '#fff' : '#666'}
                   />
                   {loadingFavorite ? '...' : (isFavorited ? 'Đã yêu thích' : 'Yêu thích')}
                 </button>
