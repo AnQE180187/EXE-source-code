@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogIn, Menu, X } from 'lucide-react';
+import { LogIn, Menu, X, ChevronDown } from 'lucide-react';
 
 import './Header.css';
 
@@ -78,6 +78,10 @@ const Header = () => {
             alt="User Avatar"
             className="profile-menu__avatar"
           />
+          <ChevronDown 
+            size={16} 
+            className={`profile-menu__arrow ${isProfileMenuOpen ? 'profile-menu__arrow--open' : ''}`}
+          />
         </button>
         {isProfileMenuOpen && (
           <div className="profile-menu__dropdown">
@@ -87,6 +91,9 @@ const Header = () => {
             </div>
             <Link to="/profile" className="profile-menu__item" onClick={closeAllMenus}>
               Hồ sơ của tôi
+            </Link>
+            <Link to="/change-password" className="profile-menu__item" onClick={closeAllMenus}>
+              Đổi mật khẩu
             </Link>
             <Link to="/my-events" className="profile-menu__item" onClick={closeAllMenus}>
               Sự kiện của tôi

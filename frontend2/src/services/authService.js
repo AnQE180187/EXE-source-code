@@ -52,3 +52,15 @@ export const verifyForgotOtp = async ({ email, otp }) => {
     throw error.response?.data?.message || 'Đã có lỗi xảy ra';
   }
 };
+
+export const changePassword = async ({ currentPassword, newPassword }) => {
+  try {
+    const response = await api.post('/auth/change-password', { 
+      currentPassword, 
+      newPassword 
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Đã có lỗi xảy ra';
+  }
+};

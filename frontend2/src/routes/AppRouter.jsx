@@ -13,6 +13,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
+import ChangePasswordPage from '../pages/ChangePasswordPage';
 import ProfilePage from '../pages/ProfilePage';
 import PaymentPage from '../pages/PaymentPage';
 import MyEventsPage from '../pages/MyEventsPage';
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProtectedRoute><ProfilePage /></ProtectedRoute>,
+      },
+      {
+        path: 'change-password',
+        element: <ProtectedRoute><ChangePasswordPage /></ProtectedRoute>,
       },
       {
         path: 'my-events',
