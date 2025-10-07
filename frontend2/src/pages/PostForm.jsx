@@ -8,23 +8,25 @@ import './PostForm.css';
 const postSchema = z.object({
   title: z.string().min(5, 'Tiêu đề phải có ít nhất 5 ký tự'),
   content: z.string().min(20, 'Nội dung phải có ít nhất 20 ký tự'),
-  tags: z.string().optional(),
+  forumTags: z.string().optional(),
 });
 
 const PostForm = ({ initialData, onSubmit, isSubmitting, submitButtonText }) => {
 
+  const defaultTagsString = initialData?.forumTags?.map(t => t.tag.name).join(', ') || '';
+
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(postSchema),
-    defaultValues: initialData || { title: '', content: '', tags: '' },
+    defaultValues: initialData ? { title: initialData.title, content: initialData.content, forumTags: defaultTagsString } : { title: '', content: '', forumTags: '' },
   });
 
   const handleFormSubmit = (data) => {
-    let finalData = { ...data };
-    // Convert tags string to array, filtering out empty strings
-    if (finalData.tags) {
-        finalData.tags = finalData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+    const finalData = { title: data.title, content: data.content };
+    // Convert forumTags string to array of names expected by backend
+    if (data.forumTags) {
+      finalData.forumTags = data.forumTags.split(',').map(tag => tag.trim()).filter(Boolean);
     } else {
-        finalData.tags = [];
+      finalData.forumTags = [];
     }
     onSubmit(finalData);
   };
@@ -55,10 +57,10 @@ const PostForm = ({ initialData, onSubmit, isSubmitting, submitButtonText }) => 
       </div>
 
       <div className="post-form-group">
-        <label htmlFor="tags">Tags (phân cách bởi dấu phẩy)</label>
+        <label htmlFor="forumTags">Tags (phân cách bởi dấu phẩy)</label>
         <input 
-          id="tags" 
-          {...register('tags')} 
+          id="forumTags" 
+          {...register('forumTags')} 
           placeholder="VD: tìm bạn, hỏi đáp, chia sẻ"
         />
       </div>

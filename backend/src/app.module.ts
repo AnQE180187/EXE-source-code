@@ -16,6 +16,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { UploadModule } from './upload/upload.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ForumTagsModule } from './forum-tags/forum-tags.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     ReportsModule,
     AuditLogsModule,
     UploadModule,
-    TransactionsModule,
+  TransactionsModule,
+  ForumTagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

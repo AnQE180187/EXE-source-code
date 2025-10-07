@@ -16,5 +16,5 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tags?: string[];
+  forumTags?: string[];
 }
