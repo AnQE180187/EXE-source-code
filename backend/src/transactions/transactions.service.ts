@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User, TransactionStatus } from '@prisma/client';
@@ -25,6 +26,67 @@ export class TransactionsService {
     private usersService: UsersService, // Inject UsersService
     private readonly httpService: HttpService,
   ) {}
+
+  async findAll() {
+    return this.prisma.transaction.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async manuallyConfirmTransaction(transactionId: string) {
+    const pendingTx = await this.prisma.transaction.findFirst({
+      where: {
+        id: transactionId,
+        status: TransactionStatus.PENDING,
+      },
+    });
+
+    if (!pendingTx) {
+      throw new NotFoundException(
+        `Pending transaction with ID ${transactionId} not found.`,
+      );
+    }
+
+    this.logger.log(
+      `Manually processing transaction for order code: ${pendingTx.orderCode}`,
+    );
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        // 1. Upgrade user role
+        await this.usersService.upgradeToOrganizer(pendingTx.userId, tx as any);
+
+        // 2. Update our transaction status to COMPLETED
+        await tx.transaction.update({
+          where: { id: pendingTx.id },
+          data: { status: TransactionStatus.COMPLETED },
+        });
+      });
+      this.logger.log(
+        `Successfully processed and completed order: ${pendingTx.orderCode}`,
+      );
+      return { message: 'Transaction confirmed successfully' };
+    } catch (error) {
+      this.logger.error(
+        `Failed to process transaction ${pendingTx.id} for order ${pendingTx.orderCode}`,
+        error.stack,
+      );
+      // Optionally, update transaction to FAILED
+      await this.prisma.transaction.update({
+        where: { id: pendingTx.id },
+        data: { status: TransactionStatus.FAILED },
+      });
+      throw new InternalServerErrorException('Failed to confirm transaction.');
+    }
+  }
 
   // ... existing createUpgradeTransaction method
   async createUpgradeTransaction(

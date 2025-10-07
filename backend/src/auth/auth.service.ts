@@ -75,17 +75,6 @@ export class AuthService {
     };
   }
 
-  async refreshToken(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
-  }
-
   async validateUser(payload: any) {
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) {

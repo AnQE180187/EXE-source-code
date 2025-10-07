@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { jwtDecode } from 'jwt-decode';
 import { register as registerService } from '../services/authService';
@@ -78,20 +78,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
   };
-
-  const refreshUser = useCallback(async () => {
-    try {
-      const response = await api.post('/auth/refresh');
-      const { accessToken } = response.data;
-      localStorage.setItem('token', accessToken);
-      const decodedUser = jwtDecode(accessToken);
-      setUser(decodedUser);
-      return decodedUser;
-    } catch (error) {
-      console.error("Could not refresh user token", error);
-      logout(); // If refresh fails, log the user out
-    }
-  }, []);
 
   return (
     <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, loading, refreshUser }}>

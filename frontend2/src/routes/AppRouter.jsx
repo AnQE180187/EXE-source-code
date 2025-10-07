@@ -28,6 +28,18 @@ import ForumPage from '../pages/ForumPage';
 import EventManagerPage from '../pages/EventManagerPage';
 import OrganizerPricingPage from '../pages/OrganizerPricingPage';
 import OrganizerPaymentPage from '../pages/OrganizerPaymentPage';
+import { AdminRoute } from './AdminRoute';
+import AdminLayout from '../admin/layouts/AdminLayout';
+import DashboardPage from '../admin/pages/DashboardPage';
+import { Navigate } from 'react-router-dom';
+import UserManagementPage from '../admin/pages/UserManagementPage';
+import ModerationPage from '../admin/pages/ModerationPage';
+import TransactionManagementPage from '../admin/pages/TransactionManagementPage';
+import AdminEventManagementPage from '../admin/pages/AdminEventManagementPage';
+import ReportManagementPage from '../admin/pages/ReportManagementPage';
+import AuditLogsPage from '../admin/pages/AuditLogsPage';
+import SettingsPage from '../admin/pages/SettingsPage';
+
 
 const router = createBrowserRouter([
   {
@@ -70,6 +82,28 @@ const router = createBrowserRouter([
       {
         path: 'organizer-payment',
         element: <ProtectedRoute><OrganizerPaymentPage /></ProtectedRoute>,
+      },
+    ],
+  },
+  // Admin Routes
+  {
+    path: '/admin',
+    element: <AdminRoute />,
+    children: [
+      {
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+          { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'users', element: <UserManagementPage /> },
+          { path: 'moderation', element: <ModerationPage /> },
+          { path: 'transactions', element: <TransactionManagementPage /> },
+          { path: 'events', element: <AdminEventManagementPage /> },
+          { path: 'reports', element: <ReportManagementPage /> },
+          { path: 'audit-logs', element: <AuditLogsPage /> },
+          { path: 'settings', element: <SettingsPage /> },
+          // Add other admin pages here
+        ],
       },
     ],
   },
