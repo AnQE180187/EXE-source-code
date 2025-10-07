@@ -33,6 +33,7 @@ const ForumPage = () => {
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState('newest');
   const [detailPostId, setDetailPostId] = useState(null);
+  const [activeTag, setActiveTag] = useState(null);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,18 +42,28 @@ const ForumPage = () => {
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getPosts();
+      const params = {};
+      if (activeTag) params.tag = activeTag;
+      let data = await getPosts(params);
+      if (activeTag) {
+        const at = activeTag.toLowerCase();
+        data = data.filter(p => (p.forumTags || []).some(ft => (ft.tag?.name || '').toLowerCase() === at));
+      }
       setPosts(data);
     } catch (err) {
       setError(err.toString());
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeTag]);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts, sortOrder]);
+
+  const handleTagClick = (tagName) => {
+    setActiveTag(tagName === activeTag ? null : tagName);
+  };
 
   const handleOpenCreateModal = () => {
     setEditingPost(null);
@@ -125,6 +136,9 @@ const ForumPage = () => {
           <div className="fp-sort-buttons">
               <button className={sortOrder === 'newest' ? 'active' : ''} onClick={() => setSortOrder('newest')}>Mới nhất</button>
               <button className={sortOrder === 'popular' ? 'active' : ''} onClick={() => setSortOrder('popular')}>Phổ biến</button>
+              {activeTag && (
+                <button className="fp-active-tag" onClick={() => setActiveTag(null)}>Tag: {activeTag} ×</button>
+              )}
           </div>
           <button onClick={handleOpenCreateModal} className="fp-create-button">
               <Plus size={20}/>
@@ -146,6 +160,7 @@ const ForumPage = () => {
                 onEditSelect={handleOpenEditModal}
                 currentUserId={user?.sub}
                 onDelete={handleDeleteClick}
+                onTagClick={handleTagClick}
               />
             ))
           ) : (
@@ -174,7 +189,7 @@ const ForumPage = () => {
 };
 
 // PostCard component
-const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId, onDelete }) => {
+const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId, onDelete, onTagClick }) => {
   return (
     <div className="fp-card">
       <div className="fp-card-author">
@@ -192,8 +207,8 @@ const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId, onDelete })
             <span className="fp-time-ago">· {timeSince(post.createdAt)}</span>
           </p>
           <div className="fp-card-tags">
-            {post.tags?.map(({ tag }) => (
-              <span key={tag.id} className="fp-tag">{tag.name}</span>
+            {post.forumTags?.map(({ tag }) => (
+              <button key={tag.id} className="fp-tag" onClick={(e) => { e.stopPropagation(); onTagClick?.(tag.name); }}>{tag.name}</button>
             ))}
           </div>
         </div>

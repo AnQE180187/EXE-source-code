@@ -118,6 +118,13 @@ const ForumDetailModal = ({ postId, onClose }) => {
                     </div>
                 </div>
 
+                {/* Tags */}
+                <div className="fdm-tags" style={{ marginTop: '8px', marginBottom: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {post.forumTags?.map(({ tag }) => (
+                        <span key={tag.id} className="fp-tag">{tag.name}</span>
+                    ))}
+                </div>
+
                 {/* Content */}
                 <div className="fdm-post-body" dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
 
