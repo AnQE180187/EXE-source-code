@@ -14,7 +14,8 @@ services:
         value: "" # <-- IMPORTANT: Paste your deployed backend URL here in the Render dashboard
 
     # Redirect all non-file requests to index.html for client-side routing
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+staticPublishPath: dist
+routes:
+  - type: rewrite
+    source: /*
+    destination: /index.html
