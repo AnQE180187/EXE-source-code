@@ -60,9 +60,19 @@ export class PostsService {
     });
   }
 
-  findAll() {
+  findAll(tag?: string) {
+    const where: any = { status: VisibilityStatus.VISIBLE };
+    if (tag) {
+      where.forumTags = {
+        some: {
+          tag: {
+            name: tag,
+          },
+        },
+      };
+    }
     return this.prisma.post.findMany({
-      where: { status: VisibilityStatus.VISIBLE },
+      where,
       include: {
         author: {
           select: {
@@ -72,11 +82,11 @@ export class PostsService {
               select: {
                 displayName: true,
                 avatarUrl: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
