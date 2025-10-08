@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, MessageSquare } from 'lucide-react';
 import { getEventById, deleteEvent } from '../services/eventService';
 import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
 import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
+import { findOrCreateConversation } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
 import './EventDetailPage.css';
@@ -148,6 +149,22 @@ const EventDetailPage = () => {
     }
   };
 
+  const handleChatWithOrganizer = async () => {
+    if (!isAuthenticated) {
+      return navigate(`/login?redirect=/events/${id}`);
+    }
+    try {
+      const conversation = await findOrCreateConversation(
+        event.id,
+        user.sub,
+        event.organizerId,
+      );
+      navigate(`/chat?conversationId=${conversation.id}`);
+    } catch (error) {
+      alert('Could not start a conversation with the organizer.');
+    }
+  };
+
   if (loading) return <div className="loading-message">Đang tải...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!event) return <div className="no-results">Không tìm thấy sự kiện.</div>;
@@ -175,6 +192,12 @@ const EventDetailPage = () => {
             <div className="organizer-info">
               <img src={event.organizer.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} alt={event.organizer.name} className="organizer-avatar" />
               <span>Tổ chức bởi <strong>{event.organizer.name}</strong></span>
+              {isAuthenticated && !isOrganizer && (
+                <button className="button button--ghost button--icon" onClick={handleChatWithOrganizer}>
+                  <MessageSquare size={18} />
+                  Nhắn tin
+                </button>
+              )}
             </div>
           </div>
           

@@ -43,8 +43,12 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const response = await api.get('/users/me');
-      // Cập nhật avatarUrl vào user context
-      setUser((prev) => ({ ...prev, avatarUrl: response.data.profile?.avatarUrl }));
+      // Cập nhật avatarUrl và displayName vào user context
+      setUser((prev) => ({ 
+        ...prev, 
+        avatarUrl: response.data.profile?.avatarUrl,
+        displayName: response.data.profile?.displayName,
+      }));
     } catch (error) {
       // Không cập nhật nếu lỗi
     }

@@ -16,6 +16,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { UploadModule } from './upload/upload.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuditLogsModule,
     UploadModule,
     TransactionsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

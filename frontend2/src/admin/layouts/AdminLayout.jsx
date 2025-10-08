@@ -1,35 +1,20 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import Sidebar from '../components/common/Sidebar';
+import AdminHeader from '../components/common/AdminHeader';
 
 const AdminLayout = () => {
   return (
-    <div style={{ display: 'flex' }}>
-      <aside style={{ width: '220px', background: '#f4f4f4', padding: '20px', minHeight: '100vh' }}>
-        <h3>Admin Panel</h3>
-        <nav>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '10px' }}>
-              <Link to="/admin/dashboard">Dashboard</Link>
-            </li>
-            <li style={{ marginBottom: '10px' }}>
-              <Link to="/admin/users">User Management</Link>
-            </li>
-            <li style={{ marginBottom: '10px' }}>
-              <Link to="/admin/moderation">Content Moderation</Link>
-            </li>
-            <li style={{ marginBottom: '10px' }}>
-              <Link to="/admin/transactions">Transactions</Link>
-            </li>
-            <li style={{ marginBottom: '10px' }}>
-              <Link to="/admin/events">Event Management</Link>
-            </li>
-            {/* Add other admin links here */}
-          </ul>
-        </nav>
-      </aside>
-      <main style={{ flex: 1, padding: '20px' }}>
-        <Outlet />
-      </main>
+    <div className="flex h-screen bg-gray-50 font-sans">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <AdminHeader />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+          <div className="container mx-auto px-8 py-8">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

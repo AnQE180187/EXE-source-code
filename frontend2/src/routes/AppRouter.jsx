@@ -41,6 +41,8 @@ import AuditLogsPage from '../admin/pages/AuditLogsPage';
 import SettingsPage from '../admin/pages/SettingsPage';
 
 
+import ChatPage from '../pages/ChatPage';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -82,6 +84,10 @@ const router = createBrowserRouter([
       {
         path: 'organizer-payment',
         element: <ProtectedRoute><OrganizerPaymentPage /></ProtectedRoute>,
+      },
+      {
+        path: 'chat',
+        element: <ProtectedRoute><ChatPage /></ProtectedRoute>,
       },
     ],
   },

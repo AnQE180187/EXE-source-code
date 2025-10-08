@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -23,12 +24,15 @@ model User {
   organizedEvents Event[]         @relation("OrganizerEvents")
   favorites       Favorite[]
   notifications   Notification[]
+  passwordResets  PasswordReset[]
   posts           Post[]
   profile         Profile?
   registrations   Registration[]
   reports         Report[]
   transactions    Transaction[]
-  passwordResets  PasswordReset[]
+  sentMessages    Message[]
+  participantConversations Conversation[] @relation("ParticipantConversations")
+  organizerConversations   Conversation[] @relation("OrganizerConversations")
 
   @@unique([provider, providerId])
   @@map("users")
@@ -75,6 +79,7 @@ model Event {
   favorites       Favorite[]
   registrations   Registration[]
   reports         Report[]        @relation("ReportedEvent")
+  conversations   Conversation[]
 
   @@map("events")
 }
@@ -233,6 +238,52 @@ model Transaction {
   @@map("transactions")
 }
 
+model PasswordReset {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  tokenHash    String?   @unique @map("token_hash")
+  expiresAt    DateTime? @map("expires_at")
+  otpHash      String?   @map("otp_hash")
+  otpExpiresAt DateTime? @map("otp_expires_at")
+  verifiedAt   DateTime? @map("verified_at")
+  usedAt       DateTime? @map("used_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model Conversation {
+  id            String    @id @default(uuid())
+  eventId       String
+  participantId String
+  organizerId   String
+  messages      Message[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  event       Event @relation(fields: [eventId], references: [id])
+  participant User  @relation("ParticipantConversations", fields: [participantId], references: [id])
+  organizer   User  @relation("OrganizerConversations", fields: [organizerId], references: [id])
+
+  @@unique([eventId, participantId, organizerId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime     @default(now())
+  isRead         Boolean      @default(false)
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
 enum Role {
   PARTICIPANT
   ORGANIZER
@@ -279,21 +330,4 @@ enum TransactionStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-model PasswordReset {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  tokenHash  String?  @map("token_hash")
-  expiresAt  DateTime? @map("expires_at")
-  otpHash    String?  @map("otp_hash")
-  otpExpiresAt DateTime? @map("otp_expires_at")
-  verifiedAt DateTime? @map("verified_at")
-  usedAt     DateTime? @map("used_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@unique([tokenHash])
-  @@map("password_resets")
 }
