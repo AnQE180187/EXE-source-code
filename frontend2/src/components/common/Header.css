@@ -169,12 +169,40 @@ color: white;
   min-height: 44px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* Đẩy arrow về phía phải */
+  gap: 0.25rem; /* Giảm gap để arrow sát phải hơn */
   transition: background-color 0.2s ease;
 }
 
 .profile-menu__trigger:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.profile-menu__arrow {
+  color: var(--text-light);
+  transition: transform 0.2s ease, color 0.2s ease;
+  margin-left: auto; /* Đẩy arrow về phía phải nhất */
+  flex-shrink: 0; /* Không cho arrow bị co lại */
+}
+
+.profile-menu__arrow--open {
+  transform: rotate(180deg);
+  color: var(--primary-color);
+}
+
+/* Mobile responsive for profile menu arrow */
+@media (max-width: 768px) {
+  .profile-menu__trigger {
+    border-radius: 8px;
+    padding: 0.5rem;
+    gap: 0.25rem;
+    min-width: 60px; /* Tăng width để có chỗ cho arrow */
+  }
+  
+  .profile-menu__arrow {
+    display: block;
+    margin-left: auto; /* Đảm bảo arrow luôn ở phải trên mobile */
+  }
 }
 
 .profile-menu__avatar {
@@ -466,3 +494,18 @@ color: white;
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Đưa mũi tên về bên phải */
+.profile-menu__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Mũi tên sát mép phải */
+.profile-menu__arrow {
+  position: absolute;
+  right: 0;
+  margin-left: auto;
+}

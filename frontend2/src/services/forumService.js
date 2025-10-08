@@ -1,8 +1,8 @@
 import api from './api';
 
-export const getPosts = async () => {
+export const getPosts = async (params = {}) => {
   try {
-    const response = await api.get('/posts');
+    const response = await api.get('/posts', { params });
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || 'Could not fetch posts.';

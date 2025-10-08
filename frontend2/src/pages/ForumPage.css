@@ -1,3 +1,64 @@
+/* ===== Custom Modal for Delete Confirmation ===== */
+.fp-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(30,41,59,0.25); /* slate-800, semi-transparent */
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fp-modal {
+    background: var(--fp-card-bg);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(30,41,59,0.15);
+    padding: 2rem 2.5rem;
+    max-width: 350px;
+    width: 100%;
+    text-align: center;
+}
+
+.fp-modal h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--fp-primary);
+    margin-bottom: 1rem;
+}
+.fp-modal p {
+    color: var(--fp-text-secondary);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+.fp-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+.fp-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.fp-btn--danger {
+    background: #ef4444;
+    color: #fff;
+}
+.fp-btn--danger:hover {
+    background: #dc2626;
+}
+.fp-btn--secondary {
+    background: #f1f5f9;
+    color: var(--fp-text-secondary);
+}
+.fp-btn--secondary:hover {
+    background: var(--fp-border);
+    color: var(--fp-text-primary);
+}
 :root {
     --fp-bg: #f8fafc; /* slate-50 */
     --fp-card-bg: #ffffff;
@@ -137,12 +198,47 @@
 }
 
 .fp-tag {
-    background-color: #f1f5f9;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #f8fafc; /* slate-50 */
     color: var(--fp-text-secondary);
-    padding: 0.25rem 0.75rem;
-    border-radius: 99px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--fp-border);
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    outline: none;
+    user-select: none;
+}
+
+.fp-tag:hover {
+    background-color: #ecfeff; /* cyan-50 */
+    color: #0e7490; /* cyan-700 */
+    border-color: #a5f3fc; /* cyan-200 */
+    box-shadow: 0 2px 6px rgba(14, 116, 144, 0.12);
+}
+
+.fp-tag:focus-visible {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); /* emerald ring */
+    border-color: var(--fp-primary);
+}
+
+/* Active filter chip in controls */
+.fp-active-tag {
+    margin-left: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    border: 1px dashed var(--fp-primary);
+    background: rgba(16,185,129,0.08);
+    color: var(--fp-primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+.fp-active-tag:hover {
+    background: rgba(16,185,129,0.14);
 }
 
 .fp-card-stats {

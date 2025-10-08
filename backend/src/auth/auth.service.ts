@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 import { randomBytes, createHash } from 'crypto';
@@ -176,5 +177,32 @@ export class AuthService {
     ]);
 
     return { message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập.' };
+  }
+
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+    const { currentPassword, newPassword } = changePasswordDto;
+
+    // Get the current user
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Mật khẩu hiện tại không đúng');
+    }
+
+    // Hash the new password
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    // Update the password
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newPasswordHash }
+    });
+
+    return { message: 'Đổi mật khẩu thành công' };
   }
 }

@@ -84,13 +84,31 @@ model Event {
   @@map("events")
 }
 
+
 model Tag {
   id     String     @id @default(uuid())
   name   String     @unique
   events EventTag[]
-  posts  PostTag[]
 
   @@map("tags")
+}
+
+model ForumTag {
+  id   String  @id @default(uuid())
+  name String  @unique
+  posts PostForumTag[]
+
+  @@map("forum_tags")
+}
+
+model PostForumTag {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    ForumTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_forum_tags")
 }
 
 model EventTag {
@@ -127,6 +145,7 @@ model Favorite {
   @@map("favorites")
 }
 
+
 model Post {
   id        String           @id @default(uuid())
   authorId  String           @map("author_id")
@@ -136,22 +155,15 @@ model Post {
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
   comments  Comment[]
-  tags      PostTag[]
+  forumTags PostForumTag[]
   author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reports   Report[]         @relation("ReportedPost")
 
   @@map("posts")
 }
 
-model PostTag {
-  postId String @map("post_id")
-  tagId  String @map("tag_id")
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
-  @@id([postId, tagId])
-  @@map("post_tags")
-}
+// Xóa PostTag vì đã tách tag cho forum
 
 model Comment {
   id        String           @id @default(uuid())
