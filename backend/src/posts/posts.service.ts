@@ -60,9 +60,13 @@ export class PostsService {
     });
   }
 
-  findAll() {
+  findAll(params?: { tag?: string }) {
+    const { tag } = params || {};
     return this.prisma.post.findMany({
-      where: { status: VisibilityStatus.VISIBLE },
+      where: {
+        status: VisibilityStatus.VISIBLE,
+        ...(tag ? { forumTags: { some: { tag: { name: tag } } } } : {}),
+      },
       include: {
         author: {
           select: {
