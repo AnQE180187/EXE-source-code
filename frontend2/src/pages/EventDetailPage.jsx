@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import { getEventById, deleteEvent } from '../services/eventService';
+import { getEventById, deleteEvent, updateEvent } from '../services/eventService';
 import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
 import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
+import EventModal from './EventModal';
 import './EventDetailPage.css';
 import '../components/ui/Button.css';
 
@@ -23,6 +24,7 @@ const EventDetailPage = () => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -148,6 +150,16 @@ const EventDetailPage = () => {
     }
   };
 
+  const handleEditSubmit = async (data) => {
+    try {
+      await updateEvent(id, data);
+      await fetchEvent();
+      setIsEditModalOpen(false);
+    } catch (error) {
+      alert(error);
+    }
+  };
+
   if (loading) return <div className="loading-message">Đang tải...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!event) return <div className="no-results">Không tìm thấy sự kiện.</div>;
@@ -158,13 +170,19 @@ const EventDetailPage = () => {
 
   return (
     <>
+      <EventModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onComplete={handleEditSubmit}
+        initialData={event}
+      />
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
         title="Xác nhận xóa sự kiện"
       >
-        <p>Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.</p>
+        <p>Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.</p>
       </Modal>
 
       <div className="event-detail-page">
@@ -285,7 +303,7 @@ const EventDetailPage = () => {
             </div>
              {isOrganizer && (
                 <div className="sidebar-card__footer">
-                  <Link to={`/events/${id}/edit`} className="button">Chỉnh sửa</Link>
+                  <button onClick={() => setIsEditModalOpen(true)} className="button">Chỉnh sửa</button>
                   <button 
                     className="button button--ghost" 
                     onClick={() => setIsDeleteModalOpen(true)}
