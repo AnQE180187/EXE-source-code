@@ -55,24 +55,18 @@ export class PostsService {
             },
           },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
       },
     });
   }
 
-  findAll(tag?: string) {
-    const where: any = { status: VisibilityStatus.VISIBLE };
-    if (tag) {
-      where.forumTags = {
-        some: {
-          tag: {
-            name: tag,
-          },
-        },
-      };
-    }
+  findAll(params?: { tag?: string }) {
+    const { tag } = params || {};
     return this.prisma.post.findMany({
-      where,
+      where: {
+        status: VisibilityStatus.VISIBLE,
+        ...(tag ? { forumTags: { some: { tag: { name: tag } } } } : {}),
+      },
       include: {
         author: {
           select: {
@@ -108,7 +102,7 @@ export class PostsService {
             },
           },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
         comments: {
           include: {
             author: {
@@ -153,7 +147,7 @@ export class PostsService {
     });
 
     // Xoá tất cả liên kết tag cũ
-  await this.prisma.postForumTag.deleteMany({ where: { postId: id } });
+    await this.prisma.postForumTag.deleteMany({ where: { postId: id } });
 
     // Tạo lại liên kết tag mới
     if (forumTags && forumTags.length > 0) {
@@ -192,7 +186,7 @@ export class PostsService {
             },
           },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
       },
     });
   }

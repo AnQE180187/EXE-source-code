@@ -254,7 +254,31 @@ export class EventsService {
       throw new ForbiddenException('You are not authorized to delete this event');
     }
 
-    await this.prisma.event.delete({ where: { id } });
+    try {
+      // Delete dependent records first to avoid FK violations if DB lacks ON DELETE CASCADE
+      await this.prisma.$transaction([
+        // Clean up possibly unmodeled tables via SQL: delete messages under conversations, then conversations
+        this.prisma.$executeRaw`DELETE FROM "messages" WHERE "conversationId" IN (SELECT id FROM "conversations" WHERE "eventId" = ${id})`,
+        this.prisma.$executeRaw`DELETE FROM "conversations" WHERE "eventId" = ${id}`,
+        this.prisma.registration.deleteMany({ where: { eventId: id } }),
+        this.prisma.favorite.deleteMany({ where: { eventId: id } }),
+        this.prisma.report.deleteMany({ where: { targetEventId: id } }),
+        this.prisma.eventTag.deleteMany({ where: { eventId: id } }),
+        this.prisma.eventWaitlist.deleteMany({ where: { eventId: id } }),
+        this.prisma.event.delete({ where: { id } }),
+      ]);
+    } catch (err: any) {
+      // Map common Prisma errors to clearer messages
+      if (err.code === 'P2003') {
+        // Foreign key violation
+        throw new ForbiddenException('Không thể xóa sự kiện do còn dữ liệu liên quan.');
+      }
+      if (err.code === 'P2025') {
+        // Record not found
+        throw new NotFoundException(`Event with ID "${id}" not found`);
+      }
+      throw err;
+    }
 
     await this.auditLogsService.log(
       user.id,
@@ -265,7 +289,8 @@ export class EventsService {
       null,
     );
 
-    return { message: 'Event deleted successfully' };
+    // Controller uses 204 No Content; return void
+    return;
   }
 
   findManagedByMe(organizer: User) {

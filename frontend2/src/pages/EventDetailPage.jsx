@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, MessageSquare } from 'lucide-react';
-import { getEventById, deleteEvent } from '../services/eventService';
+import { getEventById, deleteEvent, updateEvent } from '../services/eventService';
 import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
 import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
 import { findOrCreateConversation } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
+import EventModal from './EventModal';
 import './EventDetailPage.css';
 import '../components/ui/Button.css';
 
@@ -24,6 +25,7 @@ const EventDetailPage = () => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -92,20 +94,20 @@ const EventDetailPage = () => {
 
   const handleCancelRegistration = async () => {
     if (!isAuthenticated) return;
-    
+
     const isConfirmed = window.confirm(
-      registrationStatus.status === 'DEPOSITED' 
+      registrationStatus.status === 'DEPOSITED'
         ? 'Bạn có chắc chắn muốn hủy đặt cọc không? Tiền cọc sẽ được hoàn lại.'
         : 'Bạn có chắc chắn muốn hủy đăng ký không?'
     );
-    
+
     if (!isConfirmed) return;
-    
+
     try {
       setLoadingRegistration(true);
       await cancelRegistration(id);
       alert(
-        registrationStatus.status === 'DEPOSITED' 
+        registrationStatus.status === 'DEPOSITED'
           ? 'Hủy đặt cọc thành công! Tiền sẽ được hoàn lại trong 3-5 ngày.'
           : 'Hủy đăng ký thành công!'
       );
@@ -135,7 +137,7 @@ const EventDetailPage = () => {
       setLoadingFavorite(false);
     }
   };
-  
+
   const handleDelete = async () => {
     try {
       setLoadingDelete(true);
@@ -165,6 +167,16 @@ const EventDetailPage = () => {
     }
   };
 
+  const handleEditSubmit = async (data) => {
+    try {
+      await updateEvent(id, data);
+      await fetchEvent();
+      setIsEditModalOpen(false);
+    } catch (error) {
+      alert(error);
+    }
+  };
+
   if (loading) return <div className="loading-message">Đang tải...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!event) return <div className="no-results">Không tìm thấy sự kiện.</div>;
@@ -175,13 +187,19 @@ const EventDetailPage = () => {
 
   return (
     <>
+      <EventModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onComplete={handleEditSubmit}
+        initialData={event}
+      />
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
         title="Xác nhận xóa sự kiện"
       >
-        <p>Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.</p>
+        <p>Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.</p>
       </Modal>
 
       <div className="event-detail-page">
@@ -200,7 +218,7 @@ const EventDetailPage = () => {
               )}
             </div>
           </div>
-          
+
           <div className="event-description">
             <h3>Chi tiết sự kiện</h3>
             <p>{event.description}</p>
@@ -238,9 +256,9 @@ const EventDetailPage = () => {
                   disabled={loadingFavorite}
                   title={isFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
                 >
-                  <Heart 
-                    size={20} 
-                    fill={isFavorited ? '#fff' : 'none'} 
+                  <Heart
+                    size={20}
+                    fill={isFavorited ? '#fff' : 'none'}
                     color={isFavorited ? '#fff' : '#666'}
                   />
                   {loadingFavorite ? '...' : (isFavorited ? 'Đã yêu thích' : 'Yêu thích')}
@@ -256,14 +274,14 @@ const EventDetailPage = () => {
                           <button className="button button--success" disabled>
                             ✓ Đã đặt cọc
                           </button>
-                          <Link 
+                          <Link
                             to={`/events/${id}/ticket`}
                             className="button button--secondary"
                           >
                             Xem vé của tôi
                           </Link>
-                          <button 
-                            className="button button--ghost" 
+                          <button
+                            className="button button--ghost"
                             onClick={handleCancelRegistration}
                             disabled={loadingRegistration}
                           >
@@ -280,8 +298,8 @@ const EventDetailPage = () => {
                               Đặt cọc
                             </button>
                           )}
-                          <button 
-                            className="button button--ghost" 
+                          <button
+                            className="button button--ghost"
                             onClick={handleCancelRegistration}
                             disabled={loadingRegistration}
                           >
@@ -291,8 +309,8 @@ const EventDetailPage = () => {
                       )}
                     </>
                   ) : (
-                    <button 
-                      className="button button--secondary" 
+                    <button
+                      className="button button--secondary"
                       onClick={handleRegistration}
                       disabled={loadingRegistration}
                     >
@@ -306,18 +324,18 @@ const EventDetailPage = () => {
                 </Link>
               )}
             </div>
-             {isOrganizer && (
-                <div className="sidebar-card__footer">
-                  <Link to={`/events/${id}/edit`} className="button">Chỉnh sửa</Link>
-                  <button 
-                    className="button button--ghost" 
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    disabled={loadingDelete}
-                  >
-                    {loadingDelete ? 'Đang xóa...' : 'Xóa'}
-                  </button>
-                </div>
-              )}
+            {isOrganizer && (
+              <div className="sidebar-card__footer">
+                <button onClick={() => setIsEditModalOpen(true)} className="button">Chỉnh sửa</button>
+                <button
+                  className="button button--ghost"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  disabled={loadingDelete}
+                >
+                  {loadingDelete ? 'Đang xóa...' : 'Xóa'}
+                </button>
+              </div>
+            )}
           </div>
         </aside>
       </div>
