@@ -6,11 +6,11 @@ import { getProfile } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
 import './MomoPayment.css'; // Reusing styles
 
-const OrganizerPaymentPage = () => {
+const UserPaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
-  const selectedPackage = location.state?.package || { name: 'Gói Tháng', price: '350.000', period: 'tháng' };
+  const selectedPackage = location.state?.package || { name: 'Gói Tiêu Chuẩn', price: '49.000', period: 'tháng' };
 
   const [qrData, setQrData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ const OrganizerPaymentPage = () => {
     if (overallTimeoutRef.current) {
       clearTimeout(overallTimeoutRef.current);
     }
-    console.log("Polling stopped.");
+    console.log("Polling stopped for user feature check.");
   }, []);
 
   const runCheck = useCallback(async () => {
@@ -36,16 +36,12 @@ const OrganizerPaymentPage = () => {
     }
 
     try {
-      console.log("Polling for profile update...");
-      const latestProfile = await getProfile();
-      if (latestProfile.role === 'ORGANIZER') {
-        stopPolling();
-        toast.success('Thanh toán thành công! Tài khoản của bạn đã được nâng cấp.');
-        await refreshUser();
-        navigate('/manage/events');
-      } else {
-        scheduleNextCheck(); // Schedule the next check if not upgraded yet
-      }
+      console.log("Polling for user feature update...");
+      // const latestProfile = await getProfile();
+      // NOTE: The backend needs to add a flag to the user/profile model to confirm payment.
+      // The success condition for user payment is not defined yet.
+      // For now, we will just keep polling.
+      scheduleNextCheck();
     } catch (pollError) {
       console.error("Polling error:", pollError);
       scheduleNextCheck(); // Still schedule the next check even if there was a network error
@@ -53,19 +49,15 @@ const OrganizerPaymentPage = () => {
   }, [refreshUser, navigate, stopPolling]);
 
   const scheduleNextCheck = useCallback(() => {
+    // Smart polling logic (same as organizer payment)
     const now = new Date();
-    const currentMinutes = now.getMinutes();
-    const minutesUntilNextMark = 5 - (currentMinutes % 5);
-    
-    const nextMark = new Date(now);
-    nextMark.setMinutes(currentMinutes + minutesUntilNextMark);
+    const minutesUntilNextMark = 5 - (now.getMinutes() % 5);
+    const nextMark = new Date(now.getTime() + minutesUntilNextMark * 60 * 1000);
     nextMark.setSeconds(0, 0);
-
-    // Schedule the check 2 seconds after the next 5-minute mark
     const checkTime = new Date(nextMark.getTime() + 2000);
     const delay = Math.max(0, checkTime.getTime() - Date.now());
 
-    console.log(`Next check scheduled in ${(delay / 1000).toFixed(1)}s at: ${checkTime.toLocaleTimeString()}`);
+    console.log(`Next user feature check scheduled in ${(delay / 1000).toFixed(1)}s`);
 
     checkTimeoutRef.current = setTimeout(runCheck, delay);
   }, [runCheck]);
@@ -94,7 +86,7 @@ const OrganizerPaymentPage = () => {
         overallTimeoutRef.current = setTimeout(() => {
           stopPolling();
           toast.error('Không nhận được xác nhận thanh toán. Vui lòng đăng nhập lại hoặc liên hệ hỗ trợ.', { duration: 10000 });
-        }, 6 * 60 * 1000); // 6 minutes overall timeout to be safe
+        }, 6 * 60 * 1000); // 6 minutes timeout
 
       } catch (err) {
         const errorMessage = err.toString() || 'Không thể tạo mã thanh toán. Vui lòng thử lại.';
@@ -104,7 +96,7 @@ const OrganizerPaymentPage = () => {
       setLoading(false);
     };
 
-    if (user && user.role !== 'ORGANIZER') {
+    if (user) {
       generateQrCode();
     }
 
@@ -117,7 +109,7 @@ const OrganizerPaymentPage = () => {
       <div className="momo-payment-card">
         <div className="momo-header">
           <img src="/logofreeday.png" alt="FreeDay Logo" className="logo" />
-          <h2>Thanh toán nâng cấp tài khoản</h2>
+          <h2>Thanh toán gói tính năng</h2>
         </div>
 
         {loading ? (
@@ -125,7 +117,7 @@ const OrganizerPaymentPage = () => {
         ) : error ? (
           <div className="payment-error">
             <p>Đã xảy ra lỗi: {error}</p>
-            <Link to="/pricing" className="back-link">Quay lại trang giá</Link>
+            <Link to="/pricing/user" className="back-link">Quay lại trang giá</Link>
           </div>
         ) : qrData ? (
           <>
@@ -150,7 +142,7 @@ const OrganizerPaymentPage = () => {
                 <li>Mở ứng dụng ngân hàng của bạn và chọn tính năng <strong>QR Pay</strong>.</li>
                 <li>Quét mã QR ở trên để thanh toán.</li>
                 <li>Giữ nguyên nội dung chuyển khoản là <strong>{qrData.description}</strong> để được xử lý tự động.</li>
-                <li>Hệ thống sẽ kiểm tra thanh toán sau mỗi 5 phút. Vai trò của bạn sẽ được tự động nâng cấp ngay sau đó.</li>
+                <li>Hệ thống sẽ kiểm tra thanh toán sau mỗi 5 phút. Tính năng sẽ được tự động kích hoạt.</li>
                 <li style={{ color: '#007bff' }}><strong>Vui lòng không rời khỏi trang này</strong> để hệ thống tự động cập nhật.</li>
               </ol>
             </div>
@@ -158,11 +150,11 @@ const OrganizerPaymentPage = () => {
         ) : null}
 
         <div className="footer-links">
-          <Link to="/pricing" className="back-link">Chọn gói khác</Link>
+          <Link to="/pricing/user" className="back-link">Chọn gói khác</Link>
         </div>
       </div>
     </div>
   );
 };
 
-export default OrganizerPaymentPage;
+export default UserPaymentPage;

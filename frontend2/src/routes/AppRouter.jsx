@@ -37,6 +37,8 @@ import UserManagementPage from '../admin/pages/UserManagementPage';
 import ModerationPage from '../admin/pages/ModerationPage';
 import TransactionManagementPage from '../admin/pages/TransactionManagementPage';
 import AdminEventManagementPage from '../admin/pages/AdminEventManagementPage';
+import UserPricingPage from '../pages/UserPricingPage';
+import UserPaymentPage from '../pages/UserPaymentPage';
 import ReportManagementPage from '../admin/pages/ReportManagementPage';
 import AuditLogsPage from '../admin/pages/AuditLogsPage';
 import SettingsPage from '../admin/pages/SettingsPage';
@@ -87,8 +89,16 @@ const router = createBrowserRouter([
         element: <ProtectedRoute><OrganizerPricingPage /></ProtectedRoute>,
       },
       {
+        path: 'pricing/user',
+        element: <ProtectedRoute><UserPricingPage /></ProtectedRoute>,
+      },
+      {
         path: 'organizer-payment',
         element: <ProtectedRoute><OrganizerPaymentPage /></ProtectedRoute>,
+      },
+      {
+        path: 'user-payment',
+        element: <ProtectedRoute><UserPaymentPage /></ProtectedRoute>,
       },
       {
         path: 'chat',

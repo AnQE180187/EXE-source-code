@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +13,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMembershipMenuOpen, setIsMembershipMenuOpen] = useState(false);
 
   const navLinkClass = ({ isActive }) =>
     `nav-link ${isActive ? 'nav-link--active' : ''}`;
@@ -26,6 +28,7 @@ const Header = () => {
   const closeAllMenus = () => {
     setIsMobileMenuOpen(false);
     setIsProfileMenuOpen(false);
+    setIsMembershipMenuOpen(false);
   };
 
   useEffect(() => {
@@ -34,14 +37,16 @@ const Header = () => {
     };
     
     const handleClickOutside = (event) => {
-      // Close mobile menu when clicking outside
       if (isMobileMenuOpen && !event.target.closest('.header__nav--mobile') && !event.target.closest('.header__mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
       
-      // Close profile dropdown when clicking outside
       if (isProfileMenuOpen && !event.target.closest('.profile-menu')) {
         setIsProfileMenuOpen(false);
+      }
+
+      if (isMembershipMenuOpen && !event.target.closest('.membership-menu')) {
+        setIsMembershipMenuOpen(false);
       }
     };
     
@@ -52,7 +57,7 @@ const Header = () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isMobileMenuOpen, isProfileMenuOpen]);
+  }, [isMobileMenuOpen, isProfileMenuOpen, isMembershipMenuOpen]);
 
   const AuthActions = () => {
     if (!isAuthenticated) {
@@ -103,6 +108,11 @@ const Header = () => {
                 Quản lý sự kiện
               </Link>
             )}
+            {user.role !== 'ORGANIZER' && (
+                <Link to="/pricing/user" className="profile-menu__item" onClick={closeAllMenus}>
+                    Nâng cấp tài khoản
+                </Link>
+            )}
             <div className="profile-menu__divider"></div>
             <button onClick={handleLogout} className="profile-menu__item profile-menu__item--logout">
               Đăng xuất
@@ -124,14 +134,29 @@ const Header = () => {
         </NavLink>
       )}
       <NavLink to="/about" className={navLinkClass} onClick={closeMobileMenu}>About Us</NavLink>
-      {isAuthenticated && user.role === 'PARTICIPANT' && (
-        <NavLink 
-          to="/pricing" 
-          className="button-organizer"
-          onClick={closeMobileMenu}
-        >
-          Trở thành Organizer
-        </NavLink>
+      {isAuthenticated && (
+        <div className="profile-menu membership-menu">
+          <button 
+            className="button-organizer"
+            onClick={() => setIsMembershipMenuOpen(!isMembershipMenuOpen)}
+          >
+            Gói thành viên 
+            <ChevronDown 
+              size={16} 
+              className={`profile-menu__arrow ${isMembershipMenuOpen ? 'profile-menu__arrow--open' : ''}`}
+            />
+          </button>
+          {isMembershipMenuOpen && (
+            <div className="profile-menu__dropdown">
+              <Link to="/pricing" className="profile-menu__item" onClick={closeAllMenus}>
+                Tổ chức sự kiện
+              </Link>
+              <Link to="/pricing/user" className="profile-menu__item" onClick={closeAllMenus}>
+                Premium
+              </Link>
+            </div>
+          )}
+        </div>
       )}
       {isAuthenticated && user.role === 'ORGANIZER' && (
         <NavLink 
