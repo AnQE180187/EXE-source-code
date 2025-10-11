@@ -56,7 +56,7 @@ const OrganizerPaymentPage = () => {
     const now = new Date();
     const currentMinutes = now.getMinutes();
     const minutesUntilNextMark = 5 - (currentMinutes % 5);
-    
+
     const nextMark = new Date(now);
     nextMark.setMinutes(currentMinutes + minutesUntilNextMark);
     nextMark.setSeconds(0, 0);
