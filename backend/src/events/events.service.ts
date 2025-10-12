@@ -13,30 +13,55 @@ export class EventsService {
     private auditLogsService: AuditLogsService,
   ) {}
 
-  create(createEventDto: CreateEventDto, organizer: User) {
-    const { tags, ...eventData } = createEventDto;
+  async create(createEventDto: CreateEventDto, organizer: User) {
+    const { tags, imageUrls, ...eventData } = createEventDto as any;
+    const normalizedImages: string[] = Array.isArray(imageUrls)
+      ? imageUrls
+      : (Array.isArray((createEventDto as any).images) ? (createEventDto as any).images : []);
 
-    const eventInput: Prisma.EventCreateInput = {
-      ...eventData,
-      startAt: new Date(eventData.startAt),
-      endAt: new Date(eventData.endAt),
-      organizer: { connect: { id: organizer.id } },
-    };
+    return await this.prisma.$transaction(async (tx) => {
+      const event = await tx.event.create({
+        data: {
+          ...eventData,
+          startAt: new Date(eventData.startAt),
+          endAt: new Date(eventData.endAt),
+          organizer: { connect: { id: organizer.id } },
+          ...(tags && tags.length > 0
+            ? {
+                tags: {
+                  create: tags.map((tagName) => ({
+                    tag: {
+                      connectOrCreate: {
+                        where: { name: tagName },
+                        create: { name: tagName },
+                      },
+                    },
+                  })),
+                },
+              }
+            : {}),
+        },
+      });
 
-    if (tags && tags.length > 0) {
-      eventInput.tags = {
-        create: tags.map(tagName => ({
-          tag: {
-            connectOrCreate: {
-              where: { name: tagName },
-              create: { name: tagName },
-            },
-          },
-        })),
-      };
-    }
+      if (normalizedImages && normalizedImages.length > 0) {
+        console.log('[EventsService.create] images payload count:', normalizedImages.length);
+        await tx.event.update({
+          where: { id: event.id },
+          data: { imageUrl: normalizedImages[0] },
+        });
+        const res = await tx.eventImage.createMany({
+          data: normalizedImages.map((url, index) => ({ eventId: event.id, url, order: index })),
+        });
+        console.log('[EventsService.create] inserted images:', res.count);
+      }
 
-    return this.prisma.event.create({ data: eventInput });
+      return tx.event.findUnique({
+        where: { id: event.id },
+        include: {
+          images: { orderBy: { order: 'asc' }, select: { url: true, order: true } },
+        },
+      });
+    });
   }
 
   findAll(query: { search?: string; price?: string, tag?: string }) {
@@ -117,6 +142,10 @@ export class EventsService {
           },
         },
         tags: { include: { tag: true } }, // Include tags
+        images: {
+          orderBy: { order: 'asc' },
+          select: { url: true, order: true },
+        },
       },
     });
 
@@ -127,6 +156,7 @@ export class EventsService {
     const { organizer, ...rest } = event;
     return {
       ...rest,
+      images: (event as any).images || [],
       organizer: {
         id: organizer.id,
         name: organizer.profile?.displayName || 'Không rõ',
@@ -176,7 +206,10 @@ export class EventsService {
       throw new ForbiddenException('You are not authorized to update this event');
     }
 
-    const { tags, ...eventData } = updateEventDto;
+    const { tags, imageUrls, ...eventData } = updateEventDto as any;
+    const normalizedImages: string[] = Array.isArray(imageUrls)
+      ? imageUrls
+      : (Array.isArray((updateEventDto as any).images) ? (updateEventDto as any).images : []);
     const dataToUpdate: Prisma.EventUpdateInput = { ...eventData };
 
     if (eventData.startAt) dataToUpdate.startAt = new Date(eventData.startAt);
@@ -197,9 +230,22 @@ export class EventsService {
         };
     }
 
-    const updatedEvent = await this.prisma.event.update({
-      where: { id },
-      data: dataToUpdate,
+    const updatedEvent = await this.prisma.$transaction(async (tx) => {
+      if (Array.isArray(normalizedImages)) {
+        console.log('[EventsService.update] images payload count:', normalizedImages.length);
+        await tx.eventImage.deleteMany({ where: { eventId: id } });
+        if (normalizedImages.length > 0) {
+          const res2 = await tx.eventImage.createMany({
+            data: normalizedImages.map((url, index) => ({ eventId: id, url, order: index })),
+          });
+          console.log('[EventsService.update] inserted images:', res2.count);
+          // update primary cover
+          (dataToUpdate as any).imageUrl = normalizedImages[0];
+        } else {
+          (dataToUpdate as any).imageUrl = null;
+        }
+      }
+      return tx.event.update({ where: { id }, data: dataToUpdate });
     });
 
     await this.auditLogsService.log(

@@ -29,8 +29,10 @@ const eventSchema = z.object({
 });
 
 const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Submit' }) => {
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(initialData?.imageUrl || null);
+  const [imageItems, setImageItems] = useState(() => {
+    const existing = (initialData?.images?.map(i => i.url) || initialData?.imageUrls || (initialData?.imageUrl ? [initialData.imageUrl] : []));
+    return (existing || []).map(url => ({ url, isNew: false }));
+  });
   const [uploadError, setUploadError] = useState(null);
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
@@ -47,16 +49,30 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
             endAt: initialData.endAt ? new Date(initialData.endAt).toISOString().slice(0, 16) : '',
             tags: tagsString,
         });
-        setImagePreview(initialData.imageUrl);
+        const existing = (initialData?.images?.map(i => i.url) || initialData?.imageUrls || (initialData?.imageUrl ? [initialData.imageUrl] : []));
+        setImageItems((existing || []).map(url => ({ url, isNew: false })));
     }
   }, [initialData, reset]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+  const handleImagesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length) {
+      const newItems = files.map(f => ({ url: URL.createObjectURL(f), file: f, isNew: true }));
+      setImageItems(prev => [...prev, ...newItems]);
     }
+  };
+
+  const handleRemoveImage = (idx) => {
+    setImageItems(prev => {
+      const next = [...prev];
+      const removed = next[idx];
+      next.splice(idx, 1);
+      // Revoke object URL for new files
+      if (removed?.isNew && removed.url && removed.file) {
+        try { URL.revokeObjectURL(removed.url); } catch {}
+      }
+      return next;
+    });
   };
 
   const handleFormSubmit = async (data) => {
@@ -70,14 +86,27 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
         finalData.tags = [];
     }
 
-    if (imageFile) {
+    const newFiles = imageItems.filter(i => i.isNew && i.file).map(i => i.file);
+    const existingUrls = imageItems.filter(i => !i.isNew).map(i => i.url);
+    if (newFiles && newFiles.length > 0) {
       try {
         const { signature, timestamp, apiKey, cloudName } = await getCloudinarySignature();
-        const cloudinaryResponse = await uploadImage(imageFile, signature, timestamp, apiKey, cloudName);
-        finalData.imageUrl = cloudinaryResponse.secure_url;
+        const uploads = await Promise.all(newFiles.map(f => uploadImage(f, signature, timestamp, apiKey, cloudName)));
+        const newUrls = uploads.map(u => u.secure_url);
+        // Merge existing kept in the UI + newly uploaded (ensure unique order)
+        finalData.imageUrls = [...existingUrls, ...newUrls].filter((v, i, a) => a.indexOf(v) === i);
+        if (finalData.imageUrls.length > 0) {
+          finalData.imageUrl = finalData.imageUrls[0];
+        }
       } catch (error) {
         setUploadError('Lỗi tải ảnh lên. Vui lòng thử lại.');
         return; // Stop submission if image upload fails
+      }
+    } else if (initialData) {
+      // No new uploads: use what's currently in the UI list (existing remaining)
+      if (existingUrls && existingUrls.length > 0) {
+        finalData.imageUrls = existingUrls;
+        finalData.imageUrl = existingUrls[0];
       }
     }
     await onSubmit(finalData);
@@ -115,15 +144,22 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
         {/* Right Column */}
         <div className="form-column">
           <div className="form-group">
-            <label>Ảnh bìa</label>
+            <label>Hình ảnh sự kiện</label>
             <div className="image-preview-wrapper">
-                {imagePreview ? (
-                    <img src={imagePreview} alt="Xem trước ảnh bìa" className="image-preview" />
-                ) : (
-                    <div className="image-placeholder"><span>Chưa có ảnh</span></div>
-                )}
+              {imageItems && imageItems.length > 0 ? (
+                <div className="multi-image-grid">
+                  {imageItems.map((it, idx) => (
+                    <div key={idx} className="multi-image-item">
+                      <img src={it.url} alt={`Ảnh ${idx+1}`} className="image-preview" />
+                      <button type="button" className="remove-image-btn" onClick={() => handleRemoveImage(idx)}>×</button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="image-placeholder"><span>Chưa có ảnh</span></div>
+              )}
             </div>
-            <input id="image" type="file" accept="image/*" onChange={handleImageChange} className="file-input" />
+            <input id="images" type="file" accept="image/*" multiple onChange={handleImagesChange} className="file-input" />
             {uploadError && <p className="error-text">{uploadError}</p>}
           </div>
 

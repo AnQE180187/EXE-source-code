@@ -69,6 +69,7 @@ model Event {
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
   imageUrl        String?         @map("image_url")
+  images          EventImage[]
   tags            EventTag[]
   waitlists       EventWaitlist[]
   organizer       User            @relation("OrganizerEvents", fields: [organizerId], references: [id])
@@ -77,6 +78,18 @@ model Event {
   reports         Report[]        @relation("ReportedEvent")
 
   @@map("events")
+}
+
+model EventImage {
+  id      String @id @default(uuid())
+  eventId String @map("event_id")
+  url     String
+  order   Int    @default(0)
+
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("event_images")
 }
 
 

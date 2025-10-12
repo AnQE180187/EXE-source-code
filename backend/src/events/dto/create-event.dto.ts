@@ -37,6 +37,11 @@ export class CreateEventDto {
   imageUrl?: string;
 
   @IsArray()
+  @IsUrl({}, { each: true })
+  @IsOptional()
+  imageUrls?: string[];
+
+  @IsArray()
   @IsString({ each: true })
   @IsOptional()
   tags?: string[];

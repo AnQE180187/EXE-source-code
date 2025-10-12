@@ -22,7 +22,13 @@ export class EventsController {
   @Roles(Role.ORGANIZER)
   create(@Body() createEventDto: CreateEventDto, @Req() req: Request) {
     const organizer = req.user as User;
-    return this.eventsService.create(createEventDto, organizer);
+    // Ensure imageUrls passes through even if client sends a different field name
+    const rawBody: any = (req as any).body || {};
+    const imageUrls = Array.isArray(rawBody.imageUrls)
+      ? rawBody.imageUrls
+      : (Array.isArray(rawBody.images) ? rawBody.images : undefined);
+    const dto = (imageUrls ? { ...createEventDto, imageUrls } : createEventDto) as any;
+    return this.eventsService.create(dto, organizer);
   }
 
   @Get()
@@ -59,7 +65,12 @@ export class EventsController {
     @Req() req: Request,
   ) {
     const user = req.user as User;
-    return this.eventsService.update(id, updateEventDto, user);
+    const rawBody: any = (req as any).body || {};
+    const imageUrls = Array.isArray(rawBody.imageUrls)
+      ? rawBody.imageUrls
+      : (Array.isArray(rawBody.images) ? rawBody.images : undefined);
+    const dto = (imageUrls ? { ...updateEventDto, imageUrls } : updateEventDto) as any;
+    return this.eventsService.update(id, dto, user);
   }
 
   // New dedicated endpoint for status change

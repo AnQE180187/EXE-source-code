@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getMyEvents } from '../services/userService';
+import { getEventById } from '../services/eventService';
 import { getRegistrationsForEvent } from '../services/registrationService';
 import { createEvent, updateEvent, deleteEvent } from '../services/eventService';
 import { PlusCircle, Edit, Trash2, Users, BarChart2, Info, Calendar, MapPin } from 'lucide-react';
@@ -61,9 +62,16 @@ const EventManagerPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (event) => {
-    setEditingEvent(event);
-    setIsModalOpen(true);
+  const handleOpenEditModal = async (event) => {
+    try {
+      // Fetch full event details to include images, tags, etc.
+      const full = await getEventById(event.id);
+      setEditingEvent(full);
+    } catch (e) {
+      setEditingEvent(event);
+    } finally {
+      setIsModalOpen(true);
+    }
   };
 
   const handleModalClose = () => {

@@ -25,6 +25,8 @@ const EventDetailPage = () => {
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -160,6 +162,34 @@ const EventDetailPage = () => {
     }
   };
 
+  // Gallery helpers
+  const images = React.useMemo(() => {
+    if (!event) return [];
+    // Normalize to array<string> of URLs
+    if (Array.isArray(event.images) && event.images.length > 0) {
+      return event.images.map((img) => (typeof img === 'string' ? img : img?.url)).filter(Boolean);
+    }
+    if (Array.isArray(event.imageUrls) && event.imageUrls.length > 0) return event.imageUrls;
+    return event.imageUrl ? [event.imageUrl] : [];
+  }, [event]);
+
+  const openLightboxAt = (idx) => {
+    setCurrentImageIndex(idx);
+    setIsLightboxOpen(true);
+  };
+
+  const closeLightbox = () => setIsLightboxOpen(false);
+  const showPrev = (e) => {
+    e?.stopPropagation();
+    if (images.length === 0) return;
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+  const showNext = (e) => {
+    e?.stopPropagation();
+    if (images.length === 0) return;
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
   if (loading) return <div className="loading-message">Đang tải...</div>;
   if (error) return <div className="error-message">{error}</div>;
   if (!event) return <div className="no-results">Không tìm thấy sự kiện.</div>;
@@ -204,7 +234,27 @@ const EventDetailPage = () => {
 
         <aside className="event-detail__sidebar">
           <div className="sidebar-card">
-            <img src={event.imageUrl} alt={event.title} className="sidebar-card__image" />
+            {images.length > 0 && (
+              <div className="sidebar-gallery">
+                <img
+                  src={images[0]}
+                  alt={event.title}
+                  className="sidebar-card__image sidebar-card__image--zoomable"
+                  onClick={() => openLightboxAt(0)}
+                  title="Nhấn để phóng to"
+                />
+                {images.length > 1 && (
+                  <div className="sidebar-thumbs">
+                    {images.slice(1, 4).map((url, idx) => (
+                      <img key={idx} src={url} alt={`thumb ${idx+2}`} className="sidebar-thumb" onClick={() => openLightboxAt(idx + 1)} />
+                    ))}
+                    {images.length > 4 && (
+                      <button className="thumb-more" onClick={() => openLightboxAt(4)}>+{images.length - 4}</button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="sidebar-card__content">
               <div className="info-grid">
                 <div className="info-item">
@@ -316,6 +366,25 @@ const EventDetailPage = () => {
           </div>
         </aside>
       </div>
+
+      {/* Lightbox */}
+      {isLightboxOpen && images.length > 0 && (
+        <div className="lightbox-overlay" onClick={closeLightbox}>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={closeLightbox} aria-label="Đóng">×</button>
+            {images.length > 1 && (
+              <>
+                <button className="lightbox-nav lightbox-nav--prev" onClick={showPrev} aria-label="Ảnh trước">‹</button>
+                <button className="lightbox-nav lightbox-nav--next" onClick={showNext} aria-label="Ảnh sau">›</button>
+              </>
+            )}
+            <img src={images[currentImageIndex]} alt={`${event.title} ${currentImageIndex + 1}`} className="lightbox-img" />
+            {images.length > 1 && (
+              <div className="lightbox-counter">{currentImageIndex + 1} / {images.length}</div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };
