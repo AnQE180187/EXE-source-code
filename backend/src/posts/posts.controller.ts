@@ -20,7 +20,7 @@ export class PostsController {
 
   @Get()
   findAll(@Query('tag') tag?: string) {
-    return this.postsService.findAll(tag);
+    return this.postsService.findAll({ tag });
   }
 
   @Get(':id')

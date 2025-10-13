@@ -150,13 +150,18 @@ export class EventsService {
 
     return this.prisma.registration.findMany({
       where: { eventId },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        phone: true, // Include the phone number
         user: {
           select: {
             email: true,
             profile: {
               select: {
                 displayName: true,
+                avatarUrl: true,
               }
             }
           }

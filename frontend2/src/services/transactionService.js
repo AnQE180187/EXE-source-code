@@ -18,3 +18,13 @@ export const createFeatureTransaction = async (packageData) => {
     throw error.response?.data?.message || 'Could not create feature transaction.';
   }
 };
+export const getTransactionStatus = async (orderCode) => {
+  try {
+    const response = await api.get(`/transactions/status/${orderCode}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transaction status:', error);
+    // Return a default/error state if needed, or re-throw
+    throw error;
+  }
+}

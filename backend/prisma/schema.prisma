@@ -122,13 +122,18 @@ model EventTag {
 }
 
 model Registration {
-  id        String             @id @default(uuid())
-  eventId   String             @map("event_id")
-  userId    String             @map("user_id")
-  status    RegistrationStatus @default(REGISTERED)
-  createdAt DateTime           @default(now()) @map("created_at")
+  id            String             @id @default(uuid())
+  eventId       String             @map("event_id")
+  userId        String             @map("user_id")
+  status        RegistrationStatus @default(REGISTERED)
+  createdAt     DateTime           @default(now()) @map("created_at")
+  phone         String?
+  transactionId String?            @unique @map("transaction_id")
+
   event     Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction   Transaction?       @relation(fields: [transactionId], references: [id])
+
 
   @@unique([eventId, userId])
   @@map("registrations")
@@ -237,15 +242,16 @@ model EventWaitlist {
 }
 
 model Transaction {
-  id          String            @id @default(uuid())
-  userId      String            @map("user_id")
-  amount      Float
-  description String
-  status      TransactionStatus @default(PENDING)
-  orderCode   String            @unique @map("order_code")
-  createdAt   DateTime          @default(now()) @map("created_at")
-  updatedAt   DateTime          @updatedAt @map("updated_at")
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String            @id @default(uuid())
+  userId       String            @map("user_id")
+  amount       Float
+  description  String
+  status       TransactionStatus @default(PENDING)
+  orderCode    String            @unique @map("order_code")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registration Registration?
 
   @@map("transactions")
 }
@@ -319,6 +325,7 @@ enum RegistrationStatus {
   REGISTERED
   CANCELLED
   DEPOSITED
+  PENDING
 }
 
 enum VisibilityStatus {

@@ -31,6 +31,11 @@ export class TransactionsController {
     return this.transactionsService.findAll();
   }
 
+  @Get('status/:orderCode')
+  getTransactionStatus(@Param('orderCode') orderCode: string) {
+    return this.transactionsService.getTransactionStatusByOrderCode(orderCode);
+  }
+
   @Patch(':id/confirm')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)

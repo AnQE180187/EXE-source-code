@@ -2,12 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, MessageSquare } from 'lucide-react';
 import { getEventById, deleteEvent, updateEvent } from '../services/eventService';
-import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
+import { createRegistration, getRegistrationStatus, cancelRegistration, initiateDeposit } from '../services/registrationService';
 import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
 import { findOrCreateConversation } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
 import EventModal from './EventModal';
+import DepositModal from './DepositModal'; // Import DepositModal
 import './EventDetailPage.css';
 import '../components/ui/Button.css';
 
@@ -26,6 +27,11 @@ const EventDetailPage = () => {
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // State for deposit flow
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [depositLoading, setDepositLoading] = useState(false);
+
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -119,10 +125,29 @@ const EventDetailPage = () => {
     }
   };
 
+  // Step 1: User clicks "Đặt cọc", open phone number modal
   const handleDeposit = () => {
     if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
-    // Navigate to payment page with event info
-    navigate('/payment', { state: { event } });
+    setIsDepositModalOpen(true);
+  };
+
+  // Step 2: User confirms phone number, call API, and navigate to the QR page
+  const handleConfirmDeposit = async (phone) => {
+    setDepositLoading(true);
+    try {
+      const qrData = await initiateDeposit(id, phone);
+      const fullQrData = {
+        ...qrData,
+        qrUrl: `https://img.vietqr.io/image/${qrData.bankBin}-${qrData.accountNumber}-compact.png?amount=${qrData.amount}&addInfo=${qrData.description}&accountName=${qrData.accountName}`
+      };
+      setIsDepositModalOpen(false);
+      // Navigate to the new page with the data
+      navigate('/payment-qr', { state: { qrData: fullQrData } });
+    } catch (error) {
+      alert(error);
+    } finally {
+      setDepositLoading(false);
+    }
   };
 
   const handleToggleFavorite = async () => {
@@ -202,6 +227,14 @@ const EventDetailPage = () => {
         <p>Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.</p>
       </Modal>
 
+      {/* Add the two modals for the deposit flow */}
+      <DepositModal
+        isOpen={isDepositModalOpen}
+        onClose={() => setIsDepositModalOpen(false)}
+        onConfirm={handleConfirmDeposit}
+        loading={depositLoading}
+      />
+
       <div className="event-detail-page">
         <div className="event-detail__main">
           <div className="event-header">
@@ -266,48 +299,48 @@ const EventDetailPage = () => {
               )}
 
               {isAuthenticated ? (
-                <>
-                  {registrationStatus?.isRegistered ? (
+                registrationStatus?.isRegistered ? (
+                  // User is already registered or has deposited
+                  registrationStatus.status === 'DEPOSITED' ? (
                     <>
-                      {registrationStatus.status === 'DEPOSITED' ? (
-                        <>
-                          <button className="button button--success" disabled>
-                            ✓ Đã đặt cọc
-                          </button>
-                          <Link
-                            to={`/events/${id}/ticket`}
-                            className="button button--secondary"
-                          >
-                            Xem vé của tôi
-                          </Link>
-                          <button
-                            className="button button--ghost"
-                            onClick={handleCancelRegistration}
-                            disabled={loadingRegistration}
-                          >
-                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đặt cọc'}
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button className="button button--success" disabled>
-                            ✓ Đã đăng ký
-                          </button>
-                          {event.price > 0 && (
-                            <button className="button" onClick={handleDeposit}>
-                              Đặt cọc
-                            </button>
-                          )}
-                          <button
-                            className="button button--ghost"
-                            onClick={handleCancelRegistration}
-                            disabled={loadingRegistration}
-                          >
-                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đăng ký'}
-                          </button>
-                        </>
-                      )}
+                      <button className="button button--success" disabled>
+                        ✓ Đã đặt cọc
+                      </button>
+                      <Link to={`/events/${id}/ticket`} className="button button--secondary">
+                        Xem vé của tôi
+                      </Link>
+                      <button
+                        className="button button--ghost"
+                        onClick={handleCancelRegistration}
+                        disabled={loadingRegistration}
+                      >
+                        {loadingRegistration ? 'Đang hủy...' : 'Hủy đặt cọc'}
+                      </button>
                     </>
+                  ) : (
+                    <>
+                      <button className="button button--success" disabled>
+                        ✓ Đã đăng ký
+                      </button>
+                      <button
+                        className="button button--ghost"
+                        onClick={handleCancelRegistration}
+                        disabled={loadingRegistration}
+                      >
+                        {loadingRegistration ? 'Đang hủy...' : 'Hủy đăng ký'}
+                      </button>
+                    </>
+                  )
+                ) : (
+                  // User is not registered, show Deposit or Register button
+                  event.price > 0 ? (
+                    <button
+                      className="button button--primary"
+                      onClick={handleDeposit}
+                      disabled={loadingRegistration || depositLoading}
+                    >
+                      {depositLoading ? 'Đang xử lý...' : (loadingRegistration ? 'Đang xử lý...' : 'Đặt cọc')}
+                    </button>
                   ) : (
                     <button
                       className="button button--secondary"
@@ -316,9 +349,10 @@ const EventDetailPage = () => {
                     >
                       {loadingRegistration ? 'Đang đăng ký...' : 'Đăng ký ngay'}
                     </button>
-                  )}
-                </>
+                  )
+                )
               ) : (
+                // User is not authenticated
                 <Link to={`/login?redirect=/events/${id}`} className="button button--secondary">
                   Đăng nhập để tham gia
                 </Link>

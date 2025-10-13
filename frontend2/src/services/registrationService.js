@@ -44,3 +44,12 @@ export const confirmDeposit = async (eventId) => {
         throw error.response?.data?.message || 'Xác nhận đặt cọc thất bại.';
     }
 };
+
+export const initiateDeposit = async (eventId, phone) => {
+  try {
+    const response = await api.post(`/events/${eventId}/deposit`, { phone });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Không thể bắt đầu quá trình đặt cọc.';
+  }
+};

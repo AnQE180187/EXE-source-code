@@ -44,6 +44,7 @@ import AuditLogsPage from '../admin/pages/AuditLogsPage';
 import SettingsPage from '../admin/pages/SettingsPage';
 
 
+import PaymentQRPage from '../pages/PaymentQRPage';
 import ChatPage from '../pages/ChatPage';
 
 const router = createBrowserRouter([
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: 'payment',
         element: <ProtectedRoute><PaymentPage /></ProtectedRoute>,
+      },
+      {
+        path: 'payment-qr',
+        element: <ProtectedRoute><PaymentQRPage /></ProtectedRoute>,
       },
       {
         path: 'manage/events',

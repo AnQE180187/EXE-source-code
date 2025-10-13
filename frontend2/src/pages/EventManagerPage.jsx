@@ -312,6 +312,7 @@ const EventManagerPage = () => {
                                       <li className="participants-list__header">
                                           <span>Tên người tham gia</span>
                                           <span>Email</span>
+                                          <span>Số điện thoại</span>
                                           <span>Trạng thái</span>
                                       </li>
                                       {registrations.map(reg => (
@@ -321,6 +322,9 @@ const EventManagerPage = () => {
                                               </span>
                                               <span className="participant-email">
                                                 {reg.user.email}
+                                              </span>
+                                              <span className="participant-phone">
+                                                {reg.phone || '-'}
                                               </span>
                                               <span className="participant-status">
                                                 {registrationStatusBadge(reg.status)}
