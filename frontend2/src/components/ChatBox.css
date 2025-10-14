@@ -51,7 +51,183 @@
 }
 
 .message-item.received .message-content {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0;/* ============================
+   ChatBox — Pro Messenger UI
+   ============================ */
+
+:root{
+  --brand:#08BAA1;
+  --brand-700:#0a8a7b;
+
+  --surface:#ffffff;
+  --surface-2:#f6faf9;
+  --border:#e8eef2;
+
+  --text:#0f172a;
+  --muted:#6b7280;
+
+  --bubble-sent:#08BAA1;          /* xanh ngọc */
+  --bubble-recv:#eef6f5;          /* xám xanh nhạt */
+  --shadow-sm:0 6px 16px rgba(2,6,23,.06);
+  --shadow-bubble:0 6px 16px rgba(2,6,23,.10);
+  --ring:0 0 0 3px rgba(8,186,161,.18);
+}
+
+/* Shell */
+.chat-box{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  background: linear-gradient(180deg, #ffffff, #fbfffe);
+  border-left: 1px solid var(--border);
+}
+
+/* Header */
+.chat-header{
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.95), #fff);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: saturate(1.1) blur(4px);
+}
+.chat-header h3{
+  margin:0;
+  font-size:1.05rem;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:.2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Messages list */
+.messages-container{
+  flex:1;
+  padding: 16px 16px 20px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  background:
+    radial-gradient(900px 300px at 100% -10%, rgba(8,186,161,.06), transparent 60%),
+    radial-gradient(800px 260px at 0% 0%, rgba(2,51,52,.05), transparent 60%),
+    linear-gradient(180deg, #fcfffe, #f9fdfc);
+}
+
+/* Scrollbar */
+.messages-container::-webkit-scrollbar{ width: 10px; }
+.messages-container::-webkit-scrollbar-track{ background: transparent; }
+.messages-container::-webkit-scrollbar-thumb{
+  background: #e8f7f3;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Message item */
+.message-item{
+  display:flex;
+  max-width: 76%;
+  width: fit-content;
+  animation: bubbleIn .18s ease-out both;
+  will-change: transform, opacity;
+}
+
+@keyframes bubbleIn{
+  from { opacity: 0; transform: translateY(6px) }
+  to   { opacity: 1; transform: none }
+}
+
+.message-item.sent{
+  align-self:flex-end;
+  flex-direction: row-reverse;
+}
+.message-item.received{
+  align-self:flex-start;
+}
+
+/* Bubble */
+.message-content{
+  position: relative;
+  padding: .7rem .95rem;
+  border-radius: 18px;
+  line-height: 1.45;
+  box-shadow: var(--shadow-bubble);
+  word-break: break-word;
+}
+
+/* Sent bubble */
+.message-item.sent .message-content{
+  background: var(--bubble-sent);
+  color: #fff;
+  border-top-right-radius: 8px;     /* tạo cảm giác “đuôi” bên phải */
+}
+.message-item.sent .message-content::after{
+  content:"";
+  position:absolute; right:-2px; bottom:0;
+  width:10px; height:10px;
+  background: var(--bubble-sent);
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+  filter: drop-shadow(0 1px 0 rgba(2,6,23,.05));
+}
+
+/* Received bubble */
+.message-item.received .message-content{
+  background: var(--bubble-recv);
+  color: var(--text);
+  border-top-left-radius: 8px;      /* “đuôi” bên trái */
+}
+.message-item.received .message-content::after{
+  content:"";
+  position:absolute; left:-2px; bottom:0;
+  width:10px; height:10px;
+  background: var(--bubble-recv);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 1px 0 rgba(2,6,23,.05));
+}
+
+/* Timestamp */
+.message-timestamp{
+  align-self:flex-end;
+  font-size:.72rem;
+  color: var(--muted);
+  margin: 0 .45rem;
+  user-select:none;
+}
+
+/* Grouping: ghép bong bóng cùng phía */
+.message-item.sent + .message-item.sent{ margin-top: 2px; }
+.message-item.sent + .message-item.sent .message-content{
+  border-top-right-radius: 18px;
+}
+.message-item.received + .message-item.received{ margin-top: 2px; }
+.message-item.received + .message-item.received .message-content{
+  border-top-left-radius: 18px;
+}
+
+/* Links/inline elements trong tin nhắn */
+.message-content a{ color:#fff; text-decoration: underline; }
+.message-item.received .message-content a{ color: var(--brand-700); }
+
+/* Error (fallback) */
+.error-message{
+  display:flex; align-items:center; justify-content:center;
+  color:#ef4444; height:100%;
+  font-weight:700;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .message-item{ animation:none !important; }
+}
+
+/* Small devices */
+@media (max-width: 480px){
+  .messages-container{ padding: 12px 10px 16px; }
+  .message-item{ max-width: 84%; }
+}
+
   color: #333;
 }
 

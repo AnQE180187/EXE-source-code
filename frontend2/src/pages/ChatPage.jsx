@@ -14,6 +14,7 @@ const ChatPage = () => {
   const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
   const socketRef = useRef(null);
+  const THEME = 'messenger';
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -23,10 +24,8 @@ const ChatPage = () => {
 
         const conversationId = searchParams.get('conversationId');
         if (conversationId) {
-          const conversation = data.find((c) => c.id === conversationId);
-          if (conversation) {
-            setSelectedConversation(conversation);
-          }
+          const conversation = data.find((c) => String(c.id) === String(conversationId));
+          if (conversation) setSelectedConversation(conversation);
         }
       } catch (err) {
         setError('Could not fetch conversations.');
@@ -38,9 +37,7 @@ const ChatPage = () => {
     fetchConversations();
 
     socketRef.current = io(SOCKET_URL, {
-      auth: {
-        token: localStorage.getItem('token'),
-      },
+      auth: { token: localStorage.getItem('token') },
     });
 
     socketRef.current.on('connect_error', (err) => {
@@ -48,36 +45,30 @@ const ChatPage = () => {
       console.error(err);
     });
 
+    // cập nhật preview của list (giữ 1 message gần nhất)
     socketRef.current.on('message.receive', (newMessage) => {
-      setConversations((prevConversations) =>
-        prevConversations.map((convo) =>
-          convo.id === newMessage.conversationId
-            ? { ...convo, messages: [newMessage] }
-            : convo
+      setConversations((prev) =>
+        prev.map((cv) =>
+          String(cv.id) === String(newMessage.conversationId)
+            ? { ...cv, messages: [newMessage], updatedAt: newMessage.createdAt }
+            : cv
         )
       );
     });
 
-    return () => {
-      socketRef.current.disconnect();
-    };
+    return () => socketRef.current?.disconnect();
   }, [searchParams]);
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
-    socketRef.current.emit('joinRoom', conversation.id);
+    socketRef.current?.emit('joinRoom', conversation.id);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="error-message">{error}</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="chat-page">
+    <div className={`chat-page chat--${THEME}`}>
       <div className="chat-list-container">
         <ChatList
           conversations={conversations}
@@ -93,7 +84,7 @@ const ChatPage = () => {
           />
         ) : (
           <div className="no-conversation-selected">
-            <h2>Select a conversation to start chatting</h2>
+            <h2>Chọn một cuộc trò chuyện để bắt đầu</h2>
           </div>
         )}
       </div>

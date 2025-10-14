@@ -3,12 +3,11 @@ import { Award, Users, Target, Heart, Linkedin, Github } from 'lucide-react';
 import './AboutPage.css';
 
 const teamMembers = [
-  { name: 'Lê Trần Như Thủy', role: 'Leader', imageUrl: 'https://scontent.fdad3-1.fna.fbcdn.net/v/t1.15752-9/552409739_2218357935341645_5380644963875667638_n.jpg?stp=dst-jpg_s2048x2048_tt6&_nc_cat=103&ccb=1-7&_nc_sid=9f807c&_nc_ohc=8uoOPknzryYQ7kNvwGHwOrI&_nc_oc=AdnINZA92hEQLlhxFXTOfes5egbNbPr0_wOV3BwowNNULhd6wi1gcpg0mh7uLtg6-bY&_nc_zt=23&_nc_ht=scontent.fdad3-1.fna&oh=03_Q7cD3QH-ty__c6Q3X9MhryDyNxrVDgHWZrpjQMg8m2g4jJllyQ&oe=68FADED5' },
-  { name: 'Trần Lê Tú Anh', role: 'Member', imageUrl: 'https://scontent.fdad3-1.fna.fbcdn.net/v/t1.15752-9/552670230_721114497650219_5723539380627586731_n.jpg?stp=dst-jpg_s2048x2048_tt6&_nc_cat=110&ccb=1-7&_nc_sid=9f807c&_nc_ohc=wsAvd6dy3dEQ7kNvwG6OHed&_nc_oc=AdnR4lAcwWrU6WNXOBzhtJtX7QOHREk0eaBn3kPek5MsIyF_cQv_55jnuw_bYfxxZyo&_nc_zt=23&_nc_ht=scontent.fdad3-1.fna&oh=03_Q7cD3QFHaiZmmDO8klSY8bUQFBp_wqTtYgx5o_T821rakuS50g&oe=68FAD1E5' },
-  { name: 'Lương Gia Khánh', role: 'Member', imageUrl: 'https://scontent.fdad3-5.fna.fbcdn.net/v/t1.15752-9/516347945_753574907227917_5277974139696306356_n.jpg?stp=dst-jpg_s2048x2048_tt6&_nc_cat=102&ccb=1-7&_nc_sid=9f807c&_nc_ohc=YewxDEvCLA4Q7kNvwG8ZRYc&_nc_oc=AdmxpaaxtzfmoiltvKn7vcXFkYGK9W0L1A0sbPlq0XCOLy_O-9zFfSL_PxkSylKo0hI&_nc_zt=23&_nc_ht=scontent.fdad3-5.fna&oh=03_Q7cD3QGxAiR1gU0TfholZsHfsYmEJBKZ8zu1WPbGEhU1Vq9E7w&oe=68FACDC7' },
-  { name: 'Lê Anh Khôi', role: 'Member', imageUrl: 'https://scontent.fdad3-1.fna.fbcdn.net/v/t1.15752-9/552306879_793330349722485_5417145740558258876_n.jpg?stp=dst-jpg_s2048x2048_tt6&_nc_cat=108&ccb=1-7&_nc_sid=9f807c&_nc_ohc=SggYIrRgVqQQ7kNvwF8fn_r&_nc_oc=AdmUic9mq8OsoSQdv6fiy9l_2qk8BFrwCOdgz_zAgtZIXBqEkVQ7a376bm3aVv9reYA&_nc_zt=23&_nc_ht=scontent.fdad3-1.fna&oh=03_Q7cD3QFcH7ANb9QnZboXm8LrSb_56DXr_c1tyifIyhsLV6559Q&oe=68FAD462' },
-  { name: 'Hoàng Lê Quý An', role: 'Member', imageUrl: 'https://scontent.fdad3-4.fna.fbcdn.net/v/t1.15752-9/552085109_1848770599405288_2568185155500540463_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=9f807c&_nc_ohc=EeoO3l-PjJEQ7kNvwGnBUx4&_nc_oc=AdmCVb1rT1rbRpYOK6zJVyZqYsTff_YAsZ3jfiNxzTr8meNKLGBhuAJ3WRl3_ZyoEGw&_nc_zt=23&_nc_ht=scontent.fdad3-4.fna&oh=03_Q7cD3QEDpHR2UV8Z9nsQplWVQMrxS2TLFuj8hHe_R6Y8f_604A&oe=68FAE534' },
-  { name: 'Cao Phan Thanh Phong', role: 'Member', imageUrl: 'https://scontent.fdad3-5.fna.fbcdn.net/v/t1.15752-9/552601470_1127968402850651_7301695821784219406_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=9f807c&_nc_ohc=b_bx1a6RYO0Q7kNvwGnak2N&_nc_oc=Adm3vZH5t1YYHwy7p79Q0JvIFQvxptju0PxQT2d-NZmW-lg7IaHKbGA2HyhcC84E2Fw&_nc_zt=23&_nc_ht=scontent.fdad3-5.fna&oh=03_Q7cD3QHoWknq8v-gLv6KKIIyZ18wuiF19UZ_MNVBraIslEF6bQ&oe=68FAB549' },
+  { name: 'Hoàng Lê Quý An', role: 'Leader',  imageUrl: '' },
+  { name: 'Nguyễn Trần Quang Nhật', role: 'Member', imageUrl: '' },
+  { name: 'Lương Gia Khánh', role: 'Member', imageUrl: '' },
+  { name: 'Lê Anh Khôi', role: 'Member', imageUrl: '' },
+  { name: 'Nguyễn Đăng Nhân', role: 'Member', imageUrl: '' },
 ];
 
 const AboutPage = () => {
@@ -45,13 +44,13 @@ const AboutPage = () => {
         <div className="team-grid">
           {teamMembers.map((member, index) => (
             <div key={index} className="team-member-card">
-              <img src={member.imageUrl} alt={member.name} className="team-member__image" />
+              {/* <img src={member.imageUrl} alt={member.name} className="team-member__image" /> */}
               <h3 className="team-member__name">{member.name}</h3>
               <p className="team-member__role">{member.role}</p>
-              <div className="team-member__socials">
+              {/* <div className="team-member__socials">
                 <a href="#"><Github size={18} /></a>
                 <a href="#"><Linkedin size={18} /></a>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
