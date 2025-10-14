@@ -623,7 +623,80 @@ header img, .navbar img {
   }
   
   .cta-section__subtitle {
-    font-size: 1rem;
+    font-size: 1rem;/* ================= Animations & Motion (non-intrusive) ================= */
+
+/* Page fade-in on mount */
+.page-fade { animation: pageIn .4s ease-out both; }
+@keyframes pageIn { from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* Reveal base */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+.fade-up { }
+.fade-right { transform: translateX(-16px); }
+.fade-right.in { transform: none; }
+
+.zoom-in { transform: scale(.96); }
+.zoom-in.in { transform: scale(1); }
+
+.small-stagger { will-change: transform, opacity; }
+
+/* Buttons micro-interaction */
+.btn-press { transition: transform .12s ease, box-shadow .2s ease; }
+.btn-press:active { transform: translateY(1px) scale(.995); }
+
+/* Card hover lift used in forum preview links */
+.hover-lift { transition: transform .22s ease, box-shadow .22s ease; }
+.hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(8,186,161,.16); }
+
+/* Hero subtle parallax for image inside cards (desktop only) */
+@media (min-width: 1024px) {
+  .parallax-img { transition: transform .6s ease; transform-origin: center center; }
+  .event-card:hover .parallax-img { transform: scale(1.06) translateY(-2px); }
+}
+
+/* Floating icon loop on steps (very gentle) */
+.float-pop { animation: floatPop 3s ease-in-out infinite; }
+@keyframes floatPop {
+  0%,100% { transform: translateY(0) }
+  50%     { transform: translateY(-6px) }
+}
+
+/* CTA gradient shine sweep */
+.gradient-shine {
+  position: relative;
+  overflow: hidden;
+}
+.gradient-shine::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.18) 40%, transparent 60%);
+  transform: translateX(-120%);
+  animation: shine 5.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes shine { 0%{ transform:translateX(-120%) } 60%{ transform:translateX(120%) } 100%{ transform:translateX(120%) } }
+
+/* Section headings slight rise */
+.section-heading.reveal { transform: translateY(10px); }
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .page-fade, .reveal, .float-pop, .gradient-shine::after { animation: none !important; transition: none !important; }
+}
+
+/* Optional: subtle 3D tilt on event cards (desktop) */
+@media (min-width: 1024px){
+  .event-card{
+    perspective: 900px;
+    transform-style: preserve-3d;
+  }
+  .event-card:hover{
+    transform: translateY(-6px) rotateX(1.2deg);
+  }
+}
+
     line-height: 1.6;
     margin-bottom: 1.5rem;
   }
@@ -631,7 +704,8 @@ header img, .navbar img {
   .cta-section__button {
     width: 100%;
     max-width: 280px;
-    padding: 1rem 1.5rem;
+    padding: 10px;
+    justify-content: center;
   }
 }
 
@@ -658,5 +732,78 @@ header img, .navbar img {
     max-width: 260px;
     padding: 0.875rem 1.25rem;
     font-size: 0.9rem;
+  }
+}
+/* ================= Animations & Motion (non-intrusive) ================= */
+
+/* Page fade-in on mount */
+.page-fade { animation: pageIn .4s ease-out both; }
+@keyframes pageIn { from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* Reveal base */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+.fade-up { }
+.fade-right { transform: translateX(-16px); }
+.fade-right.in { transform: none; }
+
+.zoom-in { transform: scale(.96); }
+.zoom-in.in { transform: scale(1); }
+
+.small-stagger { will-change: transform, opacity; }
+
+/* Buttons micro-interaction */
+.btn-press { transition: transform .12s ease, box-shadow .2s ease; }
+.btn-press:active { transform: translateY(1px) scale(.995); }
+
+/* Card hover lift used in forum preview links */
+.hover-lift { transition: transform .22s ease, box-shadow .22s ease; }
+.hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(8,186,161,.16); }
+
+/* Hero subtle parallax for image inside cards (desktop only) */
+@media (min-width: 1024px) {
+  .parallax-img { transition: transform .6s ease; transform-origin: center center; }
+  .event-card:hover .parallax-img { transform: scale(1.06) translateY(-2px); }
+}
+
+/* Floating icon loop on steps (very gentle) */
+.float-pop { animation: floatPop 3s ease-in-out infinite; }
+@keyframes floatPop {
+  0%,100% { transform: translateY(0) }
+  50%     { transform: translateY(-6px) }
+}
+
+/* CTA gradient shine sweep */
+.gradient-shine {
+  position: relative;
+  overflow: hidden;
+}
+.gradient-shine::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.18) 40%, transparent 60%);
+  transform: translateX(-120%);
+  animation: shine 5.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes shine { 0%{ transform:translateX(-120%) } 60%{ transform:translateX(120%) } 100%{ transform:translateX(120%) } }
+
+/* Section headings slight rise */
+.section-heading.reveal { transform: translateY(10px); }
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .page-fade, .reveal, .float-pop, .gradient-shine::after { animation: none !important; transition: none !important; }
+}
+
+/* Optional: subtle 3D tilt on event cards (desktop) */
+@media (min-width: 1024px){
+  .event-card{
+    perspective: 900px;
+    transform-style: preserve-3d;
+  }
+  .event-card:hover{
+    transform: translateY(-6px) rotateX(1.2deg);
   }
 }

@@ -128,7 +128,7 @@ const ForumPage = () => {
 
       <div className="forum-page-container">
         <div className="fp-header">
-          <h1>Diễn đàn cộng đồng</h1>
+          <h1>Diễn Đàn Cộng Đồng</h1>
           <p>Nơi chia sẻ, hỏi đáp và tìm bạn đồng hành cho các sự kiện sắp tới.</p>
         </div>
 

@@ -48,10 +48,10 @@ const AboutPage = () => {
               <img src={member.imageUrl} alt={member.name} className="team-member__image" />
               <h3 className="team-member__name">{member.name}</h3>
               <p className="team-member__role">{member.role}</p>
-              <div className="team-member__socials">
+              {/* <div className="team-member__socials">
                 <a href="#"><Github size={18} /></a>
                 <a href="#"><Linkedin size={18} /></a>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
