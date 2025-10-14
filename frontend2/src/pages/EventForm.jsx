@@ -23,6 +23,8 @@ const eventSchema = z.object({
   ),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'CANCELLED']),
   tags: z.string().optional(), // Tags will be a comma-separated string
+  lat: z.preprocess((a) => a === '' || a === undefined ? undefined : parseFloat(String(a)), z.number().min(-90, 'Vĩ độ không hợp lệ').max(90, 'Vĩ độ không hợp lệ').optional()),
+  lng: z.preprocess((a) => a === '' || a === undefined ? undefined : parseFloat(String(a)), z.number().min(-180, 'Kinh độ không hợp lệ').max(180, 'Kinh độ không hợp lệ').optional()),
 }).refine(data => new Date(data.endAt) > new Date(data.startAt), {
   message: 'Thời gian kết thúc phải sau thời gian bắt đầu',
   path: ['endAt'],
@@ -32,20 +34,23 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(initialData?.imageUrl || null);
   const [uploadError, setUploadError] = useState(null);
+  const [geocoding, setGeocoding] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm({
     resolver: zodResolver(eventSchema),
     defaultValues: { status: 'DRAFT', price: 0, capacity: 10, tags: '' },
   });
 
   useEffect(() => {
     if (initialData) {
-        const tagsString = initialData.tags?.map(t => t.tag.name).join(', ') || '';
+    const tagsString = initialData.tags?.map(t => t.tag.name).join(', ') || '';
         reset({
             ...initialData,
             startAt: initialData.startAt ? new Date(initialData.startAt).toISOString().slice(0, 16) : '',
             endAt: initialData.endAt ? new Date(initialData.endAt).toISOString().slice(0, 16) : '',
             tags: tagsString,
+      lat: initialData.lat ?? '',
+      lng: initialData.lng ?? '',
         });
         setImagePreview(initialData.imageUrl);
     }
@@ -83,6 +88,33 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
     await onSubmit(finalData);
   };
 
+  const locationValue = watch('locationText');
+  const latValue = watch('lat');
+  const lngValue = watch('lng');
+
+  const handleGeocode = async () => {
+    if (!locationValue) return;
+    try {
+      setGeocoding(true);
+      // Use Nominatim (OpenStreetMap) for free geocoding (no key). Simple fetch on the client.
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationValue)}`, {
+        headers: { 'Accept-Language': 'vi' }
+      });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const { lat, lon } = data[0];
+        setValue('lat', parseFloat(lat));
+        setValue('lng', parseFloat(lon));
+      } else {
+        alert('Không tìm thấy vị trí. Hãy thử mô tả địa chỉ chi tiết hơn.');
+      }
+    } catch (e) {
+      alert('Lỗi tìm kiếm vị trí.');
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="event-form">
       <div className="form-grid">
@@ -104,6 +136,40 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
             <label htmlFor="locationText">Địa điểm</label>
             <input id="locationText" {...register('locationText')} className={errors.locationText ? 'input-error' : ''} />
             {errors.locationText && <p className="error-text">{errors.locationText.message}</p>}
+            <div className="inline-group" style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+              <button type="button" className="button button--secondary" onClick={handleGeocode} disabled={geocoding}>
+                {geocoding ? 'Đang tìm vị trí...' : 'Lấy tọa độ từ địa chỉ'}
+              </button>
+              <span style={{ alignSelf: 'center', color: '#666' }}>hoặc nhập tay</span>
+            </div>
+            <div className="form-group-row" style={{ marginTop: 8 }}>
+              <div className="form-group">
+                <label htmlFor="lat">Vĩ độ (lat)</label>
+                <input id="lat" type="number" step="0.000001" {...register('lat')} className={errors.lat ? 'input-error' : ''} />
+                {errors.lat && <p className="error-text">{errors.lat.message}</p>}
+              </div>
+              <div className="form-group">
+                <label htmlFor="lng">Kinh độ (lng)</label>
+                <input id="lng" type="number" step="0.000001" {...register('lng')} className={errors.lng ? 'input-error' : ''} />
+                {errors.lng && <p className="error-text">{errors.lng.message}</p>}
+              </div>
+            </div>
+            {(latValue !== undefined && latValue !== '' && lngValue !== undefined && lngValue !== '') && (
+              <div style={{ marginTop: 8 }}>
+                <label>Bản đồ xem trước</label>
+                <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #eee' }}>
+                  <iframe
+                    title="map-preview"
+                    width="100%"
+                    height="240"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps?q=${latValue},${lngValue}&output=embed`}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
            <div className="form-group">

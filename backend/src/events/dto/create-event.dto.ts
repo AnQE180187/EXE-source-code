@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsDateString, IsOptional, IsInt, IsNumber, Min, IsArray, IsUrl } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, IsOptional, IsInt, IsNumber, Min, Max, IsArray, IsUrl } from 'class-validator';
 import { EventStatus } from '@prisma/client';
 
 export class CreateEventDto {
@@ -40,4 +40,17 @@ export class CreateEventDto {
   @IsString({ each: true })
   @IsOptional()
   tags?: string[];
+
+  // Optional coordinates for map display
+  @IsNumber()
+  @IsOptional()
+  @Min(-90)
+  @Max(90)
+  lat?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(-180)
+  @Max(180)
+  lng?: number;
 }

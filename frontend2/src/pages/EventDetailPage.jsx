@@ -255,6 +255,33 @@ const EventDetailPage = () => {
           <div className="event-description">
             <h3>Chi tiết sự kiện</h3>
             <p>{event.description}</p>
+            {/* Map section */}
+            <div style={{ marginTop: 16 }}>
+              <h4>Vị trí trên bản đồ</h4>
+              <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #eee' }}>
+                {event.lat != null && event.lng != null ? (
+                  <iframe
+                    title="event-map"
+                    width="100%"
+                    height="360"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps?q=${event.lat},${event.lng}&output=embed`}
+                  />
+                ) : (
+                  <iframe
+                    title="event-map"
+                    width="100%"
+                    height="360"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(event.locationText)}&output=embed`}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
