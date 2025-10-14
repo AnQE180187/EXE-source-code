@@ -150,7 +150,8 @@ const OrganizerPaymentPage = () => {
                 <li>Mở ứng dụng ngân hàng của bạn và chọn tính năng <strong>QR Pay</strong>.</li>
                 <li>Quét mã QR ở trên để thanh toán.</li>
                 <li>Giữ nguyên nội dung chuyển khoản là <strong>{qrData.description}</strong> để được xử lý tự động.</li>
-                <li>Hệ thống sẽ kiểm tra thanh toán sau mỗi 5 phút. Vai trò của bạn sẽ được tự động nâng cấp ngay sau đó.</li>
+                <li>Hệ thống sẽ kiểm tra thanh toán sau mỗi phút. Vai trò của bạn sẽ được tự động nâng cấp ngay sau đó.</li>
+                <li>Hệ thống sẽ tự động hủy giao dịch sau 10-15 phút.</li>
                 <li style={{ color: '#007bff' }}><strong>Vui lòng không rời khỏi trang này</strong> để hệ thống tự động cập nhật.</li>
               </ol>
             </div>
