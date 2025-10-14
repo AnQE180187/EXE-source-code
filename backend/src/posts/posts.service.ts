@@ -55,7 +55,7 @@ export class PostsService {
             },
           },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
       },
     });
   }
@@ -76,11 +76,11 @@ export class PostsService {
               select: {
                 displayName: true,
                 avatarUrl: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -102,7 +102,7 @@ export class PostsService {
             },
           },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
         comments: {
           include: {
             author: {
@@ -147,7 +147,7 @@ export class PostsService {
     });
 
     // Xoá tất cả liên kết tag cũ
-  await this.prisma.postForumTag.deleteMany({ where: { postId: id } });
+    await this.prisma.postForumTag.deleteMany({ where: { postId: id } });
 
     // Tạo lại liên kết tag mới
     if (forumTags && forumTags.length > 0) {
@@ -186,7 +186,7 @@ export class PostsService {
             },
           },
         },
-          forumTags: { select: { tag: true } },
+        forumTags: { select: { tag: true } },
       },
     });
   }

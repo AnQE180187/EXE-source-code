@@ -17,6 +17,11 @@ import { UploadModule } from './upload/upload.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ForumTagsModule } from './forum-tags/forum-tags.module';
+import { ChatModule } from './chat/chat.module';
+import { PayoutAccountsModule } from './payout-accounts/payout-accounts.module';
+import { WalletModule } from './wallet/wallet.module';
+import { WithdrawalsModule } from './withdrawals/withdrawals.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -36,10 +41,15 @@ import { ForumTagsModule } from './forum-tags/forum-tags.module';
     ReportsModule,
     AuditLogsModule,
     UploadModule,
-  TransactionsModule,
-  ForumTagsModule,
+    TransactionsModule,
+    ForumTagsModule,
+    ChatModule,
+    PayoutAccountsModule,
+    WalletModule,
+    WithdrawalsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

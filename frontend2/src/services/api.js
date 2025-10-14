@@ -1,13 +1,17 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export const SOCKET_URL = API_BASE_URL;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', // URL của backend NestJS
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor để đính kèm token vào mỗi request
+// Interceptor to attach token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

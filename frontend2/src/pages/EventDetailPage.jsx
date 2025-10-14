@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  Heart, Calendar, MapPin, Clock, Users, DollarSign, Edit, Trash2,
-  ArrowLeft, CheckCircle, AlertCircle, Maximize2, X, PartyPopper, AlertTriangle
-} from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { getEventById, deleteEvent, updateEvent } from '../services/eventService';
-import { createRegistration, getRegistrationStatus, cancelRegistration } from '../services/registrationService';
+import { createRegistration, getRegistrationStatus, cancelRegistration, initiateDeposit } from '../services/registrationService';
 import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
+import { findOrCreateConversation } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/ui/Modal';
 import EventModal from './EventModal';
+import DepositModal from './DepositModal'; // Import DepositModal
 import './EventDetailPage.css';
 import '../components/ui/Button.css';
 
@@ -28,24 +27,6 @@ const EventDetailPage = () => {
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // Popups
-  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);  // đăng ký thành công
-  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false); // xác nhận hủy
-  const [isCancelSuccessOpen, setIsCancelSuccessOpen] = useState(false); // hủy xong
-  const [cancelKind, setCancelKind] = useState('REGISTER'); // 'REGISTER' | 'DEPOSIT'
-
-  // Zoom image
-  const [isImageOpen, setIsImageOpen] = useState(false);
-  const openImage = () => setIsImageOpen(true);
-  const closeImage = useCallback(() => setIsImageOpen(false), []);
-
-  useEffect(() => {
-    if (!isImageOpen) return;
-    const onKey = (e) => { if (e.key === 'Escape') closeImage(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [isImageOpen, closeImage]);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -112,11 +93,24 @@ const EventDetailPage = () => {
   };
 
   const handleCancelRegistration = async () => {
+    if (!isAuthenticated) return;
+    
+    const isConfirmed = window.confirm(
+      registrationStatus.status === 'DEPOSITED' 
+        ? 'Bạn có chắc chắn muốn hủy đặt cọc không? Tiền cọc sẽ được hoàn lại.'
+        : 'Bạn có chắc chắn muốn hủy đăng ký không?'
+    );
+    
+    if (!isConfirmed) return;
+    
     try {
       setLoadingRegistration(true);
       await cancelRegistration(id);
-      setIsCancelConfirmOpen(false);
-      setIsCancelSuccessOpen(true);
+      alert(
+        registrationStatus.status === 'DEPOSITED' 
+          ? 'Hủy đặt cọc thành công! Tiền sẽ được hoàn lại trong 3-5 ngày.'
+          : 'Hủy đăng ký thành công!'
+      );
       await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
       setTimeout(() => setIsCancelSuccessOpen(false), 7000); // auto close after 7s
     } catch (error) {
@@ -126,8 +120,10 @@ const EventDetailPage = () => {
     }
   };
 
+  // Step 1: User clicks "Đặt cọc", open phone number modal
   const handleDeposit = () => {
     if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
+    // Navigate to payment page with event info
     navigate('/payment', { state: { event } });
   };
 
@@ -143,7 +139,7 @@ const EventDetailPage = () => {
       setLoadingFavorite(false);
     }
   };
-  
+
   const handleDelete = async () => {
     try {
       setLoadingDelete(true);
@@ -154,6 +150,22 @@ const EventDetailPage = () => {
     } finally {
       setLoadingDelete(false);
       setIsDeleteModalOpen(false);
+    }
+  };
+
+  const handleChatWithOrganizer = async () => {
+    if (!isAuthenticated) {
+      return navigate(`/login?redirect=/events/${id}`);
+    }
+    try {
+      const conversation = await findOrCreateConversation(
+        event.id,
+        user.sub,
+        event.organizerId,
+      );
+      navigate(`/chat?conversationId=${conversation.id}`);
+    } catch (error) {
+      alert('Could not start a conversation with the organizer.');
     }
   };
 
@@ -183,55 +195,29 @@ const EventDetailPage = () => {
         onComplete={handleEditSubmit}
         initialData={event}
       />
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Xác nhận xóa sự kiện"
+      >
+        <p>Bạn có chắc chắn muốn xóa sự kiện này không? Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.</p>
+      </Modal>
 
-      {/* ✅ Popup Đăng ký thành công */}
-      {isSuccessPopupOpen && (
-        <div className="success-popup">
-          <div className="success-popup-content">
-            <h2>Đăng ký thành công 🎉</h2>
-            <div className="success-icon">
-              <PartyPopper size={48} color="#20CDA4" />
-            </div>
-            <p>Bạn đã đăng ký tham gia <b>{event.title}</b>.</p>
-            <p>Hẹn gặp bạn tại sự kiện nhé!</p>
-            <div className="popup-buttons">
-              {event.price > 0 && (
-                <button onClick={handleDeposit} className="button button--primary">Đặt cọc ngay</button>
-              )}
-              <button onClick={() => setIsSuccessPopupOpen(false)} className="button button--outline">Đóng</button>
+      <div className="event-detail-page">
+        <div className="event-detail__main">
+          <div className="event-header">
+            <span className="event-status">{event.status}</span>
+            <h1 className="event-title">{event.title}</h1>
+            <div className="organizer-info">
+              <img src={event.organizer.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} alt={event.organizer.name} className="organizer-avatar" />
+              <span>Tổ chức bởi <strong>{event.organizer.name}</strong></span>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* ⚠️ Popup xác nhận hủy */}
-      {isCancelConfirmOpen && (
-        <div className="success-popup">
-          <div className="success-popup-content">
-            <h2>Xác nhận hủy đăng ký</h2>
-            <div className="success-icon">
-              <AlertTriangle size={48} color="#F87171" />
-            </div>
-            <p>
-              {cancelKind === 'DEPOSIT'
-                ? 'Bạn có chắc muốn hủy ĐẶT CỌC cho sự kiện này?'
-                : 'Bạn có chắc muốn hủy đăng ký tham gia sự kiện này?'}
-            </p>
-            <div className="popup-buttons">
-              <button
-                className="button button--danger"
-                onClick={handleCancelRegistration}
-                disabled={loadingRegistration}
-              >
-                {loadingRegistration ? 'Đang hủy...' : 'Xác nhận hủy'}
-              </button>
-              <button
-                className="button button--outline"
-                onClick={() => setIsCancelConfirmOpen(false)}
-              >
-                Giữ đăng ký
-              </button>
-            </div>
+          
+          <div className="event-description">
+            <h3>Chi tiết sự kiện</h3>
+            <p>{event.description}</p>
           </div>
         </div>
       )}
@@ -269,218 +255,97 @@ const EventDetailPage = () => {
                   {event.status}
                 </span>
               </div>
-              <h1 className="event-hero__title">{event.title}</h1>
-              <div className="event-hero__meta">
-                <div className="event-hero__organizer">
-                  <img 
-                    src={event.organizer.avatarUrl || `https://i.pravatar.cc/150?u=${event.organizer.id}`} 
-                    alt={event.organizer.name} 
-                    className="organizer-avatar" 
+
+              {/* Favorite Button */}
+              {isAuthenticated && (
+                <button
+                  className={`favorite-button ${isFavorited ? 'favorited' : ''}`}
+                  onClick={handleToggleFavorite}
+                  disabled={loadingFavorite}
+                  title={isFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                >
+                  <Heart 
+                    size={20} 
+                    fill={isFavorited ? '#fff' : 'none'} 
+                    color={isFavorited ? '#fff' : '#666'}
                   />
-                  <div className="organizer-details">
-                    <span className="organizer-label">Tổ chức bởi </span>
-                    <span className="organizer-name">{event.organizer.name}</span>
-                  </div>
-                </div>
-                <div className="event-hero__actions">
-                  {isAuthenticated && (
-                    <button
-                      className={`favorite-button ${isFavorited ? 'favorited' : ''}`}
-                      onClick={handleToggleFavorite}
-                      disabled={loadingFavorite}
-                      title={isFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                  {loadingFavorite ? '...' : (isFavorited ? 'Đã yêu thích' : 'Yêu thích')}
+                </button>
+              )}
+
+              {isAuthenticated ? (
+                <>
+                  {registrationStatus?.isRegistered ? (
+                    <>
+                      {registrationStatus.status === 'DEPOSITED' ? (
+                        <>
+                          <button className="button button--success" disabled>
+                            ✓ Đã đặt cọc
+                          </button>
+                          <Link 
+                            to={`/events/${id}/ticket`}
+                            className="button button--secondary"
+                          >
+                            Xem vé của tôi
+                          </Link>
+                          <button 
+                            className="button button--ghost" 
+                            onClick={handleCancelRegistration}
+                            disabled={loadingRegistration}
+                          >
+                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đặt cọc'}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="button button--success" disabled>
+                            ✓ Đã đăng ký
+                          </button>
+                          {event.price > 0 && (
+                            <button className="button" onClick={handleDeposit}>
+                              Đặt cọc
+                            </button>
+                          )}
+                          <button 
+                            className="button button--ghost" 
+                            onClick={handleCancelRegistration}
+                            disabled={loadingRegistration}
+                          >
+                            {loadingRegistration ? 'Đang hủy...' : 'Hủy đăng ký'}
+                          </button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <button 
+                      className="button button--secondary" 
+                      onClick={handleRegistration}
+                      disabled={loadingRegistration}
                     >
-                      <Heart 
-                        size={20} 
-                        fill={isFavorited ? '#EF4444' : 'none'}
-                        color={isFavorited ? '#EF4444' : '#666'}
-                      />
+                      {loadingRegistration ? 'Đang đăng ký...' : 'Đăng ký ngay'}
                     </button>
                   )}
-                </div>
-              </div>
+                </>
+              ) : (
+                <Link to={`/login?redirect=/events/${id}`} className="button button--secondary">
+                  Đăng nhập để tham gia
+                </Link>
+              )}
             </div>
+             {isOrganizer && (
+                <div className="sidebar-card__footer">
+                  <button onClick={() => setIsEditModalOpen(true)} className="button">Chỉnh sửa</button>
+                  <button 
+                    className="button button--ghost" 
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    disabled={loadingDelete}
+                  >
+                    {loadingDelete ? 'Đang xóa...' : 'Xóa'}
+                  </button>
+                </div>
+              )}
           </div>
-
-          <div className="event-hero__image">
-            <img src={event.imageUrl} alt={event.title} className="click-zoom-image" onClick={openImage} />
-            <button type="button" className="image-zoom-button" onClick={openImage}>
-              <Maximize2 size={18} />
-            </button>
-          </div>
-        </div>
-
-        <div className="event-detail__content">
-          <div className="event-detail__main">
-            <section className="event-section">
-              <h2 className="section-title">Về sự kiện</h2>
-              <div className="event-description">
-                <p>{event.description}</p>
-              </div>
-            </section>
-
-            <section className="event-section">
-              <h2 className="section-title">Chi tiết sự kiện</h2>
-              <div className="event-details-grid">
-                <div className="detail-card">
-                  <div className="detail-card__icon">
-                    <Calendar size={24} />
-                  </div>
-                  <div className="detail-card__content">
-                    <h3>Ngày diễn ra</h3>
-                    <p>{eventDate}</p>
-                  </div>
-                </div>
-                <div className="detail-card">
-                  <div className="detail-card__icon">
-                    <Clock size={24} />
-                  </div>
-                  <div className="detail-card__content">
-                    <h3>Thời gian</h3>
-                    <p>{eventTime}</p>
-                  </div>
-                </div>
-                <div className="detail-card">
-                  <div className="detail-card__icon">
-                    <MapPin size={24} />
-                  </div>
-                  <div className="detail-card__content">
-                    <h3>Địa điểm</h3>
-                    <p>{event.locationText}</p>
-                  </div>
-                </div>
-                <div className="detail-card">
-                  <div className="detail-card__icon">
-                    <DollarSign size={24} />
-                  </div>
-                  <div className="detail-card__content">
-                    <h3>Giá vé</h3>
-                    <p className="price-text">
-                      {event.price > 0 ? `${event.price.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* Sidebar */}
-          <aside className="event-detail__sidebar">
-            <div className="sidebar-card">
-              <div className="sidebar-card__header">
-                <h3>Tham gia sự kiện</h3>
-                <div className="event-stats">
-                  <div className="stat-item">
-                    <Users size={16} />
-                    <span>{event.registrations?.length || 0} người đã đăng ký</span>
-                  </div>
-                  {event.capacity && (
-                    <div className="stat-item">
-                      <Users size={16} />
-                      <span>Còn {event.capacity - (event.registrations?.length || 0)} chỗ</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="sidebar-card__content">
-                {isAuthenticated ? (
-                  <>
-                    {registrationStatus?.isRegistered ? (
-                      <>
-                        {registrationStatus.status === 'DEPOSITED' ? (
-                          <div className="registration-status">
-                            <div className="status-success">
-                              <CheckCircle size={20} />
-                              <span>Đã đặt cọc thành công</span>
-                            </div>
-                            <Link
-                              to={`/events/${id}/ticket`}
-                              className="button button--primary"
-                            >
-                              Xem vé của tôi
-                            </Link>
-                            <button
-                              className="button button--outline"
-                              onClick={() => openCancelConfirm('DEPOSIT')}
-                              disabled={loadingRegistration}
-                            >
-                              Hủy đặt cọc
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="registration-status">
-                            <div className="status-success">
-                              <CheckCircle size={20} />
-                              <span>Đã đăng ký thành công</span>
-                            </div>
-                            {event.price > 0 && (
-                              <button className="button button--primary" onClick={handleDeposit}>
-                                Đặt cọc ngay
-                              </button>
-                            )}
-                            <button
-                              className="button button--outline"
-                              onClick={() => openCancelConfirm('REGISTER')}
-                              disabled={loadingRegistration}
-                            >
-                              Hủy đăng ký
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="registration-actions">
-                        <button
-                          className="button button--primary button--large"
-                          onClick={handleRegistration}
-                          disabled={loadingRegistration}
-                        >
-                          {loadingRegistration ? 'Đang đăng ký...' : 'Đăng ký ngay'}
-                        </button>
-                        <p className="registration-note">
-                          Đăng ký miễn phí để tham gia sự kiện này
-                        </p>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="registration-actions">
-                    <Link to={`/login?redirect=/events/${id}`} className="button button--primary button--large">
-                      Đăng nhập để tham gia
-                    </Link>
-                    <p className="registration-note">
-                      Đăng nhập để đăng ký tham gia sự kiện
-                    </p>
-                  </div>
-                )}
-
-                {isOrganizer && (
-                  <div className="organizer-actions">
-                    <h4>Quản lý sự kiện</h4>
-                    <div className="action-buttons">
-                      <button
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="button button--outline"
-                      >
-                        <Edit size={16} />
-                        Chỉnh sửa
-                      </button>
-                      <button
-                        className="button button--danger"
-                        onClick={() => setIsDeleteModalOpen(true)}
-                        disabled={loadingDelete}
-                      >
-                        <Trash2 size={16} />
-                        {loadingDelete ? 'Đang xóa...' : 'Xóa'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
-        </div>
+        </aside>
       </div>
 
       {/* ===== Lightbox ảnh ===== */}

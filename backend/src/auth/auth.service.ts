@@ -14,7 +14,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async register(registerUserDto: RegisterUserDto) {
     const { email, password, displayName, dateOfBirth, gender, city, bio, phone, address } = registerUserDto;

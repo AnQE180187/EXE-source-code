@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getMyEvents } from '../services/userService';
+import { Link } from 'react-router-dom';
+import { getManagedEvents } from '../services/userService';
 import { getRegistrationsForEvent } from '../services/registrationService';
 import { createEvent, updateEvent, deleteEvent } from '../services/eventService';
-import { PlusCircle, Edit, Trash2, Users, BarChart2, Info, Calendar, MapPin } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Users, BarChart2, Info, Calendar, MapPin, Settings, Wallet } from 'lucide-react';
 import EventModal from './EventModal'; // Import the modal
 import './EventManagerPage.css';
 
@@ -24,9 +25,9 @@ const EventManagerPage = () => {
   const fetchManagedEvents = useCallback(async () => {
     try {
       setLoadingEvents(true);
-      const data = await getMyEvents();
-      setEvents(data.organized || []);
-    } catch {
+      const data = await getManagedEvents();
+      setEvents(data || []);
+    } catch (err) {
       setError('Không thể tải danh sách sự kiện của bạn.');
     } finally {
       setLoadingEvents(false);
@@ -207,10 +208,20 @@ const EventManagerPage = () => {
       <div className="event-manager-page">
         <div className="manager-header">
           <h1 className="manager-title">Quản lý sự kiện</h1>
-          <button onClick={handleOpenCreateModal} className="create-event-button">
-            <PlusCircle size={20} />
-            <span>Tạo sự kiện mới</span>
-          </button>
+          <div className="manager-header-actions">
+            <Link to="/wallet" className="payout-settings-button">
+                <Wallet size={20} />
+                <span>Ví tiền</span>
+            </Link>
+            <Link to="/payout-settings" className="payout-settings-button">
+              <Settings size={20} />
+              <span>Cài đặt thanh toán</span>
+            </Link>
+            <button onClick={handleOpenCreateModal} className="create-event-button">
+              <PlusCircle size={20} />
+              <span>Tạo sự kiện mới</span>
+            </button>
+          </div>
         </div>
 
         {error && <p className="error-message">{error}</p>}
@@ -312,6 +323,7 @@ const EventManagerPage = () => {
                                       <li className="participants-list__header">
                                           <span>Tên người tham gia</span>
                                           <span>Email</span>
+                                          <span>Số điện thoại</span>
                                           <span>Trạng thái</span>
                                       </li>
                                       {registrations.map(reg => (
@@ -321,6 +333,9 @@ const EventManagerPage = () => {
                                               </span>
                                               <span className="participant-email">
                                                 {reg.user.email}
+                                              </span>
+                                              <span className="participant-phone">
+                                                {reg.phone || '-'}
                                               </span>
                                               <span className="participant-status">
                                                 {registrationStatusBadge(reg.status)}

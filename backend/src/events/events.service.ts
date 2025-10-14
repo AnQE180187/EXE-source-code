@@ -150,13 +150,18 @@ export class EventsService {
 
     return this.prisma.registration.findMany({
       where: { eventId },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        phone: true, // Include the phone number
         user: {
           select: {
             email: true,
             profile: {
               select: {
                 displayName: true,
+                avatarUrl: true,
               }
             }
           }
@@ -291,5 +296,17 @@ export class EventsService {
 
     // Controller uses 204 No Content; return void
     return;
+  }
+
+  findManagedByMe(organizer: User) {
+    return this.prisma.event.findMany({
+      where: { organizerId: organizer.id },
+      include: {
+        _count: {
+          select: { registrations: true },
+        },
+      },
+      orderBy: { startAt: 'desc' },
+    });
   }
 }

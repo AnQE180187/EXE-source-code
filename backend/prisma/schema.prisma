@@ -3,32 +3,41 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
-  id              String          @id @default(uuid())
-  email           String          @unique
-  passwordHash    String?
-  provider        String          @default("local")
-  providerId      String?
-  role            Role            @default(PARTICIPANT)
-  status          AccountStatus   @default(ACTIVE)
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-  auditLogs       AuditLog[]      @relation("AuditActor")
-  comments        Comment[]
-  waitlists       EventWaitlist[]
-  organizedEvents Event[]         @relation("OrganizerEvents")
-  favorites       Favorite[]
-  notifications   Notification[]
-  posts           Post[]
-  profile         Profile?
-  registrations   Registration[]
-  reports         Report[]
-  transactions    Transaction[]
-  passwordResets  PasswordReset[]
+  id                String            @id @default(uuid())
+  email             String            @unique
+  passwordHash      String?
+  provider          String            @default("local")
+  providerId        String?
+  role              Role              @default(PARTICIPANT)
+  status            AccountStatus     @default(ACTIVE)
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  auditLogs         AuditLog[]        @relation("AuditActor")
+  comments          Comment[]
+  waitlists         EventWaitlist[]
+  organizedEvents   Event[]           @relation("OrganizerEvents")
+  favorites         Favorite[]
+  notifications     Notification[]
+  passwordResets    PasswordReset[]
+  posts             Post[]
+  profile           Profile?
+  registrations     Registration[]
+  reports           Report[]
+  transactions      Transaction[]
+  sentMessages      Message[]
+  participantConversations Conversation[] @relation("ParticipantConversations")
+  organizerConversations   Conversation[] @relation("OrganizerConversations")
+
+  // Relations for Wallet and Payouts
+  wallet             Wallet?           
+  payoutAccount      PayoutAccount?    
+  withdrawalRequests WithdrawalRequest[] 
 
   @@unique([provider, providerId])
   @@map("users")
@@ -75,6 +84,7 @@ model Event {
   favorites       Favorite[]
   registrations   Registration[]
   reports         Report[]        @relation("ReportedEvent")
+  conversations   Conversation[]
 
   @@map("events")
 }
@@ -117,13 +127,18 @@ model EventTag {
 }
 
 model Registration {
-  id        String             @id @default(uuid())
-  eventId   String             @map("event_id")
-  userId    String             @map("user_id")
-  status    RegistrationStatus @default(REGISTERED)
-  createdAt DateTime           @default(now()) @map("created_at")
+  id            String             @id @default(uuid())
+  eventId       String             @map("event_id")
+  userId        String             @map("user_id")
+  status        RegistrationStatus @default(REGISTERED)
+  createdAt     DateTime           @default(now()) @map("created_at")
+  phone         String?
+  transactionId String?            @unique @map("transaction_id")
+
   event     Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction   Transaction?       @relation(fields: [transactionId], references: [id])
+
 
   @@unique([eventId, userId])
   @@map("registrations")
@@ -232,17 +247,106 @@ model EventWaitlist {
 }
 
 model Transaction {
-  id          String            @id @default(uuid())
-  userId      String            @map("user_id")
-  amount      Float
-  description String
-  status      TransactionStatus @default(PENDING)
-  orderCode   String            @unique @map("order_code")
-  createdAt   DateTime          @default(now()) @map("created_at")
-  updatedAt   DateTime          @updatedAt @map("updated_at")
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String            @id @default(uuid())
+  userId       String            @map("user_id")
+  amount       Float
+  description  String
+  status       TransactionStatus @default(PENDING)
+  orderCode    String            @unique @map("order_code")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registration Registration?
 
   @@map("transactions")
+}
+
+model PasswordReset {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  tokenHash    String?   @unique @map("token_hash")
+  expiresAt    DateTime? @map("expires_at")
+  otpHash      String?   @map("otp_hash")
+  otpExpiresAt DateTime? @map("otp_expires_at")
+  verifiedAt   DateTime? @map("verified_at")
+  usedAt       DateTime? @map("used_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model Conversation {
+  id            String    @id @default(uuid())
+  eventId       String
+  participantId String
+  organizerId   String
+  messages      Message[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  event       Event @relation(fields: [eventId], references: [id])
+  participant User  @relation("ParticipantConversations", fields: [participantId], references: [id])
+  organizer   User  @relation("OrganizerConversations", fields: [organizerId], references: [id])
+
+  @@unique([eventId, participantId, organizerId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime     @default(now())
+  isRead         Boolean      @default(false)
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  balance   Float    @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+model PayoutAccount {
+  id                 String              @id @default(uuid())
+  userId             String              @unique @map("user_id")
+  bankName           String              @map("bank_name")
+  accountName        String              @map("account_name")
+  accountNumber      String              @map("account_number")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  withdrawalRequests WithdrawalRequest[] // Add this missing relation
+
+  @@map("payout_accounts")
+}
+
+model WithdrawalRequest {
+  id              String           @id @default(uuid())
+  organizerId     String           @map("organizer_id")
+  amount          Float
+  status          WithdrawalStatus @default(PENDING)
+  payoutAccountId String           @map("payout_account_id")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  processedAt     DateTime?        @map("processed_at")
+  notes           String?
+
+  organizer     User          @relation(fields: [organizerId], references: [id])
+  payoutAccount PayoutAccount @relation(fields: [payoutAccountId], references: [id])
+
+  @@map("withdrawal_requests")
 }
 
 enum Role {
@@ -268,6 +372,7 @@ enum RegistrationStatus {
   REGISTERED
   CANCELLED
   DEPOSITED
+  PENDING
 }
 
 enum VisibilityStatus {
@@ -293,19 +398,8 @@ enum TransactionStatus {
   FAILED
 }
 
-model PasswordReset {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  tokenHash  String?  @map("token_hash")
-  expiresAt  DateTime? @map("expires_at")
-  otpHash    String?  @map("otp_hash")
-  otpExpiresAt DateTime? @map("otp_expires_at")
-  verifiedAt DateTime? @map("verified_at")
-  usedAt     DateTime? @map("used_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@unique([tokenHash])
-  @@map("password_resets")
+enum WithdrawalStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }

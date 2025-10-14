@@ -18,8 +18,12 @@ const LoginPage = () => {
     setIsLoading(true);
     setApiError(null);
     try {
-      await login(data);
-      navigate('/');
+      const user = await login(data);
+      if (user && user.role.toLowerCase() === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       const status = error?.response?.status;
       const backendMessage = error?.response?.data?.message;
