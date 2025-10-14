@@ -1,40 +1,98 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Users, Shield, MessageSquare, Flag, List, Settings } from 'lucide-react';
+import { Home, Users, Calendar, MessageSquare, Flag, List, Settings, CreditCard } from 'lucide-react';
 
 const Sidebar = () => {
   return (
-    <div className="w-64 bg-gray-800 text-white flex flex-col">
-      <div className="flex items-center justify-center h-20 border-b border-gray-700">
-        <h1 className="text-2xl font-bold">FreeDay Admin</h1>
+    <div className="admin-sidebar">
+      <div className="admin-sidebar__header">
+        <a href="/admin/dashboard" className="admin-sidebar__logo">
+          <div className="admin-sidebar__logo-icon">F</div>
+          <div>
+            <div className="admin-sidebar__logo-text">FreeDay Admin</div>
+            <div className="admin-sidebar__tagline">Event Management System</div>
+          </div>
+        </a>
       </div>
-      <nav className="flex-1 px-4 py-4 space-y-2">
-        <NavLink to="/admin/dashboard" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <Home size={20} className="mr-3" />
+      <nav className="admin-sidebar__nav">
+        <NavLink 
+          to="/admin/dashboard" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Admin dashboard overview"
+        >
+          <Home size={20} className="admin-sidebar__nav-icon" />
           Dashboard
         </NavLink>
-        <NavLink to="/admin/users" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <Users size={20} className="mr-3" />
+        <NavLink 
+          to="/admin/users" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Manage user accounts and roles"
+        >
+          <Users size={20} className="admin-sidebar__nav-icon" />
           User Management
         </NavLink>
-        <NavLink to="/admin/events" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <Shield size={20} className="mr-3" />
-          Event Moderation
+        <NavLink 
+          to="/admin/events" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Manage and moderate events"
+        >
+          <Calendar size={20} className="admin-sidebar__nav-icon" />
+          Event Management
         </NavLink>
-        <NavLink to="/admin/moderation" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <MessageSquare size={20} className="mr-3" />
-          Forum Moderation
+        <NavLink 
+          to="/admin/moderation" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Moderate forum content and posts"
+        >
+          <MessageSquare size={20} className="admin-sidebar__nav-icon" />
+          Content Moderation
         </NavLink>
-        <NavLink to="/admin/reports" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <Flag size={20} className="mr-3" />
+        <NavLink 
+          to="/admin/reports" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Review and manage user reports"
+        >
+          <Flag size={20} className="admin-sidebar__nav-icon" />
           Report Management
         </NavLink>
-        <NavLink to="/admin/audit-logs" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <List size={20} className="mr-3" />
+        <NavLink 
+          to="/admin/audit-logs" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="View system activity logs"
+        >
+          <List size={20} className="admin-sidebar__nav-icon" />
           Audit Logs
         </NavLink>
-        <NavLink to="/admin/settings" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-          <Settings size={20} className="mr-3" />
+        <NavLink 
+          to="/admin/payments" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Manage payment transactions"
+        >
+          <CreditCard size={20} className="admin-sidebar__nav-icon" />
+          Payment Management
+        </NavLink>
+        <NavLink 
+          to="/admin/settings" 
+          className={({ isActive }) => 
+            `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
+          }
+          title="Configure system settings"
+        >
+          <Settings size={20} className="admin-sidebar__nav-icon" />
           Settings
         </NavLink>
       </nav>

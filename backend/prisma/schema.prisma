@@ -9,30 +9,35 @@ datasource db {
 }
 
 model User {
-  id              String          @id @default(uuid())
-  email           String          @unique
-  passwordHash    String?
-  provider        String          @default("local")
-  providerId      String?
-  role            Role            @default(PARTICIPANT)
-  status          AccountStatus   @default(ACTIVE)
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-  auditLogs       AuditLog[]      @relation("AuditActor")
-  comments        Comment[]
-  waitlists       EventWaitlist[]
-  organizedEvents Event[]         @relation("OrganizerEvents")
-  favorites       Favorite[]
-  notifications   Notification[]
-  passwordResets  PasswordReset[]
-  posts           Post[]
-  profile         Profile?
-  registrations   Registration[]
-  reports         Report[]
-  transactions    Transaction[]
-  sentMessages    Message[]
+  id                String            @id @default(uuid())
+  email             String            @unique
+  passwordHash      String?
+  provider          String            @default("local")
+  providerId        String?
+  role              Role              @default(PARTICIPANT)
+  status            AccountStatus     @default(ACTIVE)
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  auditLogs         AuditLog[]        @relation("AuditActor")
+  comments          Comment[]
+  waitlists         EventWaitlist[]
+  organizedEvents   Event[]           @relation("OrganizerEvents")
+  favorites         Favorite[]
+  notifications     Notification[]
+  passwordResets    PasswordReset[]
+  posts             Post[]
+  profile           Profile?
+  registrations     Registration[]
+  reports           Report[]
+  transactions      Transaction[]
+  sentMessages      Message[]
   participantConversations Conversation[] @relation("ParticipantConversations")
   organizerConversations   Conversation[] @relation("OrganizerConversations")
+
+  // Relations for Wallet and Payouts
+  wallet             Wallet?           
+  payoutAccount      PayoutAccount?    
+  withdrawalRequests WithdrawalRequest[] 
 
   @@unique([provider, providerId])
   @@map("users")
@@ -302,6 +307,48 @@ model Message {
   @@map("messages")
 }
 
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  balance   Float    @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+model PayoutAccount {
+  id                 String              @id @default(uuid())
+  userId             String              @unique @map("user_id")
+  bankName           String              @map("bank_name")
+  accountName        String              @map("account_name")
+  accountNumber      String              @map("account_number")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  withdrawalRequests WithdrawalRequest[] // Add this missing relation
+
+  @@map("payout_accounts")
+}
+
+model WithdrawalRequest {
+  id              String           @id @default(uuid())
+  organizerId     String           @map("organizer_id")
+  amount          Float
+  status          WithdrawalStatus @default(PENDING)
+  payoutAccountId String           @map("payout_account_id")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  processedAt     DateTime?        @map("processed_at")
+  notes           String?
+
+  organizer     User          @relation(fields: [organizerId], references: [id])
+  payoutAccount PayoutAccount @relation(fields: [payoutAccountId], references: [id])
+
+  @@map("withdrawal_requests")
+}
+
 enum Role {
   PARTICIPANT
   ORGANIZER
@@ -346,6 +393,12 @@ enum ReportStatus {
 }
 
 enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalStatus {
   PENDING
   COMPLETED
   FAILED

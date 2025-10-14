@@ -1,0 +1,77 @@
+.payout-settings-page {
+  padding: 40px 20px;
+  background-color: #f9fafb; /* A slightly off-white background */
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+}
+
+.payout-settings-container {
+  max-width: 600px;
+  width: 100%;
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.payout-settings-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.payout-settings-subtitle {
+  font-size: 16px;
+  color: #6b7280; /* Gray-500 */
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.payout-form .form-group {
+  margin-bottom: 24px;
+}
+
+.payout-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.payout-form input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db; /* Gray-300 */
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.payout-form input:focus {
+  outline: none;
+  border-color: #4f46e5; /* Indigo-600 */
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.save-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #4f46e5; /* Indigo-600 */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #4338ca; /* Indigo-700 */
+}
+
+.save-button:disabled {
+  background-color: #a5b4fc; /* Indigo-300 */
+  cursor: not-allowed;
+}

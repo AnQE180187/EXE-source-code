@@ -79,7 +79,7 @@ const TicketPage = () => {
   };
 
   // Calculate deposit amount (30% of event price)
-  const depositAmount = Math.round(event.price * 0.3);
+  const depositAmount = Math.round(event.price);
 
   return (
     <div className="ticket-page">
@@ -116,7 +116,7 @@ const TicketPage = () => {
                 <span className="date-value">{formatDate(registrationStatus.registeredAt)}</span>
               </div>
             </div>
-            
+
             <div className="customer-info">
               <div className="info-row">
                 <span className="info-label">Người đặt:</span>
@@ -137,7 +137,7 @@ const TicketPage = () => {
 
           {/* Action Button */}
           <div className="ticket-actions">
-            <Link 
+            <Link
               to={`/events/${eventId}`}
               className="button button--primary"
             >

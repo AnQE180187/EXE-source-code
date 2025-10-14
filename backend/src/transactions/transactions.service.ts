@@ -25,7 +25,7 @@ export class TransactionsService {
     private configService: ConfigService,
     private usersService: UsersService, // Inject UsersService
     private readonly httpService: HttpService,
-  ) {}
+  ) { }
 
   async findAll() {
     return this.prisma.transaction.findMany({
@@ -34,8 +34,21 @@ export class TransactionsService {
       },
       include: {
         user: {
-          select: {
-            email: true,
+          include: {
+            profile: true,
+          },
+        },
+        registration: {
+          include: {
+            event: {
+              include: {
+                organizer: {
+                  include: {
+                    profile: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -55,7 +68,7 @@ export class TransactionsService {
     return transaction;
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleExpiredPendingTransactions() {
     this.logger.log('Running job to clean up expired pending transactions...');
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
@@ -248,7 +261,7 @@ export class TransactionsService {
     return { success: true };
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCassoSync() {
     this.logger.log('Running scheduled job to sync transactions from Casso...');
     const apiKey = this.configService.get<string>('CASSO_API_KEY');
@@ -318,8 +331,9 @@ export class TransactionsService {
           }
           // Logic for Event Deposit
           else if (orderCode.startsWith('DEP')) {
-            const registration = await tx.registration.findUnique({
+            const registration = await tx.registration.findFirst({
               where: { transactionId: pendingTx.id },
+              include: { event: true }, // Include event to get organizerId
             });
 
             if (!registration) {
@@ -339,6 +353,21 @@ export class TransactionsService {
               where: { id: registration.eventId },
               data: { registeredCount: { increment: 1 } },
             });
+
+            // Credit the organizer's wallet
+            const organizerId = registration.event.organizerId;
+            await tx.wallet.upsert({
+              where: { userId: organizerId },
+              create: {
+                userId: organizerId,
+                balance: pendingTx.amount,
+              },
+              update: {
+                balance: { increment: pendingTx.amount },
+              },
+            });
+
+            this.logger.log(`Credited ${pendingTx.amount} to wallet of organizer ${organizerId}`);
           }
 
           // Mark the transaction as completed
@@ -363,3 +392,4 @@ export class TransactionsService {
     }
   }
 }
+
