@@ -31,14 +31,21 @@ const EventsPage = () => {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAllTags, setShowAllTags] = useState(false);
+  const INITIAL_TAG_COUNT = 10;
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [priceFilter, setPriceFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [selectedTag, setSelectedTag] = useState('all');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [minRegistrations, setMinRegistrations] = useState('0');
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedLocationFilter = useDebounce(locationFilter, 500);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -61,8 +68,11 @@ const EventsPage = () => {
         if (debouncedSearchTerm) params.search = debouncedSearchTerm;
         if (priceFilter !== 'all') params.price = priceFilter;
         if (selectedTag !== 'all') params.tag = selectedTag;
-        // In a real backend, you would also handle date filters
-        // params.date = dateFilter;
+        if (dateFilter !== 'all') params.date = dateFilter;
+        if (debouncedLocationFilter) params.location = debouncedLocationFilter;
+        if (categoryFilter !== 'all') params.category = categoryFilter;
+        if (sortOrder) params.sort = sortOrder;
+        if (minRegistrations !== '0') params.min_registrations = minRegistrations;
 
         const data = await getEvents(params);
         setEvents(data);
@@ -73,7 +83,9 @@ const EventsPage = () => {
       }
     };
     fetchEvents();
-  }, [debouncedSearchTerm, priceFilter, dateFilter, selectedTag]);
+  }, [debouncedSearchTerm, priceFilter, dateFilter, selectedTag, debouncedLocationFilter, categoryFilter, sortOrder, minRegistrations]);
+
+  const displayedTags = showAllTags ? tags : tags.slice(0, INITIAL_TAG_COUNT);
 
   return (
     <div className="events-page-container">
@@ -94,26 +106,51 @@ const EventsPage = () => {
           />
         </div>
         <div className="ep-filters">
+          {/* <input
+            type="text"
+            placeholder="Địa điểm..."
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+          /> */}
           <select value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)}>
             <option value="all">Mọi mức giá</option>
             <option value="free">Miễn phí</option>
             <option value="paid">Có phí</option>
           </select>
-          <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
+          {/* <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
             <option value="all">Mọi lúc</option>
             <option value="today">Hôm nay</option>
             <option value="weekend">Cuối tuần này</option>
             <option value="month">Tháng này</option>
+          </select> */}
+          <select value={minRegistrations} onChange={(e) => setMinRegistrations(e.target.value)}>
+            <option value="0">Lượt đăng ký</option>
+            <option value="10">10+</option>
+            <option value="50">50+</option>
+            <option value="100">100+</option>
+          </select>
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="newest">Mới nhất</option>
+            <option value="popularity">Phổ biến nhất</option>
+            {/* <option value="date_asc">Ngày (tăng dần)</option>
+            <option value="date_desc">Ngày (giảm dần)</option> */}
+            <option value="price_asc">Giá (tăng dần)</option>
+            <option value="price_desc">Giá (giảm dần)</option>
           </select>
         </div>
       </div>
 
       {/* Tag Filter */}
       <div className="ep-tag-filter">
-        <button onClick={() => setSelectedTag('all')} className={selectedTag === 'all' ? 'active' : ''}>Tất cả</button>
-        {tags.map(tag => (
-            <button key={tag.id} onClick={() => setSelectedTag(tag.name)} className={selectedTag === tag.name ? 'active' : ''}>{tag.name}</button>
+        <button onClick={() => setCategoryFilter('all')} className={categoryFilter === 'all' ? 'active' : ''}>Tất cả</button>
+        {displayedTags.map(tag => (
+            <button key={tag.id} onClick={() => setCategoryFilter(tag.name)} className={categoryFilter === tag.name ? 'active' : ''}>{tag.name}</button>
         ))}
+        {tags.length > INITIAL_TAG_COUNT && (
+          <button onClick={() => setShowAllTags(!showAllTags)} className="ep-tag-toggle-button">
+            {showAllTags ? 'Ẩn bớt' : 'Xem thêm'}
+          </button>
+        )}
       </div>
 
       {/* Events Grid */}

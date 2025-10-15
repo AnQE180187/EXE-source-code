@@ -466,3 +466,26 @@
         font-size: 0.85rem;
     }
 }
+.fp-like-btn, .fp-comment-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    color: var(--fp-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.fp-like-btn:hover, .fp-comment-btn:hover {
+    background-color: #f1f5f9;
+    color: var(--fp-text-primary);
+}
+
+.fp-like-btn.liked {
+    color: #10B981; /* --fp-primary */
+}

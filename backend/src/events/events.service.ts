@@ -39,8 +39,8 @@ export class EventsService {
     return this.prisma.event.create({ data: eventInput });
   }
 
-  findAll(query: { search?: string; price?: string, tag?: string }) {
-    const { search, price, tag } = query;
+  findAll(query: { search?: string; price?: string, tag?: string, date?: string, location?: string, category?: string, sort?: string, min_registrations?: string }) {
+    const { search, price, tag, date, location, category, sort, min_registrations } = query;
     const where: Prisma.EventWhereInput = {
       status: { in: [EventStatus.PUBLISHED, EventStatus.CLOSED] },
       AND: [], // Initialize AND as an array
@@ -75,6 +75,80 @@ export class EventsService {
         });
     }
 
+    if (date) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      let endDate;
+
+      switch (date) {
+        case 'today':
+          endDate = new Date(now);
+          endDate.setHours(23, 59, 59, 999);
+          (where.AND as Prisma.EventWhereInput[]).push({ startAt: { gte: now, lte: endDate } });
+          break;
+        case 'weekend':
+          const dayOfWeek = now.getDay();
+          const nextSaturday = new Date(now);
+          nextSaturday.setDate(now.getDate() - dayOfWeek + 6);
+          nextSaturday.setHours(23, 59, 59, 999);
+          (where.AND as Prisma.EventWhereInput[]).push({ startAt: { gte: now, lte: nextSaturday } });
+          break;
+        case 'month':
+          endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          endDate.setHours(23, 59, 59, 999);
+          (where.AND as Prisma.EventWhereInput[]).push({ startAt: { gte: now, lte: endDate } });
+          break;
+      }
+    }
+
+    if (location) {
+      (where.AND as Prisma.EventWhereInput[]).push({
+        locationText: { contains: location, mode: 'insensitive' }
+      });
+    }
+
+    if (category && category !== 'all') {
+      (where.AND as Prisma.EventWhereInput[]).push({
+        tags: {
+          some: {
+            tag: {
+              name: category
+            }
+          }
+        }
+      });
+    }
+
+    if (min_registrations) {
+      (where.AND as Prisma.EventWhereInput[]).push({
+        registeredCount: { gte: parseInt(min_registrations) }
+      });
+    }
+
+    const orderBy: Prisma.EventOrderByWithRelationInput = {};
+    switch (sort) {
+      case 'date_asc':
+        orderBy.startAt = 'asc';
+        break;
+      case 'date_desc':
+        orderBy.startAt = 'desc';
+        break;
+      case 'price_asc':
+        orderBy.price = 'asc';
+        break;
+      case 'price_desc':
+        orderBy.price = 'desc';
+        break;
+      case 'newest':
+        orderBy.createdAt = 'desc';
+        break;
+      case 'popularity':
+        orderBy.registeredCount = 'desc';
+        break;
+      default:
+        orderBy.startAt = 'asc';
+    }
+
     return this.prisma.event.findMany({
       where,
       include: {
@@ -95,10 +169,57 @@ export class EventsService {
           }
         }
       },
-      orderBy: {
-        startAt: 'asc',
-      },
+      orderBy,
     });
+  }
+
+  async findAllForAdmin(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    status?: EventStatus,
+  ) {
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const where: Prisma.EventWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { organizer: { profile: { displayName: { contains: search, mode: 'insensitive' } } } },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const [events, total] = await this.prisma.$transaction([
+      this.prisma.event.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          organizer: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.event.count({ where }),
+    ]);
+
+    return {
+      data: events,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: string) {

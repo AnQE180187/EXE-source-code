@@ -60,14 +60,20 @@ export class PostsService {
     });
   }
 
-  findAll(params?: { tag?: string }) {
-    const { tag } = params || {};
-    return this.prisma.post.findMany({
+  async findAll(params?: { tag?: string, sortBy?: string }, userId?: string) {
+    const { tag, sortBy } = params || {};
+    const posts = await this.prisma.post.findMany({
       where: {
         status: VisibilityStatus.VISIBLE,
         ...(tag ? { forumTags: { some: { tag: { name: tag } } } } : {}),
       },
       include: {
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+          },
+        },
         author: {
           select: {
             id: true,
@@ -81,12 +87,23 @@ export class PostsService {
           },
         },
         forumTags: { select: { tag: true } },
+        likes: userId ? { where: { userId } } : undefined,
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    if (sortBy === 'popular') {
+      return posts.sort((a, b) => {
+        const aPopularity = (a._count.likes || 0) + (a._count.comments || 0);
+        const bPopularity = (b._count.likes || 0) + (b._count.comments || 0);
+        return bPopularity - aPopularity;
+      });
+    }
+
+    return posts;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId?: string) {
     const post = await this.prisma.post.findUnique({
       where: { id, status: VisibilityStatus.VISIBLE },
       include: {
@@ -119,6 +136,7 @@ export class PostsService {
           },
           orderBy: { createdAt: 'desc' },
         },
+        likes: userId ? { where: { userId } } : undefined,
       },
     });
     if (!post) {

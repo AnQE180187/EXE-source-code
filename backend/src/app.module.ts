@@ -22,6 +22,7 @@ import { PayoutAccountsModule } from './payout-accounts/payout-accounts.module';
 import { WalletModule } from './wallet/wallet.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { AdminModule } from './admin/admin.module';
+import { PostLikesModule } from './post-likes/post-likes.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { AdminModule } from './admin/admin.module';
     WalletModule,
     WithdrawalsModule,
     AdminModule,
+    PostLikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

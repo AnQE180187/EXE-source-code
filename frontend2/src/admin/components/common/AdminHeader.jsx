@@ -8,7 +8,7 @@ const AdminHeader = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  
+
   const getPageTitle = (pathname) => {
     const pathMap = {
       '/admin/dashboard': 'Dashboard',
@@ -82,9 +82,9 @@ const AdminHeader = () => {
         <div className="admin-header__user" onClick={toggleUserDropdown}>
           <div className="admin-header__user-avatar">
             {user?.avatarUrl ? (
-              <img 
-                src={user.avatarUrl} 
-                alt={user?.displayName || 'Admin'} 
+              <img
+                src={user.avatarUrl}
+                alt={user?.displayName || 'Admin'}
                 className="admin-header__avatar-img"
               />
             ) : (
@@ -98,15 +98,15 @@ const AdminHeader = () => {
             </div>
             <div className="admin-header__user-role">Administrator</div>
           </div>
-          
+
           {isUserDropdownOpen && (
             <div className="admin-header__user-dropdown">
               <div className="admin-header__dropdown-header">
                 <div className="admin-header__dropdown-avatar">
                   {user?.avatarUrl ? (
-                    <img 
-                      src={user.avatarUrl} 
-                      alt={user?.displayName || 'Admin'} 
+                    <img
+                      src={user.avatarUrl}
+                      alt={user?.displayName || 'Admin'}
                       className="admin-header__dropdown-avatar-img"
                     />
                   ) : (
@@ -126,11 +126,11 @@ const AdminHeader = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="admin-header__dropdown-divider"></div>
-              
+
               <div className="admin-header__dropdown-menu">
-                <button 
+                <button
                   className="admin-header__dropdown-item"
                   onClick={() => {
                     navigate('/admin/settings');
@@ -140,7 +140,7 @@ const AdminHeader = () => {
                   <Settings size={16} />
                   Settings
                 </button>
-                <button 
+                <button
                   className="admin-header__dropdown-item admin-header__dropdown-item--logout"
                   onClick={() => {
                     handleLogout();

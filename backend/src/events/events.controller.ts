@@ -44,7 +44,7 @@ export class EventsController {
   }
 
   @Get()
-  findAll(@Query() query: { search?: string; price?: string }) {
+  findAll(@Query() query: { search?: string; price?: string, date?: string, location?: string, category?: string, sort?: string, min_registrations?: string }) {
     return this.eventsService.findAll(query);
   }
 

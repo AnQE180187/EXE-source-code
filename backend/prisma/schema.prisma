@@ -33,6 +33,7 @@ model User {
   sentMessages      Message[]
   participantConversations Conversation[] @relation("ParticipantConversations")
   organizerConversations   Conversation[] @relation("OrganizerConversations")
+  postLikes         PostLike[]
 
   // Relations for Wallet and Payouts
   wallet             Wallet?           
@@ -164,12 +165,25 @@ model Post {
   status    VisibilityStatus @default(VISIBLE)
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
+  likesCount Int             @default(0) @map("likes_count")
   comments  Comment[]
   forumTags PostForumTag[]
   author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reports   Report[]         @relation("ReportedPost")
+  likes     PostLike[]
 
   @@map("posts")
+}
+
+model PostLike {
+  userId    String   @map("user_id")
+  postId    String   @map("post_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@map("post_likes")
 }
 
 
@@ -286,7 +300,7 @@ model Conversation {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  event       Event @relation(fields: [eventId], references: [id])
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   participant User  @relation("ParticipantConversations", fields: [participantId], references: [id])
   organizer   User  @relation("OrganizerConversations", fields: [organizerId], references: [id])
 
@@ -348,6 +362,7 @@ model WithdrawalRequest {
 
   @@map("withdrawal_requests")
 }
+
 
 enum Role {
   PARTICIPANT

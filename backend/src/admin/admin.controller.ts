@@ -1,8 +1,8 @@
-import { Controller, Get, Patch, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Query, UseGuards, Body, Req, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Role, WithdrawalStatus } from '@prisma/client';
+import { Role, WithdrawalStatus, AccountStatus, EventStatus } from '@prisma/client';
 import { AdminService } from './admin.service';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -10,6 +10,59 @@ import { AdminService } from './admin.service';
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  @Get('dashboard')
+  getDashboardStats() {
+    return this.adminService.getDashboardStats();
+  }
+
+  @Get('users')
+  getUsers(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+    @Query('role') role?: Role,
+    @Query('status') status?: AccountStatus,
+  ) {
+    return this.adminService.getUsers(page, limit, search, role, status);
+  }
+
+  @Get('events')
+  getEvents(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+    @Query('status') status?: EventStatus,
+  ) {
+    return this.adminService.getEvents(page, limit, search, status);
+  }
+
+  @Patch('users/:id/role')
+  updateUserRole(
+    @Param('id') id: string,
+    @Body('role') role: Role,
+    @Req() req: any,
+  ) {
+    return this.adminService.updateUserRole(id, role, req.user.id);
+  }
+
+  @Patch('users/:id/status')
+  updateUserStatus(
+    @Param('id') id: string,
+    @Body('status') status: AccountStatus,
+    @Req() req: any,
+  ) {
+    return this.adminService.updateUserStatus(id, status, req.user.id);
+  }
+
+  @Patch('events/:id/status')
+  updateEventStatus(
+    @Param('id') id: string,
+    @Body('status') status: EventStatus,
+    @Req() req: any,
+  ) {
+    return this.adminService.updateEventStatus(id, status, req.user.id);
+  }
 
   @Get('withdrawals')
   getWithdrawals(@Query('status') status?: WithdrawalStatus) {

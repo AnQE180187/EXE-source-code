@@ -8,5 +8,6 @@ import { RegistrationsModule } from 'src/registrations/registrations.module'; //
   imports: [FavoritesModule, RegistrationsModule], // Add RegistrationsModule to imports
   controllers: [EventsController],
   providers: [EventsService],
+  exports: [EventsService],
 })
 export class EventsModule {}

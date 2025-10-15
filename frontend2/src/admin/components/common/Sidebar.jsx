@@ -15,9 +15,9 @@ const Sidebar = () => {
         </a>
       </div>
       <nav className="admin-sidebar__nav">
-        <NavLink 
-          to="/admin/dashboard" 
-          className={({ isActive }) => 
+        <NavLink
+          to="/admin/dashboard"
+          className={({ isActive }) =>
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
           }
           title="Admin dashboard overview"
@@ -25,9 +25,9 @@ const Sidebar = () => {
           <Home size={20} className="admin-sidebar__nav-icon" />
           Dashboard
         </NavLink>
-        <NavLink 
-          to="/admin/users" 
-          className={({ isActive }) => 
+        <NavLink
+          to="/admin/users"
+          className={({ isActive }) =>
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
           }
           title="Manage user accounts and roles"
@@ -35,9 +35,9 @@ const Sidebar = () => {
           <Users size={20} className="admin-sidebar__nav-icon" />
           User Management
         </NavLink>
-        <NavLink 
-          to="/admin/events" 
-          className={({ isActive }) => 
+        <NavLink
+          to="/admin/events"
+          className={({ isActive }) =>
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
           }
           title="Manage and moderate events"
@@ -45,9 +45,9 @@ const Sidebar = () => {
           <Calendar size={20} className="admin-sidebar__nav-icon" />
           Event Management
         </NavLink>
-        <NavLink 
-          to="/admin/moderation" 
-          className={({ isActive }) => 
+        <NavLink
+          to="/admin/moderation"
+          className={({ isActive }) =>
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
           }
           title="Moderate forum content and posts"
@@ -55,7 +55,7 @@ const Sidebar = () => {
           <MessageSquare size={20} className="admin-sidebar__nav-icon" />
           Content Moderation
         </NavLink>
-        <NavLink 
+        {/* <NavLink 
           to="/admin/reports" 
           className={({ isActive }) => 
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
@@ -64,8 +64,8 @@ const Sidebar = () => {
         >
           <Flag size={20} className="admin-sidebar__nav-icon" />
           Report Management
-        </NavLink>
-        <NavLink 
+        </NavLink> */}
+        {/* <NavLink 
           to="/admin/audit-logs" 
           className={({ isActive }) => 
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
@@ -74,10 +74,10 @@ const Sidebar = () => {
         >
           <List size={20} className="admin-sidebar__nav-icon" />
           Audit Logs
-        </NavLink>
-        <NavLink 
-          to="/admin/payments" 
-          className={({ isActive }) => 
+        </NavLink> */}
+        <NavLink
+          to="/admin/payments"
+          className={({ isActive }) =>
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
           }
           title="Manage payment transactions"
@@ -85,7 +85,7 @@ const Sidebar = () => {
           <CreditCard size={20} className="admin-sidebar__nav-icon" />
           Payment Management
         </NavLink>
-        <NavLink 
+        {/* <NavLink 
           to="/admin/settings" 
           className={({ isActive }) => 
             `admin-sidebar__nav-item ${isActive ? 'active' : ''}`
@@ -94,7 +94,7 @@ const Sidebar = () => {
         >
           <Settings size={20} className="admin-sidebar__nav-icon" />
           Settings
-        </NavLink>
+        </NavLink> */}
       </nav>
     </div>
   );

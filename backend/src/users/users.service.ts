@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, PrismaClient, Role, User } from '@prisma/client';
+import { Prisma, PrismaClient, Role, User, AccountStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -16,6 +16,10 @@ export class UsersService {
     private prisma: PrismaService,
     private auditLogsService: AuditLogsService,
   ) { }
+
+  async findById(userId: string) {
+    return this.prisma.user.findUnique({ where: { id: userId } });
+  }
 
   async findAll(currentUser: User) {
     // Chỉ ADMIN mới có thể xem tất cả thông tin user
@@ -142,6 +146,96 @@ export class UsersService {
     );
 
     return updatedProfile;
+  }
+
+  async getUsersForAdmin(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    role?: Role,
+    status?: AccountStatus,
+  ) {
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { profile: { displayName: { contains: search, mode: 'insensitive' } } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          profile: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async updateUserRole(userId: string, role: Role, adminId: string) {
+    const userToUpdate = await this.findUserWithProfile(userId); // Reuse to check existence
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+
+    await this.auditLogsService.log(
+      adminId,
+      'UPDATE_USER_ROLE',
+      'User',
+      userId,
+      { role: userToUpdate.role },
+      { role: updatedUser.role },
+    );
+
+    return updatedUser;
+  }
+
+  async updateUserStatus(userId: string, status: AccountStatus, adminId: string) {
+    const userToUpdate = await this.findUserWithProfile(userId); // Reuse to check existence
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status },
+    });
+
+    await this.auditLogsService.log(
+      adminId,
+      'UPDATE_USER_STATUS',
+      'User',
+      userId,
+      { status: userToUpdate.status },
+      { status: updatedUser.status },
+    );
+
+    return updatedUser;
   }
 
   // Overload the method to accept an optional transaction client

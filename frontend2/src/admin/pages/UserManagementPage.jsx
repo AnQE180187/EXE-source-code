@@ -1,35 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, UserCheck, UserX, Edit, MoreHorizontal } from 'lucide-react';
 import api from '../../services/api';
+import UpdateRoleModal from '../components/user/UpdateRoleModal';
 import './AdminPages.css';
-
-// Mock data for initial UI development
-const mockUsers = [
-  { id: '1', profile: { displayName: 'Admin User' }, email: 'admin@freeday.com', role: 'Admin', status: 'Active', joinDate: '2024-01-15' },
-  { id: '2', profile: { displayName: 'Organizer User' }, email: 'organizer@freeday.com', role: 'Organizer', status: 'Active', joinDate: '2024-02-20' },
-  { id: '3', profile: { displayName: 'Participant User' }, email: 'participant@freeday.com', role: 'Participant', status: 'Active', joinDate: '2024-03-10' },
-  { id: '4', profile: { displayName: 'Banned User' }, email: 'banned@freeday.com', role: 'Participant', status: 'Banned', joinDate: '2024-01-05' },
-  { id: '5', profile: { displayName: 'New User' }, email: 'newuser@freeday.com', role: 'Participant', status: 'Active', joinDate: '2024-12-01' },
-];
 
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setLoading(true);
       try {
-        // In a real scenario, you would fetch users from the API
-        // const response = await api.get('/admin/users');
-        // setUsers(response.data);
-        
-        // Using mock data for now
-        setUsers(mockUsers);
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit,
+        });
+        if (searchTerm) params.append('search', searchTerm);
+        if (roleFilter !== 'all') params.append('role', roleFilter);
+        if (statusFilter !== 'all') params.append('status', statusFilter);
 
+        const response = await api.get(`/admin/users?${params.toString()}`);
+        setUsers(response.data.data);
+        setTotalUsers(response.data.total);
       } catch (err) {
         setError('Không thể tải danh sách người dùng.');
         console.error(err);
@@ -38,28 +41,53 @@ const UserManagementPage = () => {
       }
     };
 
-    fetchUsers();
-  }, []);
+    const debounceFetch = setTimeout(() => {
+        fetchUsers();
+    }, 500);
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.profile.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role.toLowerCase() === roleFilter;
-    const matchesStatus = statusFilter === 'all' || user.status.toLowerCase() === statusFilter;
-    
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+    return () => clearTimeout(debounceFetch);
+  }, [currentPage, limit, searchTerm, roleFilter, statusFilter]);
 
-  const handleBanUser = (userId) => {
+  const handleBanUser = async (userId, currentStatus) => {
+    const newStatus = currentStatus === 'BANNED' ? 'ACTIVE' : 'BANNED';
+    if (!window.confirm(`Bạn có chắc chắn muốn đổi trạng thái người dùng thành ${newStatus}?`)) {
+      return;
+    }
+
+    const originalUsers = [...users];
     setUsers(users.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === 'Banned' ? 'Active' : 'Banned' }
-        : user
+      user.id === userId ? { ...user, status: newStatus } : user
+    ));
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await api.patch(`/admin/users/${userId}/status`, { status: newStatus });
+      setSuccess('Cập nhật trạng thái người dùng thành công.');
+    } catch (err) {
+      setUsers(originalUsers);
+      setError(`Lỗi khi cập nhật trạng thái người dùng: ${err.message}`);
+      console.error(err);
+    }
+  };
+
+  const openModal = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedUser(null);
+    setIsModalOpen(false);
+  };
+
+  const handleRoleUpdated = (userId, newRole) => {
+    setUsers(users.map(user =>
+      user.id === userId ? { ...user, role: newRole } : user
     ));
   };
 
-  if (loading) return <div className="ap-loading">Đang tải người dùng...</div>;
-  if (error) return <div className="ap-error">{error}</div>;
+  const totalPages = Math.ceil(totalUsers / limit);
 
   return (
     <div className="ap-wrap">
@@ -70,16 +98,16 @@ const UserManagementPage = () => {
             <button className="ap-btn ap-btn--outline">
               <Filter size={16} /> Xuất
             </button>
-            <button className="ap-btn ap-btn--primary">
-              <UserCheck size={16} /> Thêm Người Dùng
-            </button>
           </div>
         </div>
       </div>
 
+      {error && <div className="ap-error">{error}</div>}
+      {success && <div className="ap-success">{success}</div>}
+
       <div className="ap-card">
         <div className="ap-card__header">
-          <h3 className="ap-card__title">Tất Cả Người Dùng ({filteredUsers.length})</h3>
+          <h3 className="ap-card__title">Tất Cả Người Dùng ({totalUsers})</h3>
           <p className="ap-card__desc">Quản lý tài khoản người dùng, vai trò và quyền hạn</p>
         </div>
         <div className="ap-card__body">
@@ -100,9 +128,9 @@ const UserManagementPage = () => {
                 onChange={(e) => setRoleFilter(e.target.value)}
               >
                 <option value="all">Tất Cả Vai Trò</option>
-                <option value="admin">Quản Trị</option>
-                <option value="organizer">Người Tổ Chức</option>
-                <option value="participant">Người Tham Gia</option>
+                <option value="ADMIN">Quản Trị</option>
+                <option value="ORGANIZER">Người Tổ Chức</option>
+                <option value="PARTICIPANT">Người Tham Gia</option>
               </select>
             </div>
             <div className="ap-filter-group">
@@ -113,8 +141,8 @@ const UserManagementPage = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="all">Tất Cả Trạng Thái</option>
-                <option value="active">Hoạt Động</option>
-                <option value="banned">Bị Cấm</option>
+                <option value="ACTIVE">Hoạt Động</option>
+                <option value="BANNED">Bị Cấm</option>
               </select>
             </div>
           </div>
@@ -131,7 +159,9 @@ const UserManagementPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
+              {loading ? (
+                <tr><td colSpan="6" className="ap-loading">Đang tải...</td></tr>
+              ) : users.map((user) => (
                 <tr key={user.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -146,11 +176,11 @@ const UserManagementPage = () => {
                         color: 'var(--primary)',
                         fontWeight: '600'
                       }}>
-                        {user.profile.displayName.charAt(0)}
+                        {user.profile?.displayName?.charAt(0) || 'U'}
                       </div>
                       <div>
                         <div style={{ fontWeight: '600', color: 'var(--ink)' }}>
-                          {user.profile.displayName}
+                          {user.profile?.displayName || 'N/A'}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
                           ID: {user.id}
@@ -169,17 +199,17 @@ const UserManagementPage = () => {
                       {user.status}
                     </span>
                   </td>
-                  <td>{new Date(user.joinDate).toLocaleDateString()}</td>
+                  <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="ap-btn ap-btn--outline ap-btn--sm">
+                      <button className="ap-btn ap-btn--outline ap-btn--sm" onClick={() => openModal(user)}>
                         <Edit size={14} />
                       </button>
                       <button 
-                        className={`ap-btn ap-btn--sm ${user.status === 'Banned' ? 'ap-btn--success' : 'ap-btn--danger'}`}
-                        onClick={() => handleBanUser(user.id)}
+                        className={`ap-btn ap-btn--sm ${user.status === 'BANNED' ? 'ap-btn--success' : 'ap-btn--danger'}`}
+                        onClick={() => handleBanUser(user.id, user.status)}
                       >
-                        {user.status === 'Banned' ? <UserCheck size={14} /> : <UserX size={14} />}
+                        {user.status === 'BANNED' ? <UserCheck size={14} /> : <UserX size={14} />}
                       </button>
                       <button className="ap-btn ap-btn--outline ap-btn--sm">
                         <MoreHorizontal size={14} />
@@ -189,10 +219,36 @@ const UserManagementPage = () => {
                 </tr>
               ))}
             </tbody>
-            <caption>Hiển thị {filteredUsers.length} trong {users.length} người dùng</caption>
+            <caption>Hiển thị {users.length} trong {totalUsers} người dùng</caption>
           </table>
+
+          <div className="ap-pagination">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="ap-btn"
+            >
+              Trước
+            </button>
+            <span>Trang {currentPage} / {totalPages}</span>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="ap-btn"
+            >
+              Sau
+            </button>
+          </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <UpdateRoleModal 
+          user={selectedUser} 
+          onClose={closeModal} 
+          onRoleUpdated={handleRoleUpdated} 
+        />
+      )}
     </div>
   );
 };

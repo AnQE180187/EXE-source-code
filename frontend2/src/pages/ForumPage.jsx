@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getPosts, createPost, updatePost, deletePost } from '../services/forumService';
+import { togglePostLike } from '../services/postLikesService'; // Import the like service
 import { useAuth } from '../context/AuthContext';
-import { MessageSquare, ThumbsUp, Plus, Edit } from 'lucide-react';
-import { Trash } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Plus, Edit, Trash } from 'lucide-react';
 import ForumDetailModal from './ForumDetailModal';
 import PostModal from './PostModal';
 import './ForumPage.css';
@@ -42,7 +41,9 @@ const ForumPage = () => {
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = {
+        sortBy: sortOrder,
+      };
       if (activeTag) params.tag = activeTag;
       let data = await getPosts(params);
       if (activeTag) {
@@ -55,11 +56,39 @@ const ForumPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTag]);
+  }, [activeTag, user, sortOrder]); // Add sortOrder to dependency array
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts, sortOrder]);
+  }, [fetchPosts]);
+
+  const handleLikeClick = async (postId) => {
+    if (!user) return; // Or prompt to login
+
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+
+    const isLiked = post.likes?.some(like => like.userId === user.sub);
+
+    // Optimistic UI update
+    setPosts(posts.map(p => 
+      p.id === postId 
+        ? { 
+            ...p, 
+            likes: isLiked ? [] : [{ userId: user.sub }], // Toggle like status
+            _count: { ...p._count, likes: (p._count.likes || 0) + (isLiked ? -1 : 1) } 
+          } 
+        : p
+    ));
+
+    try {
+      await togglePostLike(postId);
+    } catch (err) {
+      setError('Failed to update like status. Please try again.');
+      // Revert optimistic update on error
+      fetchPosts(); 
+    }
+  };
 
   const handleTagClick = (tagName) => {
     setActiveTag(tagName === activeTag ? null : tagName);
@@ -158,6 +187,7 @@ const ForumPage = () => {
                 post={post} 
                 onPostSelect={setDetailPostId} 
                 onEditSelect={handleOpenEditModal}
+                onLikeClick={handleLikeClick} // Pass the handler
                 currentUserId={user?.sub}
                 onDelete={handleDeleteClick}
                 onTagClick={handleTagClick}
@@ -189,7 +219,14 @@ const ForumPage = () => {
 };
 
 // PostCard component
-const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId, onDelete, onTagClick }) => {
+const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId, onDelete, onTagClick, onLikeClick }) => {
+  const handleLike = (e) => {
+    e.stopPropagation(); // Prevent opening the detail modal
+    onLikeClick(post.id);
+  };
+
+  const isLiked = post.likes?.some(like => like.userId === currentUserId);
+
   return (
     <div className="fp-card">
       <div className="fp-card-author">
@@ -214,14 +251,14 @@ const PostCard = ({ post, onPostSelect, onEditSelect, currentUserId, onDelete, o
         </div>
       </div>
       <div className="fp-card-stats">
-        <div className="fp-stat-item">
-          <ThumbsUp size={16} />
-          <span>0</span>
-        </div>
-        <div className="fp-stat-item">
+        <button className={`fp-stat-item fp-like-btn ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+          <ThumbsUp size={16} fill={isLiked ? 'currentColor' : 'none'} />
+          <span>{post._count?.likes || 0}</span>
+        </button>
+        <button className="fp-stat-item fp-comment-btn" onClick={() => onPostSelect(post.id)}>
           <MessageSquare size={16} />
           <span>{post._count?.comments || 0}</span>
-        </div>
+        </button>
         {currentUserId === post.authorId && (
           <>
             <button className="fp-edit-btn" onClick={() => onEditSelect(post)}><Edit size={16}/></button>

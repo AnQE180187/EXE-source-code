@@ -1,10 +1,82 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { WithdrawalStatus } from '@prisma/client';
+import { Role, WithdrawalStatus, AccountStatus, EventStatus, TransactionStatus, ReportStatus } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
+import { EventsService } from 'src/events/events.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private usersService: UsersService,
+    private eventsService: EventsService,
+  ) { }
+
+  async getDashboardStats() {
+    const [totalUsers, totalEvents, totalRevenue, totalTransactions, totalPosts, openReports, recentUsers, recentEvents, recentOpenReports, recentActivities] = await this.prisma.$transaction([
+      this.prisma.user.count(),
+      this.prisma.event.count(),
+      this.prisma.transaction.aggregate({
+        _sum: { amount: true },
+        where: { status: TransactionStatus.COMPLETED },
+      }),
+      this.prisma.transaction.count({ where: { status: TransactionStatus.COMPLETED } }),
+      this.prisma.post.count(),
+      this.prisma.report.count({ where: { status: ReportStatus.OPEN } }),
+      this.prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { profile: true } }),
+      this.prisma.event.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
+      this.prisma.report.findMany({ where: { status: ReportStatus.OPEN }, orderBy: { createdAt: 'desc' }, take: 5 }),
+      this.prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { actor: { include: { profile: true } } } }),
+    ]);
+
+    return {
+      totalUsers,
+      totalEvents,
+      totalRevenue: totalRevenue._sum.amount || 0,
+      totalTransactions,
+      totalPosts,
+      openReports,
+      recentUsers,
+      recentEvents,
+      recentOpenReports,
+      recentActivities,
+    };
+  }
+
+  async getUsers(
+    page: number,
+    limit: number,
+    search?: string,
+    role?: Role,
+    status?: AccountStatus,
+  ) {
+    return this.usersService.getUsersForAdmin(page, limit, search, role, status);
+  }
+
+  async getEvents(
+    page: number,
+    limit: number,
+    search?: string,
+    status?: EventStatus,
+  ) {
+    return this.eventsService.findAllForAdmin(page, limit, search, status);
+  }
+
+  async updateUserRole(userId: string, role: Role, adminId: string) {
+    return this.usersService.updateUserRole(userId, role, adminId);
+  }
+
+  async updateUserStatus(userId: string, status: AccountStatus, adminId: string) {
+    return this.usersService.updateUserStatus(userId, status, adminId);
+  }
+
+  async updateEventStatus(eventId: string, status: EventStatus, adminId: string) {
+    const admin = await this.usersService.findById(adminId);
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
+    return this.eventsService.updateStatus(eventId, { status }, admin);
+  }
 
   async getWithdrawals(status?: WithdrawalStatus) {
     return this.prisma.withdrawalRequest.findMany({
@@ -100,3 +172,4 @@ export class AdminService {
     });
   }
 }
+

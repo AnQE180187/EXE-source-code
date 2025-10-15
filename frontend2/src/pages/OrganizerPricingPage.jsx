@@ -7,7 +7,7 @@ const OrganizerPricingPage = () => {
   const packages = [
     {
       name: 'Gói Business Pro',
-      price: '150.000',
+      price: '4.000',
       period: 'tháng',
       features: [
         'Ưu tiên hiển thị lên đầu( luôn nằm trong top )',
