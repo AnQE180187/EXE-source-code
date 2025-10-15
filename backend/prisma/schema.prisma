@@ -315,7 +315,7 @@ model Message {
   content        String
   createdAt      DateTime     @default(now())
   isRead         Boolean      @default(false)
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation(fields: [senderId], references: [id])
 
   @@map("messages")
@@ -362,7 +362,6 @@ model WithdrawalRequest {
 
   @@map("withdrawal_requests")
 }
-
 
 enum Role {
   PARTICIPANT
