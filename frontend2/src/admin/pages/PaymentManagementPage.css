@@ -1,0 +1,233 @@
+/* ===== THEME (có thể chỉnh theo brand của bạn) ===== */
+.payment-mgmt {
+  --brand-start: #023334;
+  --brand-end: #08BAA1;
+  --primary: #08BAA1;
+  --primary-600: #079e8a;
+  --text: #0f172a;
+  --muted: #64748b;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e5e7eb;
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger:  #ef4444;
+
+  color: var(--text);
+}
+
+/* ===== PAGE TITLE ===== */
+.page-title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  position: relative;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text);
+}
+
+.tab-btn.active {
+  color: var(--text);
+}
+
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-start), var(--brand-end));
+  border-radius: 3px 3px 0 0;
+}
+
+/* ===== LOADING ===== */
+.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 10px;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== SECTIONS ===== */
+.section-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+  margin: 0.25rem 0 0.75rem;
+}
+
+/* ===== TABLE WRAP ===== */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(2, 51, 52, 0.08);
+}
+
+/* ===== TABLE ===== */
+.fd-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.fd-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f1f5f9; /* slate-100 */
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  z-index: 1;
+}
+
+.fd-table tbody td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.fd-table tbody tr:nth-child(even) {
+  background: #fcfdff;
+}
+
+.fd-table tbody tr:hover {
+  background: #f8fbfd;
+}
+
+/* ===== ACTIONS ===== */
+.action-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .04s ease, background-color .15s ease, border-color .15s ease;
+  user-select: none;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-approve {
+  background: rgba(22, 163, 74, 0.08);
+  color: var(--success);
+  border-color: rgba(22, 163, 74, 0.25);
+}
+.btn-approve:hover {
+  background: rgba(22, 163, 74, 0.15);
+}
+
+.btn-reject {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+.btn-reject:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* ===== BADGES (trạng thái giao dịch) ===== */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  border: 1px solid transparent;
+}
+
+.badge.success,
+.badge.succeeded,
+.badge.completed {
+  color: var(--success);
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+.badge.pending,
+.badge.processing {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.badge.failed,
+.badge.error,
+.badge.canceled,
+.badge.cancelled {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  padding: 18px 14px;
+  color: var(--muted);
+  background: #f8fafc;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page-title { font-size: 1.25rem; }
+  .section-title { font-size: 1rem; }
+  .fd-table thead th, .fd-table tbody td { padding: 10px 12px; }
+  .tabs { gap: 2px; }
+  .tab-btn { padding: 0.5rem 0.75rem; font-weight: 600; }
+  .action-cell { gap: 6px; }
+}
+
+/* Đảm bảo kéo ngang tốt trên màn nhỏ khi bảng rộng */
+.table-wrap { overflow-x: auto; }

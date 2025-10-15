@@ -103,7 +103,7 @@ const EventDetailPage = () => {
 
     const isConfirmed = window.confirm(
       registrationStatus.status === 'DEPOSITED'
-        ? 'Bạn có chắc chắn muốn hủy đặt cọc không? Tiền cọc sẽ được hoàn lại.'
+        ? 'Bạn có chắc chắn muốn hủy đặt cọc không? Tiền cọc sẽ KHÔNG ĐƯỢC hoàn lại.'
         : 'Bạn có chắc chắn muốn hủy đăng ký không?'
     );
 
