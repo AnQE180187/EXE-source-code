@@ -73,6 +73,12 @@ export const AuthProvider = ({ children }) => {
     return decodedUser;
   };
 
+  const loginWithToken = (token) => {
+    localStorage.setItem('token', token);
+    const decodedUser = jwtDecode(token);
+    setUser(decodedUser);
+  };
+
   const register = async (credentials) => {
     const response = await registerService(credentials);
     return response;
@@ -84,7 +90,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, loading, refreshUser }}>
+    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, loading, refreshUser, loginWithToken }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,9 +5,10 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { randomBytes, createHash } from 'crypto';
 import { MailService } from 'src/common/mail.service';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,52 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) { }
+
+  async googleLogin(req, res: Response) {
+    if (!req.user) {
+      throw new UnauthorizedException('No user from google');
+    }
+
+    const { email, firstName, lastName, picture } = req.user;
+
+    let user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          provider: 'google',
+          profile: {
+            create: {
+              displayName: `${firstName} ${lastName}`,
+              avatarUrl: picture,
+            },
+          },
+        },
+        include: { profile: true },
+      });
+    } else {
+      // Update user to set provider to google if they registered with email before
+      user = await this.prisma.user.update({
+        where: { email },
+        data: {
+          provider: 'google',
+          profile: {
+            update: {
+              avatarUrl: picture,
+            }
+          }
+        },
+        include: { profile: true },
+      });
+    }
+
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    const token = this.jwtService.sign(payload);
+
+    // Redirect to frontend with token
+    return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?token=${token}`);
+  }
 
   async register(registerUserDto: RegisterUserDto) {
     const { email, password, displayName, dateOfBirth, gender, city, bio, phone, address } = registerUserDto;

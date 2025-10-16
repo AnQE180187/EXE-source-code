@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,13 +6,21 @@ import './LoginPage.css';
 import '../styles/form.css';
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, loginWithToken } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [apiError, setApiError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isRegistered = searchParams.get('registered') === 'true';
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (token) {
+      loginWithToken(token);
+      navigate('/');
+    }
+  }, [searchParams, loginWithToken, navigate]);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -39,6 +47,10 @@ const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/auth/google`;
   };
 
   return (
@@ -70,6 +82,11 @@ const LoginPage = () => {
           </div>
           <button type="submit" className="login-button" disabled={isLoading}>
             {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
+          </button>
+          <div className="or-separator"><span>HOẶC</span></div>
+          <button type="button" className="google-login-button" onClick={handleGoogleLogin}>
+            <img src="/google-icon.svg" alt="Google icon" />
+            Đăng nhập với Google
           </button>
           <p className="login-link">
             Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
