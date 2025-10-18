@@ -7,6 +7,7 @@ import { PostLikesModule } from 'src/post-likes/post-likes.module';
 @Module({
   imports: [PrismaModule, PostLikesModule],
   controllers: [PostsController],
-  providers: [PostsService]
+  providers: [PostsService],
+  exports: [PostsService],
 })
 export class PostsModule {}

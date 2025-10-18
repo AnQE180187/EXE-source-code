@@ -191,3 +191,47 @@
   color: #6b7280;
   padding: 20px;
 }
+
+/* Styles for withdrawal summary */
+.withdrawal-summary {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+}
+
+.summary-row span:first-child {
+  color: #6b7280;
+}
+
+.summary-row span:last-child {
+  font-weight: 600;
+}
+
+.commission-fee {
+  color: #ef4444; /* Red-500 */
+}
+
+.summary-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 8px 0;
+}
+
+.total-row span {
+  font-size: 16px;
+  font-weight: 700;
+}

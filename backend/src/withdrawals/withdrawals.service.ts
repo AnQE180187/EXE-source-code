@@ -4,6 +4,8 @@ import { User, WithdrawalStatus } from '@prisma/client';
 import { CreateWithdrawalDto } from './dto/create-withdrawal.dto';
 import { WalletService } from 'src/wallet/wallet.service';
 
+const COMMISSION_RATE = 0.15; // 15% commission
+
 @Injectable()
 export class WithdrawalsService {
   constructor(
@@ -21,7 +23,7 @@ export class WithdrawalsService {
     });
   }
 
-  async createWithdrawalRequest(user: User, { amount }: CreateWithdrawalDto) {
+  async createWithdrawalRequest(user: User, { amount: requestedAmount }: CreateWithdrawalDto) {
     const payoutAccount = await this.prisma.payoutAccount.findUnique({
       where: { userId: user.id },
     });
@@ -32,29 +34,39 @@ export class WithdrawalsService {
 
     const wallet = await this.walletService.findOrCreateWalletForUser(user);
 
-    if (amount > wallet.balance) {
+    if (requestedAmount > wallet.balance) {
       throw new BadRequestException('Withdrawal amount cannot exceed your current balance.');
     }
 
+    if (requestedAmount <= 0) {
+        throw new BadRequestException('Withdrawal amount must be positive.');
+    }
+
+    const commission = requestedAmount * COMMISSION_RATE;
+    const finalAmount = requestedAmount - commission;
+
     // Use a transaction to ensure data consistency
     return this.prisma.$transaction(async (tx) => {
-      // 1. Decrease the wallet balance
-      const updatedWallet = await tx.wallet.update({
+      // 1. Decrease the wallet balance by the full requested amount
+      await tx.wallet.update({
         where: { userId: user.id },
         data: {
-          balance: { decrement: amount },
+          balance: { decrement: requestedAmount },
         },
       });
 
-      // 2. Create the withdrawal request record
+      // 2. Create the withdrawal request record with both amounts
       const withdrawalRequest = await tx.withdrawalRequest.create({
         data: {
           organizerId: user.id,
-          amount,
+          requestedAmount: requestedAmount, // Store the original amount
+          amount: finalAmount, // Store the amount after commission
           payoutAccountId: payoutAccount.id,
           status: WithdrawalStatus.PENDING,
         },
       });
+
+      // TODO: Optionally, create a transaction record for the commission itself
 
       return withdrawalRequest;
     });

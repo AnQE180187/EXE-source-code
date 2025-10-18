@@ -350,7 +350,8 @@ model PayoutAccount {
 model WithdrawalRequest {
   id              String           @id @default(uuid())
   organizerId     String           @map("organizer_id")
-  amount          Float
+  requestedAmount Float?           @map("requested_amount") // The original 100% amount requested
+  amount          Float            // The final amount after commission (e.g., 85%)
   status          WithdrawalStatus @default(PENDING)
   payoutAccountId String           @map("payout_account_id")
   createdAt       DateTime         @default(now()) @map("created_at")

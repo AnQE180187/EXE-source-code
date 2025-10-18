@@ -50,7 +50,7 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`;
   };
 
   return (
@@ -62,19 +62,19 @@ const LoginPage = () => {
           {apiError && <p className="form-message form-message--error">{apiError}</p>}
           <div>
             <label htmlFor="email" className="form-label">Email</label>
-            <input 
-              id="email" 
+            <input
+              id="email"
               className="login-input"
-              placeholder="email@example.com" 
+              placeholder="email@example.com"
               {...register('email', { required: 'Email là bắt buộc' })}
             />
             {errors.email && <p className="form-error">{errors.email.message}</p>}
           </div>
           <div>
             <label htmlFor="password" className="form-label">Mật khẩu</label>
-            <input 
-              id="password" 
-              type="password" 
+            <input
+              id="password"
+              type="password"
               className="login-input"
               {...register('password', { required: 'Mật khẩu là bắt buộc' })}
             />

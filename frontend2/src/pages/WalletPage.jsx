@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import { Wallet, DollarSign, Clock, AlertTriangle } from 'lucide-react';
 import './WalletPage.css';
 
+const COMMISSION_RATE = 0.15; // 15% commission
+
 const WalletPage = () => {
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
@@ -121,6 +123,24 @@ const WalletPage = () => {
                     {isSubmitting ? 'Đang xử lý...' : 'Rút tiền'}
                   </button>
                 </div>
+                
+                {withdrawalAmount && !isNaN(parseFloat(withdrawalAmount)) && parseFloat(withdrawalAmount) > 0 && (
+                  <div className="withdrawal-summary">
+                    <div className="summary-row">
+                      <span>Số tiền yêu cầu:</span>
+                      <span>{parseFloat(withdrawalAmount).toLocaleString('vi-VN')} VNĐ</span>
+                    </div>
+                    <div className="summary-row">
+                      <span>Phí hoa hồng (15%):</span>
+                      <span className="commission-fee">-{(parseFloat(withdrawalAmount) * COMMISSION_RATE).toLocaleString('vi-VN')} VNĐ</span>
+                    </div>
+                    <hr className="summary-divider" />
+                    <div className="summary-row total-row">
+                      <span>Thực nhận:</span>
+                      <span>{(parseFloat(withdrawalAmount) * (1 - COMMISSION_RATE)).toLocaleString('vi-VN')} VNĐ</span>
+                    </div>
+                  </div>
+                )}
               </form>
             )}
           </div>
@@ -156,3 +176,4 @@ const WalletPage = () => {
 };
 
 export default WalletPage;
+

@@ -2,7 +2,7 @@ import { Controller, Get, Patch, Param, Query, UseGuards, Body, Req, ParseIntPip
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Role, WithdrawalStatus, AccountStatus, EventStatus } from '@prisma/client';
+import { Role, WithdrawalStatus, AccountStatus, EventStatus, VisibilityStatus } from '@prisma/client';
 import { AdminService } from './admin.service';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -37,6 +37,16 @@ export class AdminController {
     return this.adminService.getEvents(page, limit, search, status);
   }
 
+  @Get('posts')
+  getPosts(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+    @Query('status') status?: VisibilityStatus,
+  ) {
+    return this.adminService.getPosts(page, limit, search, status);
+  }
+
   @Patch('users/:id/role')
   updateUserRole(
     @Param('id') id: string,
@@ -62,6 +72,15 @@ export class AdminController {
     @Req() req: any,
   ) {
     return this.adminService.updateEventStatus(id, status, req.user.id);
+  }
+
+  @Patch('posts/:id/status')
+  updatePostStatus(
+    @Param('id') id: string,
+    @Body('status') status: VisibilityStatus,
+    @Req() req: any,
+  ) {
+    return this.adminService.updatePostStatus(id, status, req.user.id);
   }
 
   @Get('withdrawals')

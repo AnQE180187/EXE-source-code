@@ -5,9 +5,10 @@ import { WithdrawalsModule } from 'src/withdrawals/withdrawals.module';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { UsersModule } from 'src/users/users.module';
 import { EventsModule } from 'src/events/events.module';
+import { PostsModule } from 'src/posts/posts.module';
 
 @Module({
-  imports: [WithdrawalsModule, WalletModule, UsersModule, EventsModule],
+  imports: [WithdrawalsModule, WalletModule, UsersModule, EventsModule, PostsModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

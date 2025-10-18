@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Role, WithdrawalStatus, AccountStatus, EventStatus, TransactionStatus, ReportStatus } from '@prisma/client';
+import { Role, WithdrawalStatus, AccountStatus, EventStatus, TransactionStatus, ReportStatus, VisibilityStatus } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { EventsService } from 'src/events/events.service';
+import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class AdminService {
@@ -10,6 +11,7 @@ export class AdminService {
     private prisma: PrismaService,
     private usersService: UsersService,
     private eventsService: EventsService,
+    private postsService: PostsService,
   ) { }
 
   async getDashboardStats() {
@@ -62,6 +64,15 @@ export class AdminService {
     return this.eventsService.findAllForAdmin(page, limit, search, status);
   }
 
+  async getPosts(
+    page: number,
+    limit: number,
+    search?: string,
+    status?: VisibilityStatus,
+  ) {
+    return this.postsService.findAllForAdmin(page, limit, search, status);
+  }
+
   async updateUserRole(userId: string, role: Role, adminId: string) {
     return this.usersService.updateUserRole(userId, role, adminId);
   }
@@ -76,6 +87,10 @@ export class AdminService {
       throw new NotFoundException('Admin not found');
     }
     return this.eventsService.updateStatus(eventId, { status }, admin);
+  }
+
+  async updatePostStatus(postId: string, status: VisibilityStatus, adminId: string) {
+    return this.postsService.updateStatus(postId, status, adminId);
   }
 
   async getWithdrawals(status?: WithdrawalStatus) {
@@ -129,13 +144,17 @@ export class AdminService {
       throw new NotFoundException('Pending withdrawal request not found.');
     }
 
+    // Determine the amount to refund. Use the original requested amount if available,
+    // otherwise fall back to the stored (85%) amount for older records.
+    const amountToRefund = request.requestedAmount ?? request.amount;
+
     // Use a transaction to refund the balance and update the request
     return this.prisma.$transaction(async (tx) => {
-      // 1. Refund the amount to the organizer's wallet
+      // 1. Refund the correct amount to the organizer's wallet
       await tx.wallet.update({
         where: { userId: request.organizerId },
         data: {
-          balance: { increment: request.amount },
+          balance: { increment: amountToRefund },
         },
       });
 
