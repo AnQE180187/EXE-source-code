@@ -85,7 +85,7 @@ const LoginPage = () => {
           </button>
           <div className="or-separator"><span>HOẶC</span></div>
           <button type="button" className="google-login-button" onClick={handleGoogleLogin}>
-            <img src="/google-icon.svg" alt="Google icon" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png" alt="Google icon" />
             Đăng nhập với Google
           </button>
           <p className="login-link">
