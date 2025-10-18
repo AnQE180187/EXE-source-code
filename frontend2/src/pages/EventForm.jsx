@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { getCloudinarySignature, uploadImage } from '../services/uploadService';
 
 import './EventForm.css';
+import MapEmbed from '../components/MapEmbed';
 
 // Validation schema using Zod
 const eventSchema = z.object({
@@ -33,7 +34,7 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
   const [imagePreview, setImagePreview] = useState(initialData?.imageUrl || null);
   const [uploadError, setUploadError] = useState(null);
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm({
     resolver: zodResolver(eventSchema),
     defaultValues: { status: 'DRAFT', price: 0, capacity: 10, tags: '' },
   });
@@ -57,6 +58,19 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
+  };
+
+  // Map helpers
+  const locationText = watch('locationText');
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) return alert('Trình duyệt không hỗ trợ định vị.');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setValue('locationText', `${latitude}, ${longitude}`);
+      },
+      () => alert('Không lấy được vị trí hiện tại.')
+    );
   };
 
   const handleFormSubmit = async (data) => {
@@ -102,8 +116,14 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
 
           <div className="form-group">
             <label htmlFor="locationText">Địa điểm</label>
-            <input id="locationText" {...register('locationText')} className={errors.locationText ? 'input-error' : ''} />
+            <input id="locationText" {...register('locationText')} className={errors.locationText ? 'input-error' : ''} placeholder="Nhập địa chỉ hoặc toạ độ (lat, lng)" />
             {errors.locationText && <p className="error-text">{errors.locationText.message}</p>}
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <button type="button" className="submit-button" onClick={handleUseCurrentLocation} style={{ padding: '0.5rem 0.75rem' }}>Dùng vị trí hiện tại</button>
+            </div>
+            <div style={{ marginTop: '0.75rem' }}>
+              <MapEmbed query={locationText} />
+            </div>
           </div>
 
            <div className="form-group">

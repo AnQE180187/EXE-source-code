@@ -10,6 +10,7 @@ import Modal from '../components/ui/Modal';
 import EventModal from './EventModal';
 import DepositModal from './DepositModal';
 import './EventDetailPage.css';
+import MapEmbed from '../components/MapEmbed';
 
 const EventDetailPage = () => {
   const { id } = useParams();
@@ -265,6 +266,11 @@ const EventDetailPage = () => {
                   Nhắn tin
                 </button>
               )}
+            </div>
+
+            {/* Google Map under organizer info (no API key) */}
+            <div className="detail-card" style={{ padding: 0, overflow: 'hidden' }}>
+              <MapEmbed query={event.locationText} />
             </div>
           </main>
 
