@@ -157,6 +157,28 @@ color: white;
 /* Profile Menu */
 .profile-menu {
   position: relative;
+  display: flex; /* Added to align items horizontally */
+  align-items: center; /* Added to align items vertically */
+  gap: 1rem; /* Added space between bell and profile */
+}
+
+.notification-icon {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 50%;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark);
+  transition: background-color 0.2s ease;
+}
+
+.notification-icon:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .profile-menu__trigger {

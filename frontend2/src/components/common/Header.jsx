@@ -1,9 +1,8 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogIn, Menu, X, ChevronDown } from 'lucide-react';
+import NotificationBell from '../NotificationBell'; // Import the new component
 
 import './Header.css';
 
@@ -74,6 +73,7 @@ const Header = () => {
     }
     return (
       <div className="profile-menu">
+        <NotificationBell />
         <button
           className="profile-menu__trigger"
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}

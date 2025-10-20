@@ -17,13 +17,12 @@ import { UploadModule } from './upload/upload.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ForumTagsModule } from './forum-tags/forum-tags.module';
-import { ChatModule } from './chat/chat.module';
-import { PayoutAccountsModule } from './payout-accounts/payout-accounts.module';
+import { ChatModule }mport { PayoutAccountsModule } from './payout-accounts/payout-accounts.module';
 import { WalletModule } from './wallet/wallet.module';
-import { WithdrawalsModule } from './withdrawals/withdrawals.module';
-import { AdminModule } from './admin/admin.module';
+import { WithdrawalsModule }mport { AdminModule } from './admin/admin.module';
 import { PostLikesModule } from './post-likes/post-likes.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -52,6 +51,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
     AdminModule,
     PostLikesModule,
     ChatbotModule,
+    NotificationsModule, // Added NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

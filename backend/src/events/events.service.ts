@@ -5,15 +5,18 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto'; // Import new DTO
 import { User, EventStatus, Role, Prisma } from '@prisma/client';
 import { AuditLogsService } from 'src/audit-logs/audit-logs.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationType } from 'src/notifications/enums/notification-type.enum';
 
 @Injectable()
 export class EventsService {
   constructor(
     private prisma: PrismaService,
     private auditLogsService: AuditLogsService,
+    private notificationsService: NotificationsService,
   ) {}
 
-  create(createEventDto: CreateEventDto, organizer: User) {
+  async create(createEventDto: CreateEventDto, organizer: User) {
     const { tags, ...eventData } = createEventDto;
 
     const eventInput: Prisma.EventCreateInput = {
@@ -36,7 +39,24 @@ export class EventsService {
       };
     }
 
-    return this.prisma.event.create({ data: eventInput });
+    const newEvent = await this.prisma.event.create({ data: eventInput });
+
+    // Notify all users about the new event
+    const allUsers = await this.prisma.user.findMany();
+    for (const user of allUsers) {
+      if (user.id !== organizer.id) {
+        await this.notificationsService.createNotification(
+          user.id,
+          NotificationType.NEW_EVENT,
+          {
+            eventId: newEvent.id,
+            eventTitle: newEvent.title,
+          },
+        );
+      }
+    }
+
+    return newEvent;
   }
 
   findAll(query: { search?: string; price?: string, tag?: string, date?: string, location?: string, category?: string, sort?: string, min_registrations?: string }) {

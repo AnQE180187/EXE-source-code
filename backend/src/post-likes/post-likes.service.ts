@@ -1,10 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationType } from 'src/notifications/enums/notification-type.enum';
 
 @Injectable()
 export class PostLikesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async toggleLike(postId: string, user: User) {
     const post = await this.prisma.post.findUnique({
@@ -52,10 +57,23 @@ export class PostLikesService {
       });
 
       // Increment the likes count
-      await this.prisma.post.update({
+      const updatedPost = await this.prisma.post.update({
         where: { id: postId },
         data: { likesCount: { increment: 1 } },
       });
+
+      // Create a notification for the post author
+      if (post.authorId !== user.id) {
+        await this.notificationsService.createNotification(
+          post.authorId,
+          NotificationType.POST_LIKED,
+          {
+            postId: post.id,
+            postTitle: post.title,
+            likedByUserId: user.id,
+          },
+        );
+      }
 
       return { liked: true };
     }
