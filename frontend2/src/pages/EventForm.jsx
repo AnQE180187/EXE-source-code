@@ -12,6 +12,8 @@ const eventSchema = z.object({
   title: z.string().min(3, 'Tên sự kiện phải có ít nhất 3 ký tự'),
   description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
   locationText: z.string().min(5, 'Địa điểm là bắt buộc'),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
   startAt: z.string().refine(val => new Date(val) > new Date(), 'Thời gian bắt đầu phải ở tương lai'),
   endAt: z.string(),
   price: z.preprocess(
@@ -61,13 +63,15 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
   };
 
   // Map helpers
-  const locationText = watch('locationText');
+  const lat = watch('lat');
+  const lng = watch('lng');
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) return alert('Trình duyệt không hỗ trợ định vị.');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        setValue('locationText', `${latitude}, ${longitude}`);
+        setValue('lat', latitude);
+        setValue('lng', longitude);
       },
       () => alert('Không lấy được vị trí hiện tại.')
     );
@@ -115,14 +119,26 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
           </div>
 
           <div className="form-group">
-            <label htmlFor="locationText">Địa điểm</label>
-            <input id="locationText" {...register('locationText')} className={errors.locationText ? 'input-error' : ''} placeholder="Nhập địa chỉ hoặc toạ độ (lat, lng)" />
+            <label htmlFor="locationText">Địa điểm (Tên đường, tòa nhà...)</label>
+            <input id="locationText" {...register('locationText')} className={errors.locationText ? 'input-error' : ''} placeholder="VD: 123 Nguyễn Văn Linh, Đà Nẵng" />
             {errors.locationText && <p className="error-text">{errors.locationText.message}</p>}
+            
+            <div className="form-group-row" style={{marginTop: '0.5rem'}}>
+                <div className="form-group">
+                    <label htmlFor="lat">Vĩ độ (Latitude)</label>
+                    <input id="lat" type="number" step="any" {...register('lat', { valueAsNumber: true })} disabled />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="lng">Kinh độ (Longitude)</label>
+                    <input id="lng" type="number" step="any" {...register('lng', { valueAsNumber: true })} disabled />
+                </div>
+            </div>
+
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <button type="button" className="submit-button" onClick={handleUseCurrentLocation} style={{ padding: '0.5rem 0.75rem' }}>Dùng vị trí hiện tại</button>
+              <button type="button" className="submit-button" onClick={handleUseCurrentLocation} style={{ padding: '0.5rem 0.75rem' }}>Lấy Tọa Độ Hiện Tại</button>
             </div>
             <div style={{ marginTop: '0.75rem' }}>
-              <MapEmbed query={locationText} />
+              <MapEmbed lat={lat} lng={lng} query={!lat && !lng ? 'Hanoi, Vietnam' : null} />
             </div>
           </div>
 

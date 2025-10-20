@@ -14,6 +14,14 @@ export class CreateEventDto {
   @IsNotEmpty()
   locationText: string;
 
+  @IsNumber()
+  @IsOptional()
+  lat?: number;
+
+  @IsNumber()
+  @IsOptional()
+  lng?: number;
+
   @IsDateString()
   startAt: string;
 

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Bot } from 'lucide-react'; // Using an icon for the AI
 import './ChatList.css';
 
 const formatTime = (ts) => {
@@ -24,24 +25,34 @@ const ChatList = ({ conversations = [], onSelectConversation, selectedConversati
   const { user } = useAuth();
   const [q, setQ] = useState('');
 
-  // Chuẩn hoá & sort theo thời gian tin nhắn mới nhất (messages[0] là mới nhất trong app của bạn)
   const items = useMemo(() => {
     const norm = conversations.map((c) => {
+      if (c.isAi) {
+        return {
+          ...c,
+          __name: 'Trợ lý AI FreeDay',
+          __avatar: null, // We will render the Bot icon directly
+          __last: c.messages?.[0]?.content || 'Sẵn sàng trả lời...',
+          __lastAt: c.updatedAt,
+        };
+      }
+
       const other = getOtherUser(c, user);
       const lastMsg = c?.messages?.[0] || null;
       const name = other?.profile?.displayName || 'Người dùng';
       const avatar =
         other?.profile?.avatarUrl ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=08BAA1&color=fff`;
+      
       return {
         ...c,
         __other: other,
         __name: name,
         __avatar: avatar,
         __last: lastMsg?.content || '',
-        __lastAt: lastMsg?.createdAt || null,
+        __lastAt: lastMsg?.createdAt || c.updatedAt,
         __unread: c?.unreadCount || 0,
-        __online: !!other?.isOnline, // nếu có trường này từ API thì dot sẽ sáng
+        __online: !!other?.isOnline,
       };
     });
 
@@ -53,14 +64,18 @@ const ChatList = ({ conversations = [], onSelectConversation, selectedConversati
         )
       : norm;
 
-    // sort desc theo thời gian tin cuối
-    filtered.sort((a, b) => {
+    // Separate AI and sort the rest
+    const aiChat = filtered.find(c => c.isAi);
+    const userChats = filtered.filter(c => !c.isAi);
+
+    userChats.sort((a, b) => {
       const ta = a.__lastAt ? new Date(a.__lastAt).getTime() : 0;
       const tb = b.__lastAt ? new Date(b.__lastAt).getTime() : 0;
       return tb - ta;
     });
 
-    return filtered;
+    return aiChat ? [aiChat, ...userChats] : userChats;
+
   }, [conversations, user, q]);
 
   return (
@@ -97,7 +112,11 @@ const ChatList = ({ conversations = [], onSelectConversation, selectedConversati
                 role="option"
               >
                 <div className="avatar-wrap">
-                  <img src={c.__avatar} alt={c.__name} className="avatar" />
+                  {c.isAi ? (
+                    <div className="ai-avatar"><Bot size={24} /></div>
+                  ) : (
+                    <img src={c.__avatar} alt={c.__name} className="avatar" />
+                  )}
                   {c.__online && <span className="status-dot" aria-label="Online" />}
                 </div>
 

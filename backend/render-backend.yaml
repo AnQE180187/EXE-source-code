@@ -1,0 +1,40 @@
+# render.yaml for the BACKEND repository
+# This file defines the Database and the Backend Web Service.
+
+services:
+  # ------------------ Database (PostgreSQL) ------------------ #
+  - type: pserv
+    name: freeday-db
+    region: singapore
+    plan: free
+    databaseName: freeday
+    postgres:
+      version: 15
+
+  # ------------------ Backend (NestJS) ------------------ #
+  - type: web
+    name: freeday-backend
+    region: singapore
+    plan: free
+    buildCommand: "npm install && npx prisma migrate deploy && npm run build"
+    startCommand: "npm run start:prod"
+    healthCheckPath: /api
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: freeday-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: "" # <-- IMPORTANT: Paste your deployed frontend URL here in the Render dashboard
+      # Add your Cloudinary secrets here in the Render Dashboard
+      - key: CLOUDINARY_CLOUD_NAME
+        value: ""
+      - key: CLOUDINARY_API_KEY
+        value: ""
+      - key: CLOUDINARY_API_SECRET
+        sync: false

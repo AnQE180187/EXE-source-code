@@ -23,6 +23,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { AdminModule } from './admin/admin.module';
 import { PostLikesModule } from './post-likes/post-likes.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { PostLikesModule } from './post-likes/post-likes.module';
     WithdrawalsModule,
     AdminModule,
     PostLikesModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

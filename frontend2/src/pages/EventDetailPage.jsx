@@ -291,7 +291,7 @@ const EventDetailPage = () => {
 
             {/* Google Map under organizer info (no API key) */}
             <div className="detail-card" style={{ padding: 0, overflow: 'hidden' }}>
-              <MapEmbed query={event.locationText} />
+              <MapEmbed lat={event.lat} lng={event.lng} />
             </div>
           </main>
 

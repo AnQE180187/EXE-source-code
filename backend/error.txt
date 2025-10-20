@@ -1,0 +1,20 @@
+node:internal/modules/cjs/loader:664
+      throw e;
+      ^
+
+Error: Cannot find module 'D:\CVScode source\FPT-7\EXE deploy\backend\node_modules\@angular-devkit\core\src\index.js'
+    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1437:15)
+    at finalizeEsmResolution (node:internal/modules/cjs/loader:1426:15)
+    at resolveExports (node:internal/modules/cjs/loader:657:14)
+    at Function._findPath (node:internal/modules/cjs/loader:749:31)
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1387:27)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24) {
+  code: 'MODULE_NOT_FOUND',
+  path: 'D:\\CVScode source\\FPT-7\\EXE deploy\\backend\\node_modules\\@angular-devkit\\core'  
+}
+
+Node.js v22.15.0

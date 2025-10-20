@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { getMessages } from '../services/chatService';
+import { postQuery } from '../services/chatbotService';
 import ChatInput from './ChatInput';
 import { useAuth } from '../context/AuthContext';
+import { Bot } from 'lucide-react';
 import './ChatBox.css';
 
 const NEAR_BOTTOM_PX = 120; // ngưỡng “đang gần cuối”
@@ -11,6 +14,7 @@ const ChatBox = ({ conversation, socket }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   // container của list tin nhắn
   const containerRef = useRef(null);
@@ -41,41 +45,43 @@ const ChatBox = ({ conversation, socket }) => {
     return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
-  // load tin khi đổi conversation
   useEffect(() => {
-    let isMounted = true;
-    const fetchMessages = async () => {
-      try {
-        setLoading(true);
-        const data = await getMessages(conversation.id);
-        if (!isMounted) return;
-        setMessages(data || []);
-        // đánh dấu vừa load để effect dưới kéo xuống 1 lần
-        justLoadedRef.current = true;
-      } catch (err) {
-        if (!isMounted) return;
-        setError('Could not fetch messages.');
-      } finally {
-        if (!isMounted) return;
-        setLoading(false);
-      }
-    };
-    fetchMessages();
+    // Reset state when conversation changes
+    setMessages(conversation?.messages || []);
+    setError(null);
+    justLoadedRef.current = true;
 
-    // lắng nghe socket
-    const onReceive = (message) => {
-      if (String(message.conversationId) === String(conversation.id)) {
-        // KHÔNG cuộn ở đây — để effect dưới quyết định
-        setMessages((prev) => [...prev, message]);
-      }
-    };
+    // If it's a regular chat, fetch messages and listen to socket
+    if (!conversation.isAi) {
+      let isMounted = true;
+      const fetchMessages = async () => {
+        try {
+          setLoading(true);
+          const data = await getMessages(conversation.id);
+          if (isMounted) setMessages(data || []);
+        } catch (err) {
+          if (isMounted) setError('Could not fetch messages.');
+        } finally {
+          if (isMounted) setLoading(false);
+        }
+      };
+      fetchMessages();
 
-    socket?.on?.('message.receive', onReceive);
+      const onReceive = (message) => {
+        if (String(message.conversationId) === String(conversation.id)) {
+          setMessages((prev) => [...prev, message]);
+        }
+      };
+      socket?.on?.('message.receive', onReceive);
 
-    return () => {
-      isMounted = false;
-      socket?.off?.('message.receive', onReceive);
-    };
+      return () => {
+        isMounted = false;
+        socket?.off?.('message.receive', onReceive);
+      };
+    } else {
+      // For AI chat, loading is immediately false
+      setLoading(false);
+    }
   }, [conversation, socket]);
 
   // quyết định cuộn sau mỗi lần messages thay đổi
@@ -93,17 +99,61 @@ const ChatBox = ({ conversation, socket }) => {
     // còn lại: giữ nguyên vị trí
   }, [messages.length]); // chỉ cần length
 
-  const handleSendMessage = (content) => {
+  const handleSendMessage = async (content) => {
     if (!content?.trim()) return;
-    socket.emit('message.send', {
-      conversationId: conversation.id,
-      content: content.trim(),
-    });
-    // KHÔNG ép cuộn ở đây → để effect trên xử lý
+
+    if (conversation.isAi) {
+      const userMessage = { senderId: 'user', content, createdAt: new Date().toISOString() };
+      setMessages((prev) => [...prev, userMessage]);
+      setIsAiLoading(true);
+      try {
+        const response = await postQuery(content);
+        const botMessage = { senderId: 'bot', content: response.reply, createdAt: new Date().toISOString() };
+        setMessages((prev) => [...prev, botMessage]);
+      } catch (error) {
+        const errorMessage = { senderId: 'bot', content: 'Rất tiếc, đã có lỗi xảy ra. Vui lòng thử lại sau.', createdAt: new Date().toISOString() };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsAiLoading(false);
+      }
+    } else {
+      socket.emit('message.send', {
+        conversationId: conversation.id,
+        content: content.trim(),
+      });
+    }
+  };
+
+  const renderMessageText = (text) => {
+    const linkRegex = /(.*?)\s*\[EVENT_URL:(\/events\/[^\]]+)\]/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    // Use a standard while loop for exec
+    while ((match = linkRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      const linkText = match[1].trim().replace(/\*\*/g, ''); // Remove markdown bold
+      const url = match[2];
+      parts.push(
+        <Link key={match.index} to={url} className="chat-event-link">
+          <strong>{linkText}</strong>
+        </Link>
+      );
+      lastIndex = linkRegex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? <>{parts}</> : text;
   };
 
   const otherUser =
-    user && conversation.organizerId === user.sub
+    !conversation.isAi && user && conversation.organizerId === user.sub
       ? conversation.participant
       : conversation.organizer;
 
@@ -113,29 +163,42 @@ const ChatBox = ({ conversation, socket }) => {
   return (
     <div className="chat-box">
       <div className="chat-header">
-        <h3>{otherUser?.profile?.displayName || 'Unknown User'}</h3>
+        {conversation.isAi ? (
+            <><Bot size={20} /> <h3>{conversation.event.title}</h3></>
+        ) : (
+            <h3>{otherUser?.profile?.displayName || 'Unknown User'}</h3>
+        )}
       </div>
 
       <div className="messages-container" ref={containerRef}>
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`message-item ${
-              msg.senderId === user.sub ? 'sent' : 'received'
-            }`}
-          >
-            <div className="message-content">{msg.content}</div>
-            <div className="message-timestamp">
-              {new Date(msg.createdAt).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+        {messages.map((msg, index) => {
+          const isSent = conversation.isAi 
+            ? msg.senderId === 'user' 
+            : msg.senderId === user?.sub;
+
+          return (
+            <div
+              key={msg.id || `msg-${index}`}
+              className={`message-item ${isSent ? 'sent' : 'received'}`}
+            >
+              <div className="message-content">{renderMessageText(msg.content)}</div>
+              <div className="message-timestamp">
+                {new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+        {isAiLoading && (
+            <div className="message-item received">
+                 <div className="message-content is-typing"><span></span><span></span><span></span></div>
+            </div>
+        )}
       </div>
 
-      <ChatInput onSendMessage={handleSendMessage} />
+      <ChatInput onSendMessage={handleSendMessage} disabled={isAiLoading} />
     </div>
   );
 };
