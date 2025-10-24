@@ -43,14 +43,14 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
 
   useEffect(() => {
     if (initialData) {
-        const tagsString = initialData.tags?.map(t => t.tag.name).join(', ') || '';
-        reset({
-            ...initialData,
-            startAt: initialData.startAt ? new Date(initialData.startAt).toISOString().slice(0, 16) : '',
-            endAt: initialData.endAt ? new Date(initialData.endAt).toISOString().slice(0, 16) : '',
-            tags: tagsString,
-        });
-        setImagePreview(initialData.imageUrl);
+      const tagsString = initialData.tags?.map(t => t.tag.name).join(', ') || '';
+      reset({
+        ...initialData,
+        startAt: initialData.startAt ? new Date(initialData.startAt).toISOString().slice(0, 16) : '',
+        endAt: initialData.endAt ? new Date(initialData.endAt).toISOString().slice(0, 16) : '',
+        tags: tagsString,
+      });
+      setImagePreview(initialData.imageUrl);
     }
   }, [initialData, reset]);
 
@@ -83,9 +83,9 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
 
     // Convert tags string to array
     if (finalData.tags) {
-        finalData.tags = finalData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+      finalData.tags = finalData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
     } else {
-        finalData.tags = [];
+      finalData.tags = [];
     }
 
     if (imageFile) {
@@ -122,16 +122,16 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
             <label htmlFor="locationText">Địa điểm (Tên đường, tòa nhà...)</label>
             <input id="locationText" {...register('locationText')} className={errors.locationText ? 'input-error' : ''} placeholder="VD: 123 Nguyễn Văn Linh, Đà Nẵng" />
             {errors.locationText && <p className="error-text">{errors.locationText.message}</p>}
-            
-            <div className="form-group-row" style={{marginTop: '0.5rem'}}>
-                <div className="form-group">
-                    <label htmlFor="lat">Vĩ độ (Latitude)</label>
-                    <input id="lat" type="number" step="any" {...register('lat', { valueAsNumber: true })} disabled />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="lng">Kinh độ (Longitude)</label>
-                    <input id="lng" type="number" step="any" {...register('lng', { valueAsNumber: true })} disabled />
-                </div>
+
+            <div className="form-group-row" style={{ marginTop: '0.5rem' }}>
+              <div className="form-group">
+                <label htmlFor="lat">Vĩ độ (Latitude)</label>
+                <input id="lat" type="number" step="any" {...register('lat', { valueAsNumber: true })} /*disabled*/ />
+              </div>
+              <div className="form-group">
+                <label htmlFor="lng">Kinh độ (Longitude)</label>
+                <input id="lng" type="number" step="any" {...register('lng', { valueAsNumber: true })} /*disabled*/ />
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
@@ -142,7 +142,7 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
             </div>
           </div>
 
-           <div className="form-group">
+          <div className="form-group">
             <label htmlFor="tags">Tags (phân cách bởi dấu phẩy)</label>
             <input id="tags" {...register('tags')} placeholder="VD: âm nhạc, công nghệ, workshop" />
           </div>
@@ -153,11 +153,11 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, submitButtonText = 'Su
           <div className="form-group">
             <label>Ảnh bìa</label>
             <div className="image-preview-wrapper">
-                {imagePreview ? (
-                    <img src={imagePreview} alt="Xem trước ảnh bìa" className="image-preview" />
-                ) : (
-                    <div className="image-placeholder"><span>Chưa có ảnh</span></div>
-                )}
+              {imagePreview ? (
+                <img src={imagePreview} alt="Xem trước ảnh bìa" className="image-preview" />
+              ) : (
+                <div className="image-placeholder"><span>Chưa có ảnh</span></div>
+              )}
             </div>
             <input id="image" type="file" accept="image/*" onChange={handleImageChange} className="file-input" />
             {uploadError && <p className="error-text">{uploadError}</p>}
