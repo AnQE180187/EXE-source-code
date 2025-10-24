@@ -10,8 +10,9 @@ const OrganizerPricingPage = () => {
       price: '150.000',
       period: 'tháng',
       features: [
-        'Ưu tiên hiển thị lên đầu( luôn nằm trong top )',
-
+        'Đăng sự kiện không giới hạn',
+        'Ưu tiên hiển thị lên đầu',
+        'Quản lí sự kiện chuyên nghiệp',
       ],
     },
     {
@@ -20,9 +21,11 @@ const OrganizerPricingPage = () => {
       period: 'tháng',
       popular: true,
       features: [
-        'Đăng nhiều sự kiện',
+        'Đăng sự kiện không giới hạn',
+        'Ưu tiên hiển thị lên đầu',
+        'Quản lí sự kiện chuyên nghiệp',
         'Quảng bá trên fanpage',
-        'Ưu tiên hiển thị & xem dữ liệu khách hàng',
+        'Xem thống kê doanh thu & xem dữ liệu khách hàng',
       ],
     }
 
