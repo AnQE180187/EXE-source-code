@@ -14,7 +14,7 @@ const eventSchema = z.object({
   locationText: z.string().min(5, 'Địa điểm là bắt buộc'),
   lat: z.number().optional(),
   lng: z.number().optional(),
-  startAt: z.string().refine(val => new Date(val) > new Date(), 'Thời gian bắt đầu phải ở tương lai'),
+  startAt: z.string()/*.refine(val => new Date(val) > new Date(), 'Thời gian bắt đầu phải ở tương lai')*/,
   endAt: z.string(),
   price: z.preprocess(
     a => parseFloat(String(a)),
