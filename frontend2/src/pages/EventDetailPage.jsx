@@ -107,7 +107,7 @@ const EventDetailPage = () => {
       await cancelRegistration(id);
       alert(
         registrationStatus.status === 'DEPOSITED'
-          ? 'Hủy đặt cọc thành công! Tiền sẽ được hoàn lại trong 3-5 ngày.'
+          ? 'Hủy đặt cọc thành công! Tiền cọc sẽ không được hoàn lại.'
           : 'Hủy đăng ký thành công!'
       );
       await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
