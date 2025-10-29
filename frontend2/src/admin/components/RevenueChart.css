@@ -1,0 +1,60 @@
+.revenue-chart-wrap {
+  width: 100%;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #f3f4f6;
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.chart-controls button {
+  border: none;
+  background-color: transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #4b5563;
+  transition: all 0.2s ease-in-out;
+}
+
+.chart-controls button.active {
+  background-color: #fff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.custom-tooltip {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.custom-tooltip .label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}

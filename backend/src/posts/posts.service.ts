@@ -287,16 +287,19 @@ export class PostsService {
     return updatedPost;
   }
 
-  async remove(id: string, userId: string) {
+  async remove(id: string, userId: string | null, adminId?: string) {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
-    if (post.authorId !== userId) {
+
+    // If an admin is performing the action, skip the ownership check
+    if (!adminId && post.authorId !== userId) {
       throw new ForbiddenException('You are not allowed to delete this post');
     }
 
-    await this.auditLogs.log(userId, 'POST_DELETE', 'Post', id, post, null);
+    const actorId = adminId || userId;
+    await this.auditLogs.log(actorId, 'POST_DELETE', 'Post', id, post, null);
 
     await this.prisma.post.delete({ where: { id } });
     return { message: 'Post deleted successfully' };

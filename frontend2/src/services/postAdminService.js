@@ -34,3 +34,18 @@ export const updateAdminPostStatus = async (postId, status) => {
     throw error.response?.data?.message || 'Cập nhật trạng thái bài viết thất bại.';
   }
 };
+
+/**
+ * Deletes a post as an administrator.
+ * @param {string} postId - The ID of the post to delete.
+ * @returns {Promise<void>}
+ */
+export const deleteAdminPost = async (postId) => {
+  try {
+    await api.delete(`/admin/posts/${postId}`);
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    throw error.response?.data?.message || 'Xóa bài viết thất bại.';
+  }
+};
+

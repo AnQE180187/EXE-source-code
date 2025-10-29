@@ -68,3 +68,32 @@ export const rejectWithdrawal = (id) => {
 export const getAllWallets = () => {
   return api.get('/admin/wallets');
 };
+
+// --- Dashboard --- 
+
+/**
+ * Fetches the statistics for the admin dashboard.
+ * @returns {Promise<object>} The dashboard statistics.
+ */
+export const getDashboardStats = async () => {
+  try {
+    const response = await api.get('/admin/dashboard');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Không thể tải dữ liệu dashboard.';
+  }
+};
+
+/**
+ * Fetches revenue data for the dashboard chart.
+ * @param {'7d' | '30d' | '12m'} period - The time period for the data.
+ * @returns {Promise<Array<{date: string, revenue: number}>>} The chart data.
+ */
+export const getRevenueChartData = async (period) => {
+  try {
+    const response = await api.get('/admin/dashboard/revenue-chart', { params: { period } });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Không thể tải dữ liệu biểu đồ.';
+  }
+};

@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, UseGuards, Body, Req, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Query, UseGuards, Body, Req, ParseIntPipe, DefaultValuePipe, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -14,6 +14,11 @@ export class AdminController {
   @Get('dashboard')
   getDashboardStats() {
     return this.adminService.getDashboardStats();
+  }
+
+  @Get('dashboard/revenue-chart')
+  getRevenueChartData(@Query('period') period: '7d' | '30d' | '12m') {
+    return this.adminService.getRevenueChartData(period || '30d');
   }
 
   @Get('users')
@@ -81,6 +86,12 @@ export class AdminController {
     @Req() req: any,
   ) {
     return this.adminService.updatePostStatus(id, status, req.user.id);
+  }
+
+  @Delete('posts/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deletePost(@Param('id') id: string, @Req() req: any) {
+    return this.adminService.deletePost(id, req.user.id);
   }
 
   @Get('withdrawals')
