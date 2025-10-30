@@ -118,7 +118,7 @@ export class EventsController {
   @UseGuards(AuthGuard('jwt'))
   toggleFavorite(@Param('id') id: string, @Req() req: Request) {
     const user = req.user as User;
-    return this.favoritesService.toggleFavorite(id, user.id);
+    return this.favoritesService.toggleFavorite(id, user);
   }
 
   @Patch(':id')

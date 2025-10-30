@@ -24,6 +24,7 @@ import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { AdminModule } from './admin/admin.module';
 import { PostLikesModule } from './post-likes/post-likes.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
     AdminModule,
     PostLikesModule,
     ChatbotModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

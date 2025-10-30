@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PostLikesService } from './post-likes.service';
 import { PostLikesController } from './post-likes.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, NotificationsModule],
   controllers: [PostLikesController],
   providers: [PostLikesService],
   exports: [PostLikesService],
