@@ -16,26 +16,67 @@ export class AdminService {
   ) { }
 
   async getDashboardStats() {
-    const [totalUsers, totalEvents, totalRevenue, totalTransactions, totalPosts, openReports, recentUsers, recentEvents, recentOpenReports, recentActivities] = await this.prisma.$transaction([
+    // Lấy dữ liệu cần thiết song song trong 1 transaction để tăng tốc
+    const [
+      totalUsers,
+      totalEvents,
+      totalTransactions,
+      totalPosts,
+      openReports,
+      recentUsers,
+      recentEvents,
+      recentOpenReports,
+      recentActivities,
+      completedTransactions,
+    ] = await this.prisma.$transaction([
       this.prisma.user.count(),
       this.prisma.event.count(),
-      this.prisma.transaction.aggregate({
-        _sum: { amount: true },
-        where: { status: TransactionStatus.COMPLETED },
-      }),
       this.prisma.transaction.count({ where: { status: TransactionStatus.COMPLETED } }),
       this.prisma.post.count(),
       this.prisma.report.count({ where: { status: ReportStatus.OPEN } }),
-      this.prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { profile: true } }),
-      this.prisma.event.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
-      this.prisma.report.findMany({ where: { status: ReportStatus.OPEN }, orderBy: { createdAt: 'desc' }, take: 5 }),
-      this.prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { actor: { include: { profile: true } } } }),
+      this.prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        include: { profile: true },
+      }),
+      this.prisma.event.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.report.findMany({
+        where: { status: ReportStatus.OPEN },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.auditLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        include: {
+          actor: { include: { profile: true } },
+        },
+      }),
+      this.prisma.transaction.findMany({
+        where: { status: TransactionStatus.COMPLETED },
+        select: { amount: true, orderCode: true },
+      }),
     ]);
+
+    // 🔹 Tính tổng doanh thu đúng theo quy tắc:
+    // - UPG (Upgrade): cộng 100%
+    // - DEP (Deposit): cộng 15%
+    let totalRevenue = 0;
+    for (const tx of completedTransactions) {
+      if (tx.orderCode.startsWith('UPG')) {
+        totalRevenue += tx.amount;
+      } else if (tx.orderCode.startsWith('DEP')) {
+        totalRevenue += tx.amount * 0.15;
+      }
+    }
 
     return {
       totalUsers,
       totalEvents,
-      totalRevenue: totalRevenue._sum.amount || 0,
+      totalRevenue,
       totalTransactions,
       totalPosts,
       openReports,
@@ -82,10 +123,10 @@ export class AdminService {
       }
 
       if (revenue > 0) {
-        const dateKey = period === '12m' 
+        const dateKey = period === '12m'
           ? tx.createdAt.toISOString().slice(0, 7) // YYYY-MM
           : tx.createdAt.toISOString().slice(0, 10); // YYYY-MM-DD
-        
+
         revenueMap.set(dateKey, (revenueMap.get(dateKey) || 0) + revenue);
       }
     });
@@ -95,9 +136,9 @@ export class AdminService {
       for (let i = 11; i >= 0; i--) {
         const date = subMonths(endDate, i);
         const dateKey = date.toISOString().slice(0, 7);
-        result.push({ 
+        result.push({
           date: dateKey,
-          revenue: revenueMap.get(dateKey) || 0 
+          revenue: revenueMap.get(dateKey) || 0
         });
       }
     } else {
@@ -105,9 +146,9 @@ export class AdminService {
       for (let i = days; i >= 0; i--) {
         const date = subDays(endDate, i);
         const dateKey = date.toISOString().slice(0, 10);
-        result.push({ 
+        result.push({
           date: dateKey,
-          revenue: revenueMap.get(dateKey) || 0 
+          revenue: revenueMap.get(dateKey) || 0
         });
       }
     }
