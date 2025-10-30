@@ -274,26 +274,27 @@ const Header = () => {
                         <button className="mark-read-btn" onClick={e => { e.stopPropagation(); markAllAsRead(); }} style={{fontSize:'0.92rem',color:'#08BAA1',background:'none',border:'none',cursor:'pointer'}}>Đánh dấu đã đọc</button>) : null}
                     </div>
                   </div>
-                  {notifications.length === 0 && (
-                    <DropdownMenuItem>
-                      <span style={{ color: '#888', fontStyle: 'italic', fontSize: '.97rem' }}>Chưa có thông báo nào</span>
-                    </DropdownMenuItem>
-                  )}
-                  {Array.isArray(notifications) && notifications.filter(Boolean).map((n) => (
-                    <DropdownMenuItem key={n.id}>
-                      <Link to={n.href || n.link || '#'} style={{
-                        textDecoration: 'none', color: n.isRead ? '#444' : '#08BAA1', fontWeight: n.isRead ? 500 : 700,
-                        display: 'flex', alignItems: 'center', gap: 8, width:'100%'}}>
-                        {n.type === 'like' && <span style={{color:'#e255a0'}}>❤️</span>}
-                        {n.type === 'comment' && <span style={{color:'#09b'}}>💬</span>}
-                        {n.type === 'favorite' && <span style={{color:'#edb602'}}>★</span>}
-                        <span>{n.content}</span>
-                        <span style={{fontSize:'.86em', color:'#aaa', marginLeft:'auto'}}>{n.time}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
+                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    {notifications.length === 0 && (
+                      <DropdownMenuItem>
+                        <span style={{ color: '#888', fontStyle: 'italic', fontSize: '.97rem' }}>Chưa có thông báo nào</span>
+                      </DropdownMenuItem>
+                    )}
+                    {Array.isArray(notifications) && notifications.filter(Boolean).map((n) => (
+                      <DropdownMenuItem key={n.id}>
+                        <Link to={n.href || n.link || '#'} style={{
+                          textDecoration: 'none', color: n.isRead ? '#444' : '#08BAA1', fontWeight: n.isRead ? 500 : 700,
+                          display: 'flex', alignItems: 'center', gap: 8, width:'100%'}}>
+                          {n.type === 'like' && <span style={{color:'#e255a0'}}>❤️</span>}
+                          {n.type === 'comment' && <span style={{color:'#09b'}}>💬</span>}
+                          {n.type === 'favorite' && <span style={{color:'#edb602'}}>★</span>}
+                          <span>{n.content}</span>
+                          <span style={{fontSize:'.86em', color:'#aaa', marginLeft:'auto'}}>{n.time}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
                   <DropdownMenuItem>
-                    <Link to="/notifications" style={{fontSize:'.96em', color:'#666', textDecoration:'underline #08BAA1'}}>Xem tất cả</Link>
                   </DropdownMenuItem>
                 </DropdownMenu>
               </div>
