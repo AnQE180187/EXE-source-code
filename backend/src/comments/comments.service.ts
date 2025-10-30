@@ -3,10 +3,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { User, VisibilityStatus } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private notificationsService: NotificationsService) {}
 
   async create(createCommentDto: CreateCommentDto, author: User) {
     const { postId, ...commentData } = createCommentDto;
@@ -16,7 +17,7 @@ export class CommentsService {
       throw new NotFoundException(`Post with ID "${postId}" not found`);
     }
 
-    return this.prisma.comment.create({
+    const comment = await this.prisma.comment.create({
       data: {
         ...commentData,
         postId,
@@ -36,6 +37,15 @@ export class CommentsService {
         },
       },
     });
+
+    // Tạo notify cho chủ post nếu không tự comment
+    await this.notificationsService.createCommentNotification(
+      author.id,
+      postId,
+      commentData.content || ''
+    );
+
+    return comment;
   }
 
   findAllByPost(postId: string) {

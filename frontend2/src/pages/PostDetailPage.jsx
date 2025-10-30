@@ -84,7 +84,6 @@ const PostDetailPage = () => {
             </div>
             {isAuthor && (
               <div className="post-actions">
-                <Link to={`/forum/${id}/edit`} className="button button--ghost">Chỉnh sửa</Link>
                 <button onClick={() => setIsDeleteModalOpen(true)} className="button button--danger">Xóa</button>
               </div>
             )}

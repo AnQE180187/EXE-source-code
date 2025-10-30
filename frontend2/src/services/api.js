@@ -25,4 +25,9 @@ api.interceptors.request.use(
   }
 );
 
+export const getMyNotifications = async () => {
+  const res = await api.get('/notifications/me');
+  return res.data;
+};
+
 export default api;

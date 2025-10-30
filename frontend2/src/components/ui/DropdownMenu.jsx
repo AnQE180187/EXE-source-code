@@ -27,13 +27,15 @@ const DropdownMenu = ({ trigger, children }) => {
       </div>
       {isOpen && (
         <div className="dropdown__menu">
-          {React.Children.map(children, child => 
-            React.cloneElement(child, { onClick: () => {
-              if (child.props.onClick) {
-                child.props.onClick();
-              }
-              setIsOpen(false);
-            }})
+          {React.Children.map(children, child =>
+            React.isValidElement(child)
+              ? React.cloneElement(child, { onClick: () => {
+                  if (child.props.onClick) {
+                    child.props.onClick();
+                  }
+                  setIsOpen(false);
+                }})
+              : null
           )}
         </div>
       )}

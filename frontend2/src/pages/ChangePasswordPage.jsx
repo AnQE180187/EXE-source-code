@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { changePassword } from '../services/authService';
-import './ChangePasswordPage.css';
 import '../styles/form.css';
+import './ChangePasswordPage.css';
 
 const ChangePasswordPage = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
