@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Heart, MessageSquare, Calendar, Clock, MapPin, Tag, X } from 'lucide-react';
+import { Heart, MessageSquare, Calendar, Clock, MapPin, Tag, X, Users } from 'lucide-react';
 import { getEventById, deleteEvent, updateEvent } from '../services/eventService';
-import { createRegistration, getRegistrationStatus, cancelRegistration, initiateDeposit } from '../services/registrationService';
+import { createRegistration, getRegistrationStatus, cancelRegistration, initiateDeposit, getRegistrationsForEvent } from '../services/registrationService';
 import { toggleFavorite, getFavoriteStatus } from '../services/favoritesService';
 import { findOrCreateConversation } from '../services/chatService';
 import { useAuth } from '../context/AuthContext';
@@ -33,6 +33,8 @@ const EventDetailPage = () => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositLoading, setDepositLoading] = useState(false);
 
+  const [registrations, setRegistrations] = useState([]);
+
   const fetchEvent = useCallback(async () => {
     try {
       setLoading(true);
@@ -43,6 +45,13 @@ const EventDetailPage = () => {
     } finally {
       setLoading(false);
     }
+  }, [id]);
+
+  const fetchRegistrations = useCallback(async () => {
+    try {
+      const list = await getRegistrationsForEvent(id);
+      setRegistrations(list);
+    } catch {}
   }, [id]);
 
   const fetchRegistrationStatus = useCallback(async () => {
@@ -75,7 +84,8 @@ const EventDetailPage = () => {
     fetchEvent();
     fetchRegistrationStatus();
     fetchFavoriteStatus();
-  }, [fetchEvent, fetchRegistrationStatus, fetchFavoriteStatus]);
+    fetchRegistrations();
+  }, [fetchEvent, fetchRegistrationStatus, fetchFavoriteStatus, fetchRegistrations]);
 
   const handleRegistration = async () => {
     if (!isAuthenticated) return navigate(`/login?redirect=/events/${id}`);
@@ -83,7 +93,7 @@ const EventDetailPage = () => {
       setLoadingRegistration(true);
       await createRegistration(id);
       alert('Đăng ký thành công!');
-      await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
+      await Promise.all([fetchEvent(), fetchRegistrationStatus(), fetchRegistrations()]); // <- cập nhật luôn registrations
     } catch (error) {
       alert(error);
     } finally {
@@ -110,7 +120,7 @@ const EventDetailPage = () => {
           ? 'Hủy đặt cọc thành công! Tiền cọc sẽ không được hoàn lại.'
           : 'Hủy đăng ký thành công!'
       );
-      await Promise.all([fetchEvent(), fetchRegistrationStatus()]);
+      await Promise.all([fetchEvent(), fetchRegistrationStatus(), fetchRegistrations()]); // <- cập nhật luôn registrations
     } catch (error) {
       alert(error);
     } finally {
@@ -327,6 +337,20 @@ const EventDetailPage = () => {
                       <span>{event.price > 0 ? `${event.price.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}</span>
                     </div>
                   </div>
+                  {
+                    typeof event.capacity === 'number' && event.capacity > 0 && (
+                      <div className="info-item">
+                        <Users className="icon" size={22} />
+                        <div style={{display:'flex', flexDirection:'column', lineHeight:'1.3'}}>
+                          <strong>Đăng ký</strong>
+                          <span style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
+                            {registrations.length} / {event.capacity}
+                            <span className="capacity-label" style={{fontWeight:400, color:'#4f9c76',marginLeft:3}}> đã đăng ký</span>
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  }
                 </div>
 
                 {isAuthenticated && (

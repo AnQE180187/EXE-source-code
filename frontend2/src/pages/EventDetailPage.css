@@ -383,6 +383,44 @@
   transform: scale(1.2) rotate(90deg);
 }
 
+.capacity-status {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  font-size: 1.15rem;
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(54,82,173,0.07);
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  gap: 0.18rem;
+  transition: background 0.3s;
+  box-shadow: 0 2px 12px rgba(54,82,173,0.04);
+}
+.capacity-status strong {
+  font-size: 2rem;
+  color: var(--accent-color);
+  min-width: 2.5rem;
+  display: inline-block;
+  margin-right: 0.16rem;
+  transition: color .4s, transform .3s;
+}
+.capacity-divider {
+  font-size: 1.2rem;
+  margin: 0 0.11rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+.capacity-total {
+  font-size: 1.15rem;
+  color: #888;
+}
+.capacity-label {
+  font-size: 1rem;
+  color: #666;
+  margin-left: .48rem;
+}
 
 /* Responsive Design */
 @media (max-width: 992px) {
@@ -420,6 +458,27 @@
   .organizer-info .button {
     margin-left: 0;
     margin-top: 1rem;
+  }
+  .sidebar-card__content {
+    padding: 1.1rem;
+  }
+  .event-detail__sidebar {
+    padding: 0 !important;
+  }
+}
+@media (max-width: 480px) {
+  .capacity-status {
+    font-size: 1rem;
+    padding: 0.35rem 0.4rem;
+  }
+  .sidebar-card__content {
+    padding: 0.5rem 0.3rem;
+  }
+}
+@media (max-width: 600px) {
+  .registrants-info-item {
+    padding: 0.38rem 0.52rem;
+    font-size: 0.96rem;
   }
 }
 
