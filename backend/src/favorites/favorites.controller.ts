@@ -13,7 +13,7 @@ export class FavoritesController {
   @HttpCode(HttpStatus.OK)
   toggle(@Param('eventId') eventId: string, @Req() req: Request) {
     const user = req.user as User;
-    return this.favoritesService.toggleFavorite(eventId, user.id);
+    return this.favoritesService.toggleFavorite(eventId, user); // truyền object user
   }
 
   @Get()

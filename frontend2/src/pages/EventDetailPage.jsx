@@ -155,7 +155,7 @@ const EventDetailPage = () => {
     try {
       setLoadingFavorite(true);
       const result = await toggleFavorite(id);
-      setIsFavorited(result.isFavorited);
+      setIsFavorited(result.favorited); // Backend trả về "favorited", không phải "isFavorited"
     } catch (error) {
       alert(error.message);
     } finally {

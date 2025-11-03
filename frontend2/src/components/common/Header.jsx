@@ -1,9 +1,14 @@
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogIn, Menu, X, ChevronDown } from 'lucide-react';
+import { LogIn, Menu, X, ChevronDown, Bell } from 'lucide-react';
+import DropdownMenu, { DropdownMenuItem } from '../ui/DropdownMenu';
+import { getMyNotifications } from '../../services/api';
+import api from '../../services/api';
+import io from 'socket.io-client';
+import { SOCKET_URL } from '../../services/api';
 
 import './Header.css';
 
@@ -14,6 +19,10 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMembershipMenuOpen, setIsMembershipMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const socketRef = useRef(null);
 
   const navLinkClass = ({ isActive }) =>
     `nav-link ${isActive ? 'nav-link--active' : ''}`;
@@ -29,6 +38,68 @@ const Header = () => {
     setIsMobileMenuOpen(false);
     setIsProfileMenuOpen(false);
     setIsMembershipMenuOpen(false);
+  };
+
+  useEffect(() => {
+    let polling;
+    const fetchNoti = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const noti = await getMyNotifications();
+        setNotifications(noti);
+        setUnreadCount(noti.filter(n => !n.isRead).length);
+      } catch {}
+    };
+    fetchNoti();
+    if (isAuthenticated) {
+      polling = setInterval(fetchNoti, 10000); // Poll mỗi 10s
+    }
+    return () => polling && clearInterval(polling);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated && user && user.userId) {
+      socketRef.current = io(`${SOCKET_URL}/notifications`, {
+        auth: {
+          token: localStorage.getItem('token')
+        }
+      });
+      socketRef.current.on('notification', handleNotificationSocket);
+    }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  // eslint-disable-next-line
+  }, [isAuthenticated, user?.userId]);
+
+  const handleBellClick = async () => {
+    setShowDropdown((v) => !v);
+    // Refresh noti khi mở dropdown
+    if (!showDropdown && isAuthenticated) {
+      try {
+        const noti = await getMyNotifications();
+        setNotifications(noti);
+        setUnreadCount(noti.filter(n => !n.isRead).length);
+      } catch {}
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await api.patch('/notifications/me/read');
+      const noti = await getMyNotifications();
+      setNotifications(noti);
+      setUnreadCount(0);
+    } catch {}
+  };
+
+  // (Chuẩn bị cho socket push realtime)
+  const handleNotificationSocket = newNotification => {
+    setNotifications(prev => [newNotification, ...prev]);
+    setUnreadCount(u => u + 1);
   };
 
   useEffect(() => {
@@ -185,7 +256,49 @@ const Header = () => {
         </nav>
 
         <div className="header__actions">
-          <div className="desktop-actions">
+          <div className="desktop-actions" style={{display:'flex',alignItems:'center',gap:16}}>
+            {isAuthenticated && (
+              <div className="notification-bell-wrapper">
+                <DropdownMenu
+                  trigger={
+                    <div className="notification-bell-btn" style={{cursor:'pointer', position:'relative'}} onClick={handleBellClick}>
+                      <Bell size={24} color={unreadCount>0?'#08BAA1':'#222'} fill={unreadCount>0?"#08BAA1":"none"}/>
+                      {unreadCount > 0 && <span className="notification-dot"></span>}
+                    </div>
+                  }
+                >
+                  <div style={{ padding: '0.5rem 1rem', minWidth: 260 }}>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <span style={{fontWeight:600}}>Thông báo</span>
+                      {unreadCount ? (
+                        <button className="mark-read-btn" onClick={e => { e.stopPropagation(); markAllAsRead(); }} style={{fontSize:'0.92rem',color:'#08BAA1',background:'none',border:'none',cursor:'pointer'}}>Đánh dấu đã đọc</button>) : null}
+                    </div>
+                  </div>
+                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    {notifications.length === 0 && (
+                      <DropdownMenuItem>
+                        <span style={{ color: '#888', fontStyle: 'italic', fontSize: '.97rem' }}>Chưa có thông báo nào</span>
+                      </DropdownMenuItem>
+                    )}
+                    {Array.isArray(notifications) && notifications.filter(Boolean).map((n) => (
+                      <DropdownMenuItem key={n.id}>
+                        <Link to={n.href || n.link || '#'} style={{
+                          textDecoration: 'none', color: n.isRead ? '#444' : '#08BAA1', fontWeight: n.isRead ? 500 : 700,
+                          display: 'flex', alignItems: 'center', gap: 8, width:'100%'}}>
+                          {n.type === 'like' && <span style={{color:'#e255a0'}}>❤️</span>}
+                          {n.type === 'comment' && <span style={{color:'#09b'}}>💬</span>}
+                          {n.type === 'favorite' && <span style={{color:'#edb602'}}>★</span>}
+                          <span>{n.content}</span>
+                          <span style={{fontSize:'.86em', color:'#aaa', marginLeft:'auto'}}>{n.time}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                  <DropdownMenuItem>
+                  </DropdownMenuItem>
+                </DropdownMenu>
+              </div>
+            )}
             <AuthActions />
           </div>
           <button

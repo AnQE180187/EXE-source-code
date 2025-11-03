@@ -26,6 +26,7 @@ import TicketPage from '../pages/TicketPage';
 
 // Forum Pages
 import ForumPage from '../pages/ForumPage';
+import PostDetailPage from '../pages/PostDetailPage';
 import EventManagerPage from '../pages/EventManagerPage';
 import OrganizerPricingPage from '../pages/OrganizerPricingPage';
 import OrganizerPaymentPage from '../pages/OrganizerPaymentPage';
@@ -65,6 +66,7 @@ const router = createBrowserRouter([
       { path: 'events/:id', element: <EventDetailPage /> },
       { path: 'events/:id/ticket', element: <ProtectedRoute><TicketPage /></ProtectedRoute> },
       { path: 'forum', element: <ForumPage /> },
+      { path: 'forum/:id', element: <PostDetailPage /> },
 
       // Protected Routes
       {
@@ -150,3 +152,4 @@ const AppRouter = () => {
 };
 
 export default AppRouter;
+// Added a comment to force re-evaluation

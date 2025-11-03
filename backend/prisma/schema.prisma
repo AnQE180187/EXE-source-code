@@ -42,6 +42,7 @@ model User {
 
   @@unique([provider, providerId])
   @@map("users")
+  actingNotifications Notification[] @relation("ActorRelation")
 }
 
 model Profile {
@@ -223,15 +224,16 @@ model Report {
 }
 
 model Notification {
-  id        String    @id @default(uuid())
-  userId    String    @map("user_id")
-  type      String
-  payload   Json
-  readAt    DateTime? @map("read_at")
-  createdAt DateTime  @default(now()) @map("created_at")
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
+  id        String   @id @default(uuid())
+  type      NotificationType
+  content   String
+  link      String   // đường dẫn tới bài viết/sự kiện liên quan
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id]) // người nhận
+  userId    String
+  actor     User     @relation("ActorRelation", fields: [actorId], references: [id]) // người thực hiện like/comment/favorite
+  actorId   String
 }
 
 model AuditLog {
@@ -417,4 +419,10 @@ enum WithdrawalStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FAVORITE
 }
