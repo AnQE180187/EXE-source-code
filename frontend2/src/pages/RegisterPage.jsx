@@ -8,7 +8,7 @@ import './RegisterPage.css';
 
 // Zod schema for validation, matching the backend DTO
 const registerSchema = z.object({
-  displayName: z.string().min(2, { message: 'Tên hiển thị phải có ít nhất 2 ký tự.' }),
+  displayName: z.string().min(2, { message: 'Tên hiển thị phải có ít nhất 2 ký tự.' }).optional().or(z.literal('')),
   email: z.string().email({ message: 'Email không hợp lệ.' }),
   password: z.string().min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự.' }),
   confirmPassword: z.string(),
@@ -35,9 +35,14 @@ const RegisterPage = () => {
     try {
       // Exclude confirmPassword from the data sent to the backend
       const { confirmPassword: _confirmPassword, ...submissionData } = data;
-      if (submissionData.dateOfBirth === '') {
-        submissionData.dateOfBirth = null;
-      }
+
+      // Convert empty strings to undefined for optional fields
+      Object.keys(submissionData).forEach(key => {
+        if (submissionData[key] === '') {
+          submissionData[key] = undefined;
+        }
+      });
+
       await registerUser(submissionData);
       navigate('/login?registered=true');
     } catch (error) {

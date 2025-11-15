@@ -25,7 +25,7 @@ export class EventsController {
     private readonly eventsService: EventsService,
     private readonly favoritesService: FavoritesService,
     private readonly registrationsService: RegistrationsService, // Injected RegistrationsService
-  ) {}
+  ) { }
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -41,6 +41,17 @@ export class EventsController {
   findManagedByMe(@Req() req: Request) {
     const user = req.user as User;
     return this.eventsService.findManagedByMe(user);
+  }
+
+  @Get(':id/statistics')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ORGANIZER)
+  getEventStatistics(
+    @Param('id') eventId: string,
+    @Req() req: Request
+  ) {
+    const user = req.user as User;
+    return this.eventsService.getEventStatistics(eventId, user);
   }
 
   @Get()

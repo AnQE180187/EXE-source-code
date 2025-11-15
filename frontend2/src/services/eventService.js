@@ -1,12 +1,12 @@
 import api from './api';
 
 export const getEvents = async (params) => {
-  try {
-    const response = await api.get('/events', { params });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data?.message || 'Could not fetch events.';
-  }
+    try {
+        const response = await api.get('/events', { params });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.message || 'Could not fetch events.';
+    }
 };
 
 export const getEventById = async (id) => {
@@ -51,5 +51,14 @@ export const toggleFavorite = async (id) => {
         return response.data;
     } catch (error) {
         throw error.response?.data?.message || 'Could not toggle favorite status.';
+    }
+};
+
+export const getEventStatistics = async (eventId) => {
+    try {
+        const response = await api.get(`/events/${eventId}/statistics`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.message || 'Không thể tải thống kê sự kiện.';
     }
 };

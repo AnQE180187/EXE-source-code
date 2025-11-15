@@ -9,13 +9,19 @@ import MapEmbed from '../components/MapEmbed';
 
 // Validation schema using Zod
 const eventSchema = z.object({
-  title: z.string().min(3, 'Tên sự kiện phải có ít nhất 3 ký tự'),
+  title: z.string().min(1, 'Tên sự kiện không được để trống'),
   description: z.string().min(10, 'Mô tả phải có ít nhất 10 ký tự'),
-  locationText: z.string().min(5, 'Địa điểm là bắt buộc'),
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  startAt: z.string()/*.refine(val => new Date(val) > new Date(), 'Thời gian bắt đầu phải ở tương lai')*/,
-  endAt: z.string(),
+  locationText: z.string().min(1, 'Địa điểm là bắt buộc'),
+  lat: z.preprocess(
+    val => (isNaN(val) ? undefined : val),
+    z.number().optional()
+  ),
+  lng: z.preprocess(
+    val => (isNaN(val) ? undefined : val),
+    z.number().optional()
+  ),
+  startAt: z.string().min(1, 'Thời gian bắt đầu không được để trống')/*.refine(val => new Date(val) > new Date(), 'Thời gian bắt đầu phải ở tương lai')*/,
+  endAt: z.string().min(1, 'Thời gian kết thúc không được để trống'),
   price: z.preprocess(
     a => parseFloat(String(a)),
     z.number().min(0, 'Giá vé không thể âm').optional()

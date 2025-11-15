@@ -6,8 +6,8 @@ import './PostForm.css';
 
 // Validation schema
 const postSchema = z.object({
-  title: z.string().min(5, 'Tiêu đề phải có ít nhất 5 ký tự'),
-  content: z.string().min(20, 'Nội dung phải có ít nhất 20 ký tự'),
+  title: z.string().min(1, 'Tiêu đề Không được để trống'),
+  content: z.string().min(1, 'Nội dung Không được để trống'),
   forumTags: z.string().optional(),
 });
 
@@ -35,10 +35,10 @@ const PostForm = ({ initialData, onSubmit, isSubmitting, submitButtonText }) => 
     <form onSubmit={handleSubmit(handleFormSubmit)} className="post-form">
       <div className="post-form-group">
         <label htmlFor="title">Tiêu đề</label>
-        <input 
-          id="title" 
-          {...register('title')} 
-          placeholder="Bạn có câu hỏi gì?" 
+        <input
+          id="title"
+          {...register('title')}
+          placeholder="Bạn có câu hỏi gì?"
           className={errors.title ? 'input-error' : ''}
         />
         {errors.title && <p className="form-error-text">{errors.title.message}</p>}
@@ -46,10 +46,10 @@ const PostForm = ({ initialData, onSubmit, isSubmitting, submitButtonText }) => 
 
       <div className="post-form-group">
         <label htmlFor="content">Nội dung</label>
-        <textarea 
-          id="content" 
-          {...register('content')} 
-          rows="12" 
+        <textarea
+          id="content"
+          {...register('content')}
+          rows="12"
           placeholder="Mô tả chi tiết vấn đề hoặc câu chuyện của bạn..."
           className={errors.content ? 'input-error' : ''}
         ></textarea>
@@ -58,9 +58,9 @@ const PostForm = ({ initialData, onSubmit, isSubmitting, submitButtonText }) => 
 
       <div className="post-form-group">
         <label htmlFor="forumTags">Tags (phân cách bởi dấu phẩy)</label>
-        <input 
-          id="forumTags" 
-          {...register('forumTags')} 
+        <input
+          id="forumTags"
+          {...register('forumTags')}
           placeholder="VD: tìm bạn, hỏi đáp, chia sẻ"
         />
       </div>

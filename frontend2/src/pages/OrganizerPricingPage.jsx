@@ -6,28 +6,29 @@ import './OrganizerPricingPage.css';
 const OrganizerPricingPage = () => {
   const packages = [
     {
-      name: 'Gói Business Pro',
+      name: 'Gói Nhà Tổ Chức Sự Kiện',
       price: '150.000',
-      period: 'tháng',
-      features: [
-        'Đăng sự kiện không giới hạn',
-        'Ưu tiên hiển thị lên đầu',
-        'Quản lí sự kiện chuyên nghiệp',
-      ],
-    },
-    {
-      name: 'Gói Premium',
-      price: '250.000',
       period: 'tháng',
       popular: true,
       features: [
         'Đăng sự kiện không giới hạn',
         'Ưu tiên hiển thị lên đầu',
         'Quản lí sự kiện chuyên nghiệp',
-        'Quảng bá trên fanpage',
-        'Xem thống kê doanh thu & xem dữ liệu khách hàng',
       ],
-    }
+    },
+    // {
+    //   name: 'Gói Premium',
+    //   price: '250.000',
+    //   period: 'tháng',
+    //   popular: true,
+    //   features: [
+    //     'Đăng sự kiện không giới hạn',
+    //     'Ưu tiên hiển thị lên đầu',
+    //     'Quản lí sự kiện chuyên nghiệp',
+    //     'Quảng bá trên fanpage',
+    //     'Xem thống kê doanh thu & xem dữ liệu khách hàng',
+    //   ],
+    // }
 
   ];
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getManagedEvents } from '../services/userService';
-import { getRegistrationsForEvent } from '../services/registrationService';
+import { getRegistrationsForEvent, getEventStatistics } from '../services/registrationService';
 import { createEvent, updateEvent, deleteEvent } from '../services/eventService';
 import { PlusCircle, Edit, Trash2, Users, BarChart2, Info, Calendar, MapPin, Settings, Wallet } from 'lucide-react';
 import EventModal from './EventModal'; // Import the modal
@@ -11,6 +11,7 @@ const EventManagerPage = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [registrations, setRegistrations] = useState([]);
+  const [statistics, setStatistics] = useState(null);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [error, setError] = useState(null);
@@ -40,22 +41,38 @@ const EventManagerPage = () => {
 
   const handleSelectEvent = useCallback(async (event) => {
     if (selectedEvent?.id === event.id) {
-        setSelectedEvent(null);
-        setRegistrations([]);
-        return;
+      setSelectedEvent(null);
+      setRegistrations([]);
+      setStatistics(null);
+      return;
     }
     setSelectedEvent(event);
     setLoadingDetails(true);
     try {
       const registrationData = await getRegistrationsForEvent(event.id);
       setRegistrations(registrationData || []);
+
+      // Fetch statistics
+      const statsData = await getEventStatistics(event.id);
+      setStatistics(statsData);
     } catch {
       setError('Không thể tải chi tiết sự kiện.');
       setRegistrations([]);
+      setStatistics(null);
     } finally {
       setLoadingDetails(false);
     }
   }, [selectedEvent]);
+
+  // Format amount: show VNĐ for small amounts, shorthand M for millions
+  const formatAmountShort = (amount) => {
+    if (!amount && amount !== 0) return '0 VNĐ';
+    const n = Number(amount) || 0;
+    if (n >= 1000000) {
+      return `${(n / 1000000).toFixed(1)}M`;
+    }
+    return `${n.toLocaleString('vi-VN')} VNĐ`;
+  };
 
   const handleOpenCreateModal = () => {
     setEditingEvent(null);
@@ -74,14 +91,14 @@ const EventManagerPage = () => {
 
   const handleFormSubmit = async (data, eventId) => {
     try {
-        if (eventId) { // If ID exists, it's an update
-            await updateEvent(eventId, data);
-        } else { // Otherwise, it's a create
-            await createEvent(data);
-        }
-        fetchManagedEvents(); // Refetch events on success
+      if (eventId) { // If ID exists, it's an update
+        await updateEvent(eventId, data);
+      } else { // Otherwise, it's a create
+        await createEvent(data);
+      }
+      fetchManagedEvents(); // Refetch events on success
     } catch (err) {
-        setError(err.toString());
+      setError(err.toString());
     }
   };
 
@@ -101,18 +118,18 @@ const EventManagerPage = () => {
     try {
       setLoadingDelete(true);
       await deleteEvent(deletingEvent.id);
-      
+
       // Reset selected event if it's the one being deleted
       if (selectedEvent?.id === deletingEvent.id) {
         setSelectedEvent(null);
         setRegistrations([]);
       }
-      
+
       // Refresh events list
       await fetchManagedEvents();
       setIsDeleteModalOpen(false);
       setDeletingEvent(null);
-      
+
       // Show success message
       setError(null);
     } catch (err) {
@@ -134,21 +151,21 @@ const EventManagerPage = () => {
 
   const registrationStatusBadge = (status) => {
     const statusConfig = {
-      REGISTERED: { 
-        class: 'badge--registered', 
-        text: 'Đăng ký', 
-        icon: '📝' 
+      REGISTERED: {
+        class: 'badge--registered',
+        text: 'Đăng ký',
+        icon: '📝'
       },
-      DEPOSITED: { 
-        class: 'badge--deposited', 
-        text: 'Đã cọc', 
-        icon: '💰' 
+      DEPOSITED: {
+        class: 'badge--deposited',
+        text: 'Đã cọc',
+        icon: '💰'
       },
     };
-    const config = statusConfig[status] || { 
-      class: 'badge--default', 
-      text: status, 
-      icon: '❓' 
+    const config = statusConfig[status] || {
+      class: 'badge--default',
+      text: status,
+      icon: '❓'
     };
     return (
       <span className={`badge ${config.class}`}>
@@ -161,23 +178,23 @@ const EventManagerPage = () => {
   // Calculate registration statistics
   const getRegistrationStats = () => {
     if (!registrations.length) return null;
-    
+
     const total = registrations.length;
     const deposited = registrations.filter(reg => reg.status === 'DEPOSITED').length;
     const registered = registrations.filter(reg => reg.status === 'REGISTERED').length;
-    
+
     return { total, deposited, registered };
   };
 
   return (
     <>
-      <EventModal 
+      <EventModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onComplete={handleFormSubmit}
         initialData={editingEvent}
       />
-      
+
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <div className="delete-modal-overlay" onClick={handleCloseDeleteModal}>
@@ -186,15 +203,15 @@ const EventManagerPage = () => {
             <p>Bạn có chắc chắn muốn xóa sự kiện <strong>"{deletingEvent?.title}"</strong>?</p>
             <p className="delete-warning-text">Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan.</p>
             <div className="delete-modal-actions">
-              <button 
-                onClick={handleCloseDeleteModal} 
+              <button
+                onClick={handleCloseDeleteModal}
                 className="delete-button delete-button--secondary"
                 disabled={loadingDelete}
               >
                 Hủy
               </button>
-              <button 
-                onClick={handleConfirmDelete} 
+              <button
+                onClick={handleConfirmDelete}
                 className="delete-button delete-button--danger"
                 disabled={loadingDelete}
               >
@@ -204,14 +221,14 @@ const EventManagerPage = () => {
           </div>
         </div>
       )}
-      
+
       <div className="event-manager-page">
         <div className="manager-header">
           <h1 className="manager-title">Quản lý sự kiện</h1>
           <div className="manager-header-actions">
             <Link to="/wallet" className="payout-settings-button">
-                <Wallet size={20} />
-                <span>Ví tiền</span>
+              <Wallet size={20} />
+              <span>Ví tiền</span>
             </Link>
             <Link to="/payout-settings" className="payout-settings-button">
               <Settings size={20} />
@@ -234,8 +251,8 @@ const EventManagerPage = () => {
             ) : events.length > 0 ? (
               <ul className="event-list">
                 {events.map(event => (
-                  <li 
-                    key={event.id} 
+                  <li
+                    key={event.id}
                     className={`event-list-item ${selectedEvent?.id === event.id ? 'event-list-item--selected' : ''}`}
                     onClick={() => handleSelectEvent(event)}
                   >
@@ -268,89 +285,122 @@ const EventManagerPage = () => {
               ) : (
                 <div className="details-card">
                   <div className="details-header">
-                      <img src={selectedEvent.imageUrl || 'https://via.placeholder.com/400x200?text=Event'} alt={selectedEvent.title} className="details-header__image" />
-                      <div className="details-header__overlay">
-                          <h2 className="details-title">{selectedEvent.title}</h2>
-                          <div className="details-actions">
-                              <button onClick={() => handleOpenEditModal(selectedEvent)} className="action-button"><Edit size={16}/> Sửa</button>
-                              <button 
-                                onClick={() => handleOpenDeleteModal(selectedEvent)} 
-                                className="action-button action-button--danger"
-                                disabled={loadingDelete}
-                              >
-                                <Trash2 size={16}/> {loadingDelete ? 'Đang xóa...' : 'Xóa'}
-                              </button>
-                          </div>
+                    <img src={selectedEvent.imageUrl || 'https://via.placeholder.com/400x200?text=Event'} alt={selectedEvent.title} className="details-header__image" />
+                    <div className="details-header__overlay">
+                      <h2 className="details-title">{selectedEvent.title}</h2>
+                      <div className="details-actions">
+                        <button onClick={() => handleOpenEditModal(selectedEvent)} className="action-button"><Edit size={16} /> Sửa</button>
+                        <button
+                          onClick={() => handleOpenDeleteModal(selectedEvent)}
+                          className="action-button action-button--danger"
+                          disabled={loadingDelete}
+                        >
+                          <Trash2 size={16} /> {loadingDelete ? 'Đang xóa...' : 'Xóa'}
+                        </button>
                       </div>
+                    </div>
                   </div>
-                  
-                  <div className="details-content">
-                      {/* Basic Info & Stats */}
-                      <div className="stats-grid">
-                          <div className="stat-item"><BarChart2 size={20}/> <span>{statusBadge(selectedEvent.status)}</span></div>
-                          <div className="stat-item"><Users size={20}/> <span>{registrations.length} / {selectedEvent.capacity || '∞'} đã đăng ký</span></div>
-                          <div className="stat-item"><Calendar size={20}/> <span>{new Date(selectedEvent.startAt).toLocaleString('vi-VN')}</span></div>
-                          <div className="stat-item"><MapPin size={20}/> <span>{selectedEvent.locationText}</span></div>
-                      </div>
 
-                      {/* Registration Statistics */}
-                      {registrations.length > 0 && (
-                        <div className="registration-stats">
-                          <h3 className="stats-title">Thống kê đăng ký</h3>
-                          <div className="stats-summary">
-                            <div className="stat-card stat-card--total">
-                              <span className="stat-number">{getRegistrationStats().total}</span>
-                              <span className="stat-label">Tổng số</span>
-                            </div>
-                            <div className="stat-card stat-card--registered">
-                              <span className="stat-number">{getRegistrationStats().registered}</span>
-                              <span className="stat-label">Đăng ký</span>
-                            </div>
-                            <div className="stat-card stat-card--deposited">
-                              <span className="stat-number">{getRegistrationStats().deposited}</span>
-                              <span className="stat-label">Đã cọc</span>
-                            </div>
+                  <div className="details-content">
+                    {/* Basic Info & Stats */}
+                    <div className="stats-grid">
+                      <div className="stat-item"><BarChart2 size={20} /> <span>{statusBadge(selectedEvent.status)}</span></div>
+                      <div className="stat-item"><Users size={20} /> <span>{registrations.length} / {selectedEvent.capacity || '∞'} đã đăng ký</span></div>
+                      <div className="stat-item"><Calendar size={20} /> <span>{new Date(selectedEvent.startAt).toLocaleString('vi-VN')}</span></div>
+                      <div className="stat-item"><MapPin size={20} /> <span>{selectedEvent.locationText}</span></div>
+                    </div>
+
+                    {/* Registration Statistics */}
+                    {registrations.length > 0 && (
+                      <div className="registration-stats">
+                        <h3 className="stats-title">Thống kê đăng ký</h3>
+                        <div className="stats-summary">
+                          <div className="stat-card stat-card--total">
+                            <span className="stat-number">{getRegistrationStats().total}</span>
+                            <span className="stat-label">Tổng số</span>
+                          </div>
+                          <div className="stat-card stat-card--registered">
+                            <span className="stat-number">{getRegistrationStats().registered}</span>
+                            <span className="stat-label">Đăng ký</span>
+                          </div>
+                          <div className="stat-card stat-card--deposited">
+                            <span className="stat-number">{getRegistrationStats().deposited}</span>
+                            <span className="stat-label">Đã cọc</span>
                           </div>
                         </div>
-                      )}
-
-                      {/* Participant List */}
-                      <div className="participants-section">
-                          <h3 className="section-title">Danh sách người tham gia</h3>
-                          <div className="participants-list-wrapper">
-                              {registrations.length > 0 ? (
-                                  <ul className="participants-list">
-                                      <li className="participants-list__header">
-                                          <span>Tên người tham gia</span>
-                                          <span>Email</span>
-                                          <span>Số điện thoại</span>
-                                          <span>Trạng thái</span>
-                                      </li>
-                                      {registrations.map(reg => (
-                                          <li key={reg.id} className="participants-list__item">
-                                              <span className="participant-name">
-                                                {reg.user.profile?.displayName || 'N/A'}
-                                              </span>
-                                              <span className="participant-email">
-                                                {reg.user.email}
-                                              </span>
-                                              <span className="participant-phone">
-                                                {reg.phone || '-'}
-                                              </span>
-                                              <span className="participant-status">
-                                                {registrationStatusBadge(reg.status)}
-                                              </span>
-                                          </li>
-                                      ))}
-                                  </ul>
-                              ) : (
-                                  <div className="no-participants">
-                                    <Users size={48} />
-                                    <p>Chưa có ai đăng ký sự kiện này.</p>
-                                  </div>
-                              )}
-                          </div>
                       </div>
+                    )}
+
+                    {/* Financial Statistics */}
+                    {statistics && statistics.depositedCount > 0 && (
+                      <div className="registration-stats" style={{ borderLeft: '4px solid #10b981', backgroundColor: '#ecfdf5' }}>
+                        <h3 className="stats-title">💰 Thống kê tài chính</h3>
+                        <div className="stats-summary">
+                          <div className="stat-card stat-card--total" style={{ backgroundColor: '#d1fae5' }}>
+                            <span className="stat-number" style={{ color: '#059669' }}>
+                              {formatAmountShort(statistics.totalDepositAmount)}
+                            </span>
+                            <span className="stat-label">Tổng tiền cọc</span>
+                          </div>
+                          <div className="stat-card stat-card--registered" style={{ backgroundColor: '#a7f3d0' }}>
+                            <span className="stat-number" style={{ color: '#047857' }}>
+                              {formatAmountShort(statistics.netRevenue)}
+                            </span>
+                            <span className="stat-label">Tiền ròng (85%)</span>
+                          </div>
+                          {/* <div className="stat-card stat-card--deposited" style={{ backgroundColor: '#6ee7b7' }}>
+                            <span className="stat-number" style={{ color: '#0f766e' }}>
+                              {statistics.conversionRate.toFixed(1)}%
+                            </span>
+                            <span className="stat-label">Tỷ lệ chuyển đổi</span>
+                          </div> */}
+                        </div>
+                        {/* <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#065f46', padding: '0.75rem', backgroundColor: '#fff', borderRadius: '6px' }}>
+                          <p style={{ margin: '0 0 0.5rem 0' }}>📊 Chi tiết:</p>
+                          <p style={{ margin: '0.25rem 0' }}>• Tiền cọc: <strong>{(statistics.totalDepositAmount).toLocaleString('vi-VN')} VNĐ</strong></p>
+                          <p style={{ margin: '0.25rem 0' }}>• Hoa hồng hệ thống (15%): <strong>{(statistics.platformCommission).toLocaleString('vi-VN')} VNĐ</strong></p>
+                          <p style={{ margin: '0.25rem 0' }}>• Trung bình/người: <strong>{(statistics.averageDepositAmount).toLocaleString('vi-VN')} VNĐ</strong></p>
+                        </div> */}
+                      </div>
+                    )}
+
+                    {/* Participant List */}
+                    <div className="participants-section">
+                      <h3 className="section-title">Danh sách người tham gia</h3>
+                      <div className="participants-list-wrapper">
+                        {registrations.length > 0 ? (
+                          <ul className="participants-list">
+                            <li className="participants-list__header">
+                              <span>Tên người tham gia</span>
+                              <span>Email</span>
+                              <span>Số điện thoại</span>
+                              <span>Trạng thái</span>
+                            </li>
+                            {registrations.map(reg => (
+                              <li key={reg.id} className="participants-list__item">
+                                <span className="participant-name">
+                                  {reg.user.profile?.displayName || 'N/A'}
+                                </span>
+                                <span className="participant-email">
+                                  {reg.user.email}
+                                </span>
+                                <span className="participant-phone">
+                                  {reg.phone || '-'}
+                                </span>
+                                <span className="participant-status">
+                                  {registrationStatusBadge(reg.status)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="no-participants">
+                            <Users size={48} />
+                            <p>Chưa có ai đăng ký sự kiện này.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )

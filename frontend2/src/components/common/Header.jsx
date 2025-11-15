@@ -48,7 +48,7 @@ const Header = () => {
         const noti = await getMyNotifications();
         setNotifications(noti);
         setUnreadCount(noti.filter(n => !n.isRead).length);
-      } catch {}
+      } catch { }
     };
     fetchNoti();
     if (isAuthenticated) {
@@ -72,7 +72,7 @@ const Header = () => {
         socketRef.current = null;
       }
     };
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [isAuthenticated, user?.userId]);
 
   const handleBellClick = async () => {
@@ -83,7 +83,7 @@ const Header = () => {
         const noti = await getMyNotifications();
         setNotifications(noti);
         setUnreadCount(noti.filter(n => !n.isRead).length);
-      } catch {}
+      } catch { }
     }
   };
 
@@ -93,7 +93,7 @@ const Header = () => {
       const noti = await getMyNotifications();
       setNotifications(noti);
       setUnreadCount(0);
-    } catch {}
+    } catch { }
   };
 
   // (Chuẩn bị cho socket push realtime)
@@ -106,12 +106,12 @@ const Header = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    
+
     const handleClickOutside = (event) => {
       if (isMobileMenuOpen && !event.target.closest('.header__nav--mobile') && !event.target.closest('.header__mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
-      
+
       if (isProfileMenuOpen && !event.target.closest('.profile-menu')) {
         setIsProfileMenuOpen(false);
       }
@@ -120,10 +120,10 @@ const Header = () => {
         setIsMembershipMenuOpen(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('mousedown', handleClickOutside);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
@@ -133,8 +133,8 @@ const Header = () => {
   const AuthActions = () => {
     if (!isAuthenticated) {
       return (
-        <Link 
-          to="/login" 
+        <Link
+          to="/login"
           className="button-primary"
           onClick={closeMobileMenu}
         >
@@ -154,8 +154,8 @@ const Header = () => {
             alt="User Avatar"
             className="profile-menu__avatar"
           />
-          <ChevronDown 
-            size={16} 
+          <ChevronDown
+            size={16}
             className={`profile-menu__arrow ${isProfileMenuOpen ? 'profile-menu__arrow--open' : ''}`}
           />
         </button>
@@ -180,9 +180,9 @@ const Header = () => {
               </Link>
             )}
             {user.role !== 'ORGANIZER' && (
-                <Link to="/pricing/user" className="profile-menu__item" onClick={closeAllMenus}>
-                    Nâng cấp tài khoản
-                </Link>
+              <Link to="/pricing/user" className="profile-menu__item" onClick={closeAllMenus}>
+                Nâng cấp tài khoản
+              </Link>
             )}
             <div className="profile-menu__divider"></div>
             <button onClick={handleLogout} className="profile-menu__item profile-menu__item--logout">
@@ -207,13 +207,13 @@ const Header = () => {
       <NavLink to="/about" className={navLinkClass} onClick={closeMobileMenu}>About Us</NavLink>
       {isAuthenticated && (
         <div className="profile-menu membership-menu">
-          <button 
+          <button
             className="button-organizer"
             onClick={() => setIsMembershipMenuOpen(!isMembershipMenuOpen)}
           >
-            Gói thành viên 
-            <ChevronDown 
-              size={16} 
+            Gói thành viên
+            <ChevronDown
+              size={16}
               className={`profile-menu__arrow ${isMembershipMenuOpen ? 'profile-menu__arrow--open' : ''}`}
             />
           </button>
@@ -222,16 +222,14 @@ const Header = () => {
               <Link to="/pricing" className="profile-menu__item" onClick={closeAllMenus}>
                 Tổ chức sự kiện
               </Link>
-              <Link to="/pricing/user" className="profile-menu__item" onClick={closeAllMenus}>
-                Premium
-              </Link>
+
             </div>
           )}
         </div>
       )}
       {isAuthenticated && user.role === 'ORGANIZER' && (
-        <NavLink 
-          to="/manage/events" 
+        <NavLink
+          to="/manage/events"
           className="button-organizer"
           onClick={closeMobileMenu}
         >
@@ -256,22 +254,22 @@ const Header = () => {
         </nav>
 
         <div className="header__actions">
-          <div className="desktop-actions" style={{display:'flex',alignItems:'center',gap:16}}>
+          <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {isAuthenticated && (
               <div className="notification-bell-wrapper">
                 <DropdownMenu
                   trigger={
-                    <div className="notification-bell-btn" style={{cursor:'pointer', position:'relative'}} onClick={handleBellClick}>
-                      <Bell size={24} color={unreadCount>0?'#08BAA1':'#222'} fill={unreadCount>0?"#08BAA1":"none"}/>
+                    <div className="notification-bell-btn" style={{ cursor: 'pointer', position: 'relative' }} onClick={handleBellClick}>
+                      <Bell size={24} color={unreadCount > 0 ? '#08BAA1' : '#222'} fill={unreadCount > 0 ? "#08BAA1" : "none"} />
                       {unreadCount > 0 && <span className="notification-dot"></span>}
                     </div>
                   }
                 >
                   <div style={{ padding: '0.5rem 1rem', minWidth: 260 }}>
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                      <span style={{fontWeight:600}}>Thông báo</span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontWeight: 600 }}>Thông báo</span>
                       {unreadCount ? (
-                        <button className="mark-read-btn" onClick={e => { e.stopPropagation(); markAllAsRead(); }} style={{fontSize:'0.92rem',color:'#08BAA1',background:'none',border:'none',cursor:'pointer'}}>Đánh dấu đã đọc</button>) : null}
+                        <button className="mark-read-btn" onClick={e => { e.stopPropagation(); markAllAsRead(); }} style={{ fontSize: '0.92rem', color: '#08BAA1', background: 'none', border: 'none', cursor: 'pointer' }}>Đánh dấu đã đọc</button>) : null}
                     </div>
                   </div>
                   <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -284,12 +282,13 @@ const Header = () => {
                       <DropdownMenuItem key={n.id}>
                         <Link to={n.href || n.link || '#'} style={{
                           textDecoration: 'none', color: n.isRead ? '#444' : '#08BAA1', fontWeight: n.isRead ? 500 : 700,
-                          display: 'flex', alignItems: 'center', gap: 8, width:'100%'}}>
-                          {n.type === 'like' && <span style={{color:'#e255a0'}}>❤️</span>}
-                          {n.type === 'comment' && <span style={{color:'#09b'}}>💬</span>}
-                          {n.type === 'favorite' && <span style={{color:'#edb602'}}>★</span>}
+                          display: 'flex', alignItems: 'center', gap: 8, width: '100%'
+                        }}>
+                          {n.type === 'like' && <span style={{ color: '#e255a0' }}>❤️</span>}
+                          {n.type === 'comment' && <span style={{ color: '#09b' }}>💬</span>}
+                          {n.type === 'favorite' && <span style={{ color: '#edb602' }}>★</span>}
                           <span>{n.content}</span>
-                          <span style={{fontSize:'.86em', color:'#aaa', marginLeft:'auto'}}>{n.time}</span>
+                          <span style={{ fontSize: '.86em', color: '#aaa', marginLeft: 'auto' }}>{n.time}</span>
                         </Link>
                       </DropdownMenuItem>
                     ))}

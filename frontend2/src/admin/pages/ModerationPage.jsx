@@ -179,7 +179,7 @@ const ModerationPage = () => {
                               <div style={{ fontWeight: '600', color: 'var(--ink)', marginBottom: '0.25rem' }}>
                                 {post.title}
                               </div>
-                              <div style={{ fontSize: '0.8rem', color: 'var(--muted)', maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
                                 {post.content}
                               </div>
                             </div>

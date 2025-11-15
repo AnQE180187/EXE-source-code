@@ -39,7 +39,7 @@ const AboutPage = () => {
       </section>
 
       {/* Team Section */}
-      <section className="team-section">
+      {/* <section className="team-section">
         <h2 className="section-title">Gặp gỡ đội ngũ</h2>
         <p className="section-subtitle">Chúng tôi là những người đam mê công nghệ và kết nối cộng đồng, cùng nhau xây dựng FreeDay.</p>
         <div className="team-grid">
@@ -55,7 +55,7 @@ const AboutPage = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Our Values Section */}
       <section className="values-section">

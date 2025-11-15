@@ -19,30 +19,30 @@ export const createRegistration = async (eventId) => {
 };
 
 export const cancelRegistration = async (eventId) => {
-    try {
-        const response = await api.delete(`/events/${eventId}/registration`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data?.message || 'Hủy đăng ký thất bại.';
-    }
+  try {
+    const response = await api.delete(`/events/${eventId}/registration`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Hủy đăng ký thất bại.';
+  }
 };
 
 export const getRegistrationsForEvent = async (eventId) => {
-    try {
-        const response = await api.get(`/events/${eventId}/registrations`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data?.message || 'Không thể tải danh sách người tham gia.';
-    }
+  try {
+    const response = await api.get(`/events/${eventId}/registrations`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Không thể tải danh sách người tham gia.';
+  }
 };
 
 export const confirmDeposit = async (eventId) => {
-    try {
-        const response = await api.post(`/events/${eventId}/registration/confirm-deposit`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data?.message || 'Xác nhận đặt cọc thất bại.';
-    }
+  try {
+    const response = await api.post(`/events/${eventId}/registration/confirm-deposit`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Xác nhận đặt cọc thất bại.';
+  }
 };
 
 export const initiateDeposit = async (eventId, phone) => {
@@ -51,5 +51,14 @@ export const initiateDeposit = async (eventId, phone) => {
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || 'Không thể bắt đầu quá trình đặt cọc.';
+  }
+};
+
+export const getEventStatistics = async (eventId) => {
+  try {
+    const response = await api.get(`/events/${eventId}/statistics`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Không thể tải thống kê sự kiện.';
   }
 };

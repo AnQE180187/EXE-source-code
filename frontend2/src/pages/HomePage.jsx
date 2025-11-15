@@ -1,37 +1,66 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Search, Users, CalendarCheck, MessageSquare, Award, Star } from 'lucide-react';
+import { getEvents } from '../services/eventService';
+import { getPosts } from '../services/forumService';
 import './HomePage.css';
 
-// Dummy data - in a real app, this would come from an API
-const featuredEvents = [
-  {
-    id: 1,
-    title: 'Hội thảo Công nghệ Tương lai',
-    category: 'Công nghệ',
-    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1170&q=80',
-  },
-  {
-    id: 2,
-    title: 'Workshop Thiết kế UI/UX Chuyên sâu',
-    category: 'Thiết kế',
-    imageUrl: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=764&q=80',
-  },
-  {
-    id: 3,
-    title: 'Lễ hội Âm nhạc Đa sắc màu',
-    category: 'Âm nhạc',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1074&q=80',
-  },
-];
-
-const recentPosts = [
-  { id: 1, title: 'Tìm bạn đi xem concert cuối tuần này!', author: 'An Nguyễn', comments: 12 },
-  { id: 2, title: 'Ai có hứng thú với workshop làm gốm không?', author: 'Bảo Trân', comments: 8 },
-  { id: 3, title: 'Chia sẻ kinh nghiệm tham gia marathon', author: 'Minh Hoàng', comments: 5 },
-];
-
 const HomePage = () => {
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch featured events - get top 3 events by registeredCount
+        const eventsResponse = await getEvents({ 
+          sort: 'popularity', 
+          limit: '3' 
+        });
+        
+        // Map events to match frontend structure
+        const mappedEvents = eventsResponse.map((event) => ({
+          id: event.id,
+          title: event.title,
+          category: event.tags && event.tags.length > 0 
+            ? event.tags[0].tag.name 
+            : 'Khác',
+          imageUrl: event.imageUrl || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1170&q=80',
+        }));
+        setFeaturedEvents(mappedEvents);
+
+        // Fetch recent posts - get latest 3 posts
+        const postsResponse = await getPosts({ sortBy: 'newest' });
+        const latestPosts = postsResponse.slice(0, 3);
+        
+        // Map posts to match frontend structure
+        const mappedPosts = latestPosts.map((post) => ({
+          id: post.id,
+          title: post.title,
+          author: post.author?.profile?.displayName || post.author?.email || 'Người dùng',
+          comments: post._count?.comments || 0,
+        }));
+        setRecentPosts(mappedPosts);
+      } catch (err) {
+        console.error('Error fetching homepage data:', err);
+        setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
+        // Set fallback empty arrays
+        setFeaturedEvents([]);
+        setRecentPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // IntersectionObserver: lướt tới đâu hiện tới đó
   useEffect(() => {
     const els = document.querySelectorAll('.reveal');
@@ -48,7 +77,7 @@ const HomePage = () => {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [featuredEvents, recentPosts]); // Re-run observer when data changes
 
   return (
     <div className="home-page page-fade">
@@ -95,22 +124,38 @@ const HomePage = () => {
           SỰ KIỆN <span className="section-heading--highlight">NỔI BẬT</span>
         </h2>
 
-        <div className="featured-events-grid">
-          {featuredEvents.map((event, i) => (
-            <Link
-              to={`/events/${event.id}`}
-              key={event.id}
-              className="event-card reveal zoom-in small-stagger"
-              style={{ transitionDelay: `${i * 90}ms` }}
-            >
-              <img src={event.imageUrl} alt={event.title} className="event-card__image parallax-img" />
-              <div className="event-card__overlay">
-                <span className="event-card__category">{event.category}</span>
-                <h3 className="event-card__title">{event.title}</h3>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {error && (
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#ef4444' }}>
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="featured-events-grid" style={{ textAlign: 'center', padding: '3rem' }}>
+            <p>Đang tải sự kiện...</p>
+          </div>
+        ) : featuredEvents.length > 0 ? (
+          <div className="featured-events-grid">
+            {featuredEvents.map((event, i) => (
+              <Link
+                to={`/events/${event.id}`}
+                key={event.id}
+                className="event-card reveal zoom-in small-stagger"
+                style={{ transitionDelay: `${i * 90}ms` }}
+              >
+                <img src={event.imageUrl} alt={event.title} className="event-card__image parallax-img" />
+                <div className="event-card__overlay">
+                  <span className="event-card__category">{event.category}</span>
+                  <h3 className="event-card__title">{event.title}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>Chưa có sự kiện nổi bật nào.</p>
+          </div>
+        )}
       </section>
 
       {/* How it works */}
@@ -142,28 +187,43 @@ const HomePage = () => {
         </h2>
 
         <div className="forum-preview">
-          <ul className="post-list">
-            {recentPosts.map((post, i) => (
-              <li key={post.id} className="post-item reveal fade-right" style={{ transitionDelay: `${i * 80}ms` }}>
-                <Link to={`/forum/${post.id}`} className="post-item__link hover-lift">
-                  <h4 className="post-item__title">{post.title}</h4>
-                  <div className="post-item__meta">
-                    <span>bởi {post.author}</span>
-                    <span className="post-item__comments">
-                      <MessageSquare size={14} /> {post.comments}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <p>Đang tải bài viết...</p>
+            </div>
+          ) : recentPosts.length > 0 ? (
+            <>
+              <ul className="post-list">
+                {recentPosts.map((post, i) => (
+                  <li key={post.id} className="post-item reveal fade-right" style={{ transitionDelay: `${i * 80}ms` }}>
+                    <Link to={`/forum/${post.id}`} className="post-item__link hover-lift">
+                      <h4 className="post-item__title">{post.title}</h4>
+                      <div className="post-item__meta">
+                        <span>bởi {post.author}</span>
+                        <span className="post-item__comments">
+                          <MessageSquare size={14} /> {post.comments}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
 
-          <div className="forum-preview__cta reveal fade-up" style={{ transitionDelay: '220ms' }}>
-            <p>... và hàng trăm cuộc thảo luận khác đang chờ bạn!</p>
-            <Link to="/forum" className="hero__button hero__button--primary btn-press">
-              Vào Diễn đàn <ArrowRight size={18} />
-            </Link>
-          </div>
+              <div className="forum-preview__cta reveal fade-up" style={{ transitionDelay: '220ms' }}>
+                <p>... và hàng trăm cuộc thảo luận khác đang chờ bạn!</p>
+                <Link to="/forum" className="hero__button hero__button--primary btn-press">
+                  Vào Diễn đàn <ArrowRight size={18} />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <p>Chưa có bài viết nào.</p>
+              <Link to="/forum" className="hero__button hero__button--primary btn-press" style={{ marginTop: '1rem' }}>
+                Vào Diễn đàn <ArrowRight size={18} />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

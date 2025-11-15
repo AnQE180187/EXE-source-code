@@ -11,7 +11,7 @@ export class EventsService {
   constructor(
     private prisma: PrismaService,
     private auditLogsService: AuditLogsService,
-  ) {}
+  ) { }
 
   create(createEventDto: CreateEventDto, organizer: User) {
     const { tags, ...eventData } = createEventDto;
@@ -64,15 +64,15 @@ export class EventsService {
     }
 
     if (tag && tag !== 'all') {
-        (where.AND as Prisma.EventWhereInput[]).push({
-            tags: {
-                some: {
-                    tag: {
-                        name: tag
-                    }
-                }
+      (where.AND as Prisma.EventWhereInput[]).push({
+        tags: {
+          some: {
+            tag: {
+              name: tag
             }
-        });
+          }
+        }
+      });
     }
 
     if (date) {
@@ -310,17 +310,17 @@ export class EventsService {
 
     // Handle tags separately for update
     if (tags) {
-        dataToUpdate.tags = {
-            deleteMany: {}, // First, disconnect all existing tags
-            create: tags.map(tagName => ({ // Then, create connections to the new set of tags
-                tag: {
-                    connectOrCreate: {
-                        where: { name: tagName },
-                        create: { name: tagName },
-                    },
-                },
-            })),
-        };
+      dataToUpdate.tags = {
+        deleteMany: {}, // First, disconnect all existing tags
+        create: tags.map(tagName => ({ // Then, create connections to the new set of tags
+          tag: {
+            connectOrCreate: {
+              where: { name: tagName },
+              create: { name: tagName },
+            },
+          },
+        })),
+      };
     }
 
     const updatedEvent = await this.prisma.event.update({
@@ -429,5 +429,72 @@ export class EventsService {
       },
       orderBy: { startAt: 'desc' },
     });
+  }
+
+  async getEventStatistics(eventId: string, organizer: User) {
+    // Verify event exists and belongs to organizer
+    const event = await this.prisma.event.findFirst({
+      where: {
+        id: eventId,
+        organizerId: organizer.id,
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found or you are not the organizer');
+    }
+
+    // Get all registrations for this event with transaction details
+    const registrations = await this.prisma.registration.findMany({
+      where: { eventId },
+      include: {
+        transaction: true,
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+
+    // Calculate statistics
+    const totalRegistrations = registrations.length;
+    const depositedRegistrations = registrations.filter(r => r.status === 'DEPOSITED');
+    const depositedCount = depositedRegistrations.length;
+
+    let totalDepositAmount = 0;
+    depositedRegistrations.forEach(reg => {
+      if (reg.transaction) {
+        totalDepositAmount += reg.transaction.amount;
+      }
+    });
+
+    const netRevenue = totalDepositAmount * 0.85; // 85% after 15% commission
+    const platformCommission = totalDepositAmount * 0.15;
+    const conversionRate = totalRegistrations > 0 ? (depositedCount / totalRegistrations) * 100 : 0;
+    const averageDepositAmount = depositedCount > 0 ? totalDepositAmount / depositedCount : 0;
+
+    return {
+      eventId,
+      eventTitle: event.title,
+      totalRegistrations,
+      depositedCount,
+      pendingCount: registrations.filter(r => r.status === 'REGISTERED').length,
+      totalDepositAmount,
+      netRevenue: Math.round(netRevenue * 100) / 100,
+      platformCommission: Math.round(platformCommission * 100) / 100,
+      conversionRate: Math.round(conversionRate * 100) / 100,
+      averageDepositAmount: Math.round(averageDepositAmount * 100) / 100,
+      registrations: registrations.map(reg => ({
+        id: reg.id,
+        userName: reg.user.profile?.displayName || 'N/A',
+        userEmail: reg.user.email,
+        phone: reg.phone,
+        status: reg.status,
+        depositAmount: reg.transaction?.amount || 0,
+        transactionId: reg.transaction?.id,
+        registeredAt: reg.createdAt,
+      })),
+    };
   }
 }

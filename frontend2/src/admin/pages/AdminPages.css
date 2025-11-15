@@ -210,12 +210,15 @@
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   background: var(--card);
+  table-layout: fixed; /* Ensures columns respect width settings */
+  word-wrap: break-word; /* Allows long words to break and wrap */
 }
 .ap-table th, .ap-table td { 
   padding: 0.75rem 1rem; 
   border-bottom: 1px solid var(--border); 
   text-align: left;
   transition: background-color 0.2s ease;
+  white-space: normal; /* Allow text to wrap */
 }
 .ap-table th { 
   color: #064e3b; 

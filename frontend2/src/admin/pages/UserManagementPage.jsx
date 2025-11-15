@@ -147,81 +147,80 @@ const UserManagementPage = () => {
             </div>
           </div>
 
-          <table className="ap-table">
-            <thead>
-              <tr>
-                <th>Người Dùng</th>
-                <th>Email</th>
-                <th>Vai Trò</th>
-                <th>Trạng Thái</th>
-                <th>Ngày Tham Gia</th>
-                <th>Hành Động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="6" className="ap-loading">Đang tải...</td></tr>
-              ) : users.map((user) => (
-                <tr key={user.id}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '50%', 
-                        background: 'linear-gradient(135deg, var(--primary-50), var(--primary-100))',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--primary)',
-                        fontWeight: '600'
-                      }}>
-                        {user.profile?.displayName?.charAt(0) || 'U'}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: '600', color: 'var(--ink)' }}>
-                          {user.profile?.displayName || 'N/A'}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
-                          ID: {user.id}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`ap-badge ap-badge--${user.role.toLowerCase()}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`ap-badge ap-badge--${user.status.toLowerCase()}`}>
-                      {user.status}
-                    </span>
-                  </td>
-                  <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="ap-btn ap-btn--outline ap-btn--sm" onClick={() => openModal(user)}>
-                        <Edit size={14} />
-                      </button>
-                      <button 
-                        className={`ap-btn ap-btn--sm ${user.status === 'BANNED' ? 'ap-btn--success' : 'ap-btn--danger'}`}
-                        onClick={() => handleBanUser(user.id, user.status)}
-                      >
-                        {user.status === 'BANNED' ? <UserCheck size={14} /> : <UserX size={14} />}
-                      </button>
-                      <button className="ap-btn ap-btn--outline ap-btn--sm">
-                        <MoreHorizontal size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <caption>Hiển thị {users.length} trong {totalUsers} người dùng</caption>
-          </table>
-
+                    <table className="ap-table">
+                      <thead>
+                        <tr>
+                          <th>Người Dùng</th>
+                          <th>Email</th>
+                          <th>Vai Trò</th>
+                          <th>Trạng Thái</th>
+                          <th>Ngày Tham Gia</th>
+                          <th>Hành Động</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          <tr><td colSpan="6" className="ap-loading">Đang tải...</td></tr>
+                        ) : users.map((user) => (
+                          <tr key={user.id}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ 
+                                  width: '40px', 
+                                  height: '40px', 
+                                  borderRadius: '50%', 
+                                  background: 'linear-gradient(135deg, var(--primary-50), var(--primary-100))',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: 'var(--primary)',
+                                  fontWeight: '600'
+                                }}>
+                                  {user.profile?.displayName?.charAt(0) || 'U'}
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: '600', color: 'var(--ink)' }}>
+                                    {user.profile?.displayName || 'N/A'}
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                                    ID: {user.id}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>{user.email}</td>
+                            <td>
+                              <span className={`ap-badge ap-badge--${user.role.toLowerCase()}`}>
+                                {user.role}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={`ap-badge ap-badge--${user.status.toLowerCase()}`}>
+                                {user.status}
+                              </span>
+                            </td>
+                            <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                            <td>
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button className="ap-btn ap-btn--outline ap-btn--sm" onClick={() => openModal(user)}>
+                                  <Edit size={14} />
+                                </button>
+                                <button 
+                                  className={`ap-btn ap-btn--sm ${user.status === 'BANNED' ? 'ap-btn--success' : 'ap-btn--danger'}`}
+                                  onClick={() => handleBanUser(user.id, user.status)}
+                                >
+                                  {user.status === 'BANNED' ? <UserCheck size={14} /> : <UserX size={14} />}
+                                </button>
+                                <button className="ap-btn ap-btn--outline ap-btn--sm">
+                                  <MoreHorizontal size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <caption>Hiển thị {users.length} trong {totalUsers} người dùng</caption>
+                    </table>
           <div className="ap-pagination">
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
