@@ -149,8 +149,33 @@
 
 .ap-btn--sm {
   height: 36px;
-  padding: 0 1rem;
+  padding: 0 0.75rem;
   font-size: 0.8rem;
+  min-width: 36px;
+  justify-content: center;
+}
+
+/* Ensure icons are visible in buttons */
+.ap-btn svg {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  color: inherit;
+  stroke-width: 2;
+  pointer-events: none;
+  vertical-align: middle;
+}
+
+.ap-btn--outline svg {
+  color: var(--primary);
+}
+
+.ap-btn--primary svg,
+.ap-btn--danger svg,
+.ap-btn--success svg,
+.ap-btn--warning svg {
+  color: #fff;
 }
 
 /* Enhanced Cards */

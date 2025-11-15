@@ -24,8 +24,11 @@ const HomePage = () => {
           limit: '3' 
         });
         
+        // Ensure we only take 3 events (slice in case backend returns more)
+        const top3Events = Array.isArray(eventsResponse) ? eventsResponse.slice(0, 3) : [];
+        
         // Map events to match frontend structure
-        const mappedEvents = eventsResponse.map((event) => ({
+        const mappedEvents = top3Events.map((event) => ({
           id: event.id,
           title: event.title,
           category: event.tags && event.tags.length > 0 

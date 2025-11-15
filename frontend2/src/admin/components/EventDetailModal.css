@@ -20,7 +20,8 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .event-detail-modal .modal-header {
@@ -29,6 +30,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .event-detail-modal .modal-header h2 {
@@ -39,7 +41,9 @@
 
 .event-detail-modal .modal-content {
   padding: 0;
-  overflow-y: auto;
+  overflow: visible;
+  flex: 1 1 100%;
+  width: 100%;
 }
 
 .event-details-layout {
